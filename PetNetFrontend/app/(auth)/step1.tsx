@@ -1,10 +1,15 @@
 import { Image, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, TextStyle, TouchableWithoutFeedback, View } from 'react-native'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Link } from 'expo-router'
 import { Pallete } from '@/constants/Pallete'
 import { Typography } from '@/constants/Typography'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Images } from '@/constants/Images'
+
+import axios from 'axios';
+import { useRouter } from 'expo-router';
+import { Alert } from 'react-native';
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 type WalletButtonProps = {
     title: string;
@@ -39,6 +44,54 @@ const WalletButton = ({
 );
 
 const step1 = () => {
+    const router = useRouter();
+    const [manualWalletAddress, setManualWalletAddress] = useState('');
+
+    const handleWalletLogin = async (walletType: 'phantom' | 'solflare' | 'metamask' | 'NONE', walletAddress: string | undefined = undefined) => {
+        try {
+            const selectedWalletAddress = walletAddress ? walletAddress : await simulateWalletConnect(walletType);
+
+            if (!selectedWalletAddress) {
+                Alert.alert('Connection Failed', 'No wallet address received');
+                return;
+            }
+
+            const res = await axios.post(`${apiUrl}/auth/login`, {
+                selectedWalletAddress,
+            });
+
+            if (res.status === 200) {
+                router.navigate('/step3');
+            }
+        } catch (err: any) {
+            if (err.response?.status === 404) {
+                router.push({
+                    pathname: '/step2',
+                    params: { walletAddress: err.config?.data?.walletAddress },
+                });
+            } else {
+                //Alert.alert('Error', err.message || 'Login failed');
+            }
+        }
+    };
+
+    const handleLogin = async (walletAddress: string) => {
+        await handleWalletLogin('NONE', walletAddress);
+    }
+
+    const simulateWalletConnect = async (walletType: string): Promise<string | null> => {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                const dummyWallets = {
+                    phantom: '2kPDhXqAuGGUinUx2se1qkF7qM5N8btwuHKgQdZHYmwK',
+                    solflare: '2kPJ...solflare',
+                    metamask: '0xABC...metamask',
+                };
+                resolve(dummyWallets[walletType] || null);
+            }, 1000);
+        });
+    };
+
     return (
         <SafeAreaView style={styles.outerContainer}>
             <KeyboardAvoidingView
@@ -67,7 +120,7 @@ const step1 = () => {
                                     backgroundColor={Pallete.greyscale.white}
                                     borderColor={Pallete.greyscale[300]}
                                     textColor={Pallete.greyscale[900]}
-                                    onPress={() => console.log('Connect MetaMask')}
+                                    onPress={() => handleWalletLogin('metamask')}
                                 />
                                 <WalletButton
                                     title="Connect with Phantom"
@@ -75,14 +128,14 @@ const step1 = () => {
                                     backgroundColor="#551BF9"
                                     borderColor="#551BF9"
                                     textColor="#ffffff"
-                                    onPress={() => console.log('Connect Phantom')}
+                                    onPress={() => handleWalletLogin('phantom')}
                                 />
                                 <WalletButton
                                     title="Connect with Solflare"
                                     logo={Images.solflare}
                                     backgroundColor="#4f4f4f"
                                     textColor="#ffffff"
-                                    onPress={() => console.log('Connect Solflare')}
+                                    onPress={() => handleWalletLogin('solflare')}
                                 />
                             </View>
 
@@ -91,12 +144,22 @@ const step1 = () => {
                                 <Text style={styles.orText}>OR</Text>
                                 <View style={styles.divider} />
                             </View>
-
                             <TextInput
                                 placeholder="Enter wallet address"
                                 placeholderTextColor={Pallete.greyscale[400]}
                                 style={styles.input}
+                                value={manualWalletAddress}
+                                onChangeText={setManualWalletAddress}
                             />
+
+                            {manualWalletAddress.trim().length > 0 && (
+                                <WalletButton
+                                    title="Connect"
+                                    backgroundColor="#4f4f4f"
+                                    textColor="#ffffff"
+                                    onPress={() => handleLogin(manualWalletAddress)}
+                                />
+                            )}
                         </View>
                     </ScrollView>
                 </TouchableWithoutFeedback>
