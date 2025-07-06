@@ -1,7 +1,11 @@
+import 'react-native-get-random-values'
 import { Text, View, StyleSheet } from 'react-native';
 import { Link } from 'expo-router';
 import Splash from './splash';
 import { useFonts } from 'expo-font';
+
+import { Buffer } from 'buffer';
+global.Buffer = global.Buffer || Buffer;
 
 export default function Index() {
     // return (
@@ -12,6 +16,7 @@ export default function Index() {
     //         </Link>
     //     </View>
     // );
+
     const [fontsLoaded] = useFonts({
         'SchibstedGrotesk-Regular': require('../assets/fonts/SchibstedGrotesk-Regular.ttf'),
         'SchibstedGrotesk-Medium': require('../assets/fonts/SchibstedGrotesk-Medium.ttf'),

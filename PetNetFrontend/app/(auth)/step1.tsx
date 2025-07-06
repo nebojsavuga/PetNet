@@ -1,6 +1,6 @@
-import { Image, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, TextStyle, TouchableWithoutFeedback, View } from 'react-native'
-import React, { useEffect, useRef, useState } from 'react'
-import { Link } from 'expo-router'
+import 'react-native-get-random-values';
+import { Image, Keyboard, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, TextStyle, TouchableWithoutFeedback, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { Pallete } from '@/constants/Pallete'
 import { Typography } from '@/constants/Typography'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -9,6 +9,9 @@ import { Images } from '@/constants/Images'
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { Alert } from 'react-native';
+import { decryptPhantomPayload, generatePhantomSession, openPhantomConnect } from '@/services/walletService'
+
+let session = null;
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
 type WalletButtonProps = {
@@ -44,12 +47,91 @@ const WalletButton = ({
 );
 
 const step1 = () => {
+
     const router = useRouter();
     const [manualWalletAddress, setManualWalletAddress] = useState('');
 
-    const handleWalletLogin = async (walletType: 'phantom' | 'solflare' | 'metamask' | 'NONE', walletAddress: string | undefined = undefined) => {
+    useEffect(() => {
+        const sub = Linking.addEventListener('url', ({ url }) => {
+            const parsed = new URL(url);
+            const phantomEncryptionPublicKey = parsed.searchParams.get('phantom_encryption_public_key');
+            const nonce = parsed.searchParams.get('nonce');
+            const data = parsed.searchParams.get('data');
+
+            if (!data || !phantomEncryptionPublicKey || !nonce || !session) {
+                Alert.alert('Connection failed', 'Missing Phantom response data.');
+                return;
+            }
+
+            const decrypted = decryptPhantomPayload({
+                data,
+                nonce,
+                phantomEncryptionPublicKey,
+                dappSecretKey: session.dappSecretKey,
+            });
+
+            if (!decrypted) {
+                Alert.alert('Decryption failed');
+                return;
+            }
+
+            const { public_key } = JSON.parse(decrypted);
+            console.log('Connected Phantom Wallet:', public_key);
+            Alert.alert('Wallet Connected', public_key);
+
+            setTimeout(() => {
+                router.replace('/(auth)/step2');
+            }, 2000);
+        });
+
+        return () => sub.remove();
+    }, [])
+
+    useEffect(() => {
+        const handleRedirect = ({ url }: { url: string }) => {
+            const parsed = new URL(url);
+            const phantomPublicKey = parsed.searchParams.get('phantom_encryption_public_key');
+            const data = parsed.searchParams.get('data');
+            const nonce = parsed.searchParams.get('nonce');
+
+            console.log('Redirected with Phantom data:', { phantomPublicKey, data, nonce });
+        };
+
+        const sub = Linking.addEventListener('url', handleRedirect);
+
+        return () => sub.remove();
+    }, []);
+
+    const handleWalletLogin = async (
+        walletType: 'phantom' | 'solflare' | 'metamask' | 'NONE',
+        walletAddress?: string
+    ) => {
         try {
-            const selectedWalletAddress = walletAddress ? walletAddress : await simulateWalletConnect(walletType);
+            let selectedWalletAddress: string | null = walletAddress || null;
+
+            if (!walletAddress) {
+                switch (walletType) {
+                    case 'phantom':
+                        try {
+                            session = await generatePhantomSession();
+                            console.log('Generated Session:', session);
+                            await openPhantomConnect(session);
+                        } catch (error) {
+                            console.error('handleConnect error:', error);
+                            Alert.alert('Error', 'Could not initiate Phantom connection.');
+                        }
+                    case 'solflare':
+                        // selectedWalletAddress = await connectWithSolflare(); // optional future
+                        Alert.alert('Not implemented', 'Solflare support coming soon!');
+                        return;
+                    case 'metamask':
+                        // selectedWalletAddress = await connectWithMetaMask(); // optional future
+                        Alert.alert('Not implemented', 'MetaMask support coming soon!');
+                        return;
+                    default:
+                        selectedWalletAddress = null;
+                }
+            }
 
             if (!selectedWalletAddress) {
                 Alert.alert('Connection Failed', 'No wallet address received');
@@ -70,7 +152,7 @@ const step1 = () => {
                     params: { walletAddress: err.config?.data?.walletAddress },
                 });
             } else {
-                //Alert.alert('Error', err.message || 'Login failed');
+                Alert.alert('Error', err.message || 'Login failed');
             }
         }
     };
@@ -78,19 +160,6 @@ const step1 = () => {
     const handleLogin = async (walletAddress: string) => {
         await handleWalletLogin('NONE', walletAddress);
     }
-
-    const simulateWalletConnect = async (walletType: string): Promise<string | null> => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                const dummyWallets = {
-                    phantom: '2kPDhXqAuGGUinUx2se1qkF7qM5N8btwuHKgQdZHYmwK',
-                    solflare: '2kPJ...solflare',
-                    metamask: '0xABC...metamask',
-                };
-                resolve(dummyWallets[walletType] || null);
-            }, 1000);
-        });
-    };
 
     return (
         <SafeAreaView style={styles.outerContainer}>
@@ -129,6 +198,7 @@ const step1 = () => {
                                     borderColor="#551BF9"
                                     textColor="#ffffff"
                                     onPress={() => handleWalletLogin('phantom')}
+                                // onPress={handleConnect}
                                 />
                                 <WalletButton
                                     title="Connect with Solflare"
