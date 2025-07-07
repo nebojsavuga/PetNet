@@ -1,33 +1,24 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
-import { Link } from 'expo-router'
+import { Link, useRouter } from 'expo-router'
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const step2 = () => {
+    const router = useRouter();
+
+    const handleBack = () => {
+        router.back();
+    }
+
     return (
-        <View style={styles.container}>
-            <Text style={styles.text}>Step2 screen</Text>
-            <Link href="/(auth)/step3" style={styles.button}>
-                Go to step2 screen
-            </Link>
-        </View>
+        <SafeAreaView className='flex-1 bg-greyscale50 justify-center items-center px-4'>
+            <View className='flex flex-row w-full items-center justify-between'>
+                <Text className='text-greyscale800'>Step 1/6</Text>
+            </View>
+        </SafeAreaView>
     )
 }
 
 export default step2
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#25292e',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    text: {
-        color: '#fff',
-    },
-    button: {
-        fontSize: 20,
-        textDecorationLine: 'underline',
-        color: '#fff',
-    },
-});
+const styles = StyleSheet.create({});

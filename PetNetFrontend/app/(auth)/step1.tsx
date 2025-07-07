@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Images } from '@/constants/Images'
 
 import axios from 'axios';
-import { useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { Alert } from 'react-native';
 import { decryptPhantomPayload, generatePhantomSession, openPhantomConnect } from '@/services/walletService'
 
@@ -191,15 +191,17 @@ const step1 = () => {
                                     textColor={Pallete.greyscale[900]}
                                     onPress={() => handleWalletLogin('metamask')}
                                 />
-                                <WalletButton
+                                {/* <WalletButton
                                     title="Connect with Phantom"
                                     logo={Images.phantom}
                                     backgroundColor="#551BF9"
                                     borderColor="#551BF9"
                                     textColor="#ffffff"
                                     onPress={() => handleWalletLogin('phantom')}
-                                // onPress={handleConnect}
-                                />
+                                /> */}
+                                <Link href="/(auth)/step2" style={styles.button}>
+                                    Go to step2 screen
+                                </Link>
                                 <WalletButton
                                     title="Connect with Solflare"
                                     logo={Images.solflare}
@@ -323,5 +325,10 @@ const styles = StyleSheet.create({
         borderColor: Pallete.greyscale[300],
         borderRadius: 8,
         width: '100%',
+    },
+    button: {
+        fontSize: 20,
+        textDecorationLine: 'underline',
+        color: '#fff',
     },
 });

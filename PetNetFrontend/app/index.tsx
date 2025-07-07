@@ -1,6 +1,6 @@
 import 'react-native-get-random-values'
-import { Text, View, StyleSheet } from 'react-native';
-import { Link } from 'expo-router';
+import './globals.css'
+import { StyleSheet } from 'react-native';
 import Splash from './splash';
 import { useFonts } from 'expo-font';
 
