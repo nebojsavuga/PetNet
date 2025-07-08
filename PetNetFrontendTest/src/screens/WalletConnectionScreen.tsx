@@ -6,8 +6,15 @@ import { Images } from '../constants/Images'
 import { useAuthorization } from '../utils/useAuthorization'
 import { useMobileWallet } from '../utils/useMobileWallet'
 import { alertAndLog } from '../utils/alertAndLog'
+import { useNavigation } from '@react-navigation/native'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { RootStackParamList } from '../types/RootStackParamList'
+import { Ionicons } from '@expo/vector-icons';
+
+type WalletNavProp = NativeStackNavigationProp<RootStackParamList, "WalletConnectionScreen">;
 
 const WalletConnectionScreen = () => {
+    const navigation = useNavigation<WalletNavProp>();
     const { authorizeSession } = useAuthorization();
     const { connect } = useMobileWallet();
     const [authorizationInProgress, setAuthorizationInProgress] = useState(false);
@@ -36,6 +43,12 @@ const WalletConnectionScreen = () => {
             <Image source={Images.strongCentralPinkEllipse} style={styles.centerGlow} resizeMode="contain" />
             <Image source={Images.centralGreenEllipse} style={styles.centerGreenGlow} resizeMode="contain" />
             <View style={styles.textArea}>
+                <Pressable
+                    onPress={() => navigation.goBack()}
+
+                >
+                    <Ionicons name="arrow-back" size={24} color="#F7F7F7" />
+                </Pressable>
                 <Text style={[Typography.h2, { color: '#F7F7F7' }]}>Connect your crypto wallet</Text>
             </View>
             <Image
@@ -48,10 +61,10 @@ const WalletConnectionScreen = () => {
                 </Pressable>
                 <View style={styles.dividerContainer}>
                     <View style={styles.divider} />
-                    <Text style={[Typography.bodySmall, { color: '#8F8F8F' }]}>OR</Text>
+                    <Text style={[Typography.bodySmall, { color: '#988F99' }]}>OR</Text>
                     <View style={styles.divider} />
                 </View>
-                <Pressable style={styles.enterManuallyButton}>
+                <Pressable style={styles.enterManuallyButton} onPress={() => navigation.navigate('Onboarding')}>
                     <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Enter Wallet Address Manually</Text>
                 </Pressable>
             </View>
@@ -69,15 +82,17 @@ const styles = StyleSheet.create({
         height: '100%',
         backgroundColor: '#19171A',
         alignItems: 'center',
-        justifyContent: 'space-evenly',
-        padding: 24,
+        justifyContent: 'space-between',
+        paddingHorizontal: 24,
+        paddingVertical: 48,
         position: 'relative'
     },
     textArea: {
         display: 'flex',
-        flexDirection: 'row',
+        flexDirection: 'column',
+        gap: 32,
         width: '100%',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'flex-start'
     },
     solanaCoin: {
@@ -110,7 +125,7 @@ const styles = StyleSheet.create({
     divider: {
         flex: 1,
         height: 1,
-        backgroundColor: "#8F8F8F",
+        backgroundColor: "#4C454D",
         marginHorizontal: 8,
     },
     enterManuallyButton: {

@@ -55,6 +55,14 @@ export const Typography = StyleSheet.create({
         letterSpacing: 0,
         color: '#333333',
     },
+    bodyExtraSmall: {
+        fontFamily: 'SchibstedGrotesk-Regular',
+        fontWeight: '400' as TextStyle['fontWeight'],
+        fontSize: 12,
+        lineHeight: 20,
+        letterSpacing: 0,
+        color: '#333333',
+    },
     bodyBold: {
         fontFamily: 'SchibstedGrotesk-SemiBold',
         fontWeight: '600' as TextStyle['fontWeight'],
