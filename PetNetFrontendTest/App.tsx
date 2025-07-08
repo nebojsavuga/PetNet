@@ -7,6 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ConnectionProvider } from "./src/utils/ConnectionProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
+  NavigationContainer,
   DarkTheme as NavigationDarkTheme,
   DefaultTheme as NavigationDefaultTheme,
 } from "@react-navigation/native";
@@ -17,11 +18,21 @@ import {
   adaptNavigationTheme,
 } from "react-native-paper";
 import { AppNavigator } from "./src/navigators/AppNavigator";
+import RootNavigator from "./src/navigators/RootNavigator";
 import { ClusterProvider } from "./src/components/cluster/cluster-data-access";
+import { useFonts } from 'expo-font';
 
 const queryClient = new QueryClient();
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    'SchibstedGrotesk-Regular': require('./assets/fonts/SchibstedGrotesk-Regular.ttf'),
+    'SchibstedGrotesk-Medium': require('./assets/fonts/SchibstedGrotesk-Medium.ttf'),
+    'SchibstedGrotesk-Bold': require('./assets/fonts/SchibstedGrotesk-Bold.ttf'),
+    'SchibstedGrotesk-Black': require('./assets/fonts/SchibstedGrotesk-Black.ttf'),
+    'SchibstedGrotesk-SemiBold': require('./assets/fonts/SchibstedGrotesk-SemiBold.ttf'),
+  });
+
   const colorScheme = useColorScheme();
   const { LightTheme, DarkTheme } = adaptNavigationTheme({
     reactNavigationLight: NavigationDefaultTheme,
@@ -66,7 +77,13 @@ export default function App() {
                   : CombinedDefaultTheme
               }
             >
-              <AppNavigator />
+              <NavigationContainer theme={
+                colorScheme === "dark"
+                  ? CombinedDarkTheme
+                  : CombinedDefaultTheme
+              }>
+                <RootNavigator />
+              </NavigationContainer>
             </PaperProvider>
           </SafeAreaView>
         </ConnectionProvider>
