@@ -23,12 +23,14 @@ const Step2Screen = () => {
                 </Pressable>
             </View>
             <View style={styles.upperContent}>
-                <Text style={[Typography.h2, { color: '#F7F7F7' }]}>What’s your Email Address?</Text>
+                <Image source={Images.MailSent} style={styles.mailSentImg} resizeMode="contain" />
+                <Text style={[Typography.bodyLarge, { color: '#F7F7F7' }]}>Verify your email</Text>
                 <View style={styles.emailSection}>
-                    <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>Email</Text>
-                    <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>
-                        By submitting your email you confirm{'\n'}you’ve read the{' '}
-                        <Text style={{ color: '#BF38F2', fontWeight: '600' }}>Privacy Notice</Text>
+                    <Text style={[Typography.bodySmall, { color: '#F1EFF2' }]}>
+                        An email was sent to aleksa@gmail.com
+                    </Text>
+                    <Text style={[Typography.bodySmall, { color: '#F1EFF2' }]}>
+                        Verify your email with the link to continue
                     </Text>
                 </View>
             </View>
@@ -68,6 +70,10 @@ const styles = StyleSheet.create({
         paddingVertical: 48,
         position: 'relative'
     },
+    mailSentImg: {
+        width: 54,
+        height: 54
+    },
     backButton: {
         display: 'flex',
         flexDirection: 'row',
@@ -77,8 +83,10 @@ const styles = StyleSheet.create({
     upperContent: {
         display: 'flex',
         flexDirection: 'column',
-        gap: 32,
-        width: '100%'
+        gap: 8,
+        width: '100%',
+        alignItems: 'center',
+
     },
     connectionSection: {
         display: 'flex',
@@ -143,8 +151,7 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'column',
         width: '100%',
-        gap: 12,
-        alignItems: 'flex-start'
+        alignItems: 'center'
     },
     input: {
         width: '100%',
