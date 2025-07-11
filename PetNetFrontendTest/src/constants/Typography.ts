@@ -45,7 +45,6 @@ export const Typography = StyleSheet.create({
         fontSize: 16,
         lineHeight: 24,
         letterSpacing: 0,
-        color: '#333333',
     },
     bodySmall: {
         fontFamily: 'SchibstedGrotesk-Regular',
@@ -53,7 +52,6 @@ export const Typography = StyleSheet.create({
         fontSize: 14,
         lineHeight: 20,
         letterSpacing: 0,
-        color: '#333333',
     },
     bodyExtraSmall: {
         fontFamily: 'SchibstedGrotesk-Regular',
@@ -61,7 +59,6 @@ export const Typography = StyleSheet.create({
         fontSize: 12,
         lineHeight: 20,
         letterSpacing: 0,
-        color: '#333333',
     },
     bodyBold: {
         fontFamily: 'SchibstedGrotesk-SemiBold',

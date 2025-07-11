@@ -1,7 +1,7 @@
 // Polyfills
 import "./src/polyfills";
 
-import { StyleSheet, useColorScheme } from "react-native";
+import { Keyboard, StyleSheet, TouchableWithoutFeedback, useColorScheme } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ConnectionProvider } from "./src/utils/ConnectionProvider";
@@ -59,33 +59,35 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ClusterProvider>
         <ConnectionProvider config={{ commitment: "processed" }}>
-          <SafeAreaView
-            style={[
-              styles.shell,
-              {
-                backgroundColor:
-                  colorScheme === "dark"
-                    ? MD3DarkTheme.colors.background
-                    : MD3LightTheme.colors.background,
-              },
-            ]}
-          >
-            <PaperProvider
-              theme={
-                colorScheme === "dark"
-                  ? CombinedDarkTheme
-                  : CombinedDefaultTheme
-              }
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <SafeAreaView
+              style={[
+                styles.shell,
+                {
+                  backgroundColor:
+                    colorScheme === "dark"
+                      ? MD3DarkTheme.colors.background
+                      : MD3LightTheme.colors.background,
+                },
+              ]}
             >
-              <NavigationContainer theme={
-                colorScheme === "dark"
-                  ? CombinedDarkTheme
-                  : CombinedDefaultTheme
-              }>
-                <RootNavigator />
-              </NavigationContainer>
-            </PaperProvider>
-          </SafeAreaView>
+              <PaperProvider
+                theme={
+                  colorScheme === "dark"
+                    ? CombinedDarkTheme
+                    : CombinedDefaultTheme
+                }
+              >
+                <NavigationContainer theme={
+                  colorScheme === "dark"
+                    ? CombinedDarkTheme
+                    : CombinedDefaultTheme
+                }>
+                  <RootNavigator />
+                </NavigationContainer>
+              </PaperProvider>
+            </SafeAreaView>
+          </TouchableWithoutFeedback>
         </ConnectionProvider>
       </ClusterProvider>
     </QueryClientProvider>

@@ -1,9 +1,8 @@
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Images } from '../../constants/Images'
 import { Typography } from '../../constants/Typography'
-import { TextInput } from 'react-native-paper'
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -13,6 +12,8 @@ type Step1NavProp = NativeStackNavigationProp<OnboardingStackParamList, "Step1">
 
 const Step1Screen = () => {
     const navigation = useNavigation<Step1NavProp>();
+
+    const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -25,7 +26,20 @@ const Step1Screen = () => {
                 <Text style={[Typography.h2, { color: '#F7F7F7' }]}>What’s your Email Address?</Text>
                 <View style={styles.emailSection}>
                     <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>Email</Text>
-                    <TextInput underlineColor="transparent" placeholder='Your email address' style={styles.input} />
+                    <TextInput
+                        placeholder='Your email address'
+                        placeholderTextColor={'#D8D5D9'}
+                        onFocus={() => setFocusedInput('fullName')}
+                        onBlur={() => setFocusedInput(null)}
+                        style={[
+                            Typography.bodySmall,
+                            styles.inputField,
+                            {
+                                color: '#F7F7F7',
+                                borderColor: focusedInput === 'fullName' ? '#D988F7' : '#4C454D',
+                            },
+                        ]}
+                    />
                     <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>
                         By submitting your email you confirm{'\n'}you’ve read the{' '}
                         <Text style={{ color: '#BF38F2', fontWeight: '600' }}>Privacy Notice</Text>
@@ -64,7 +78,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 24,
-        paddingVertical: 48,
+        paddingVertical: 32,
         position: 'relative'
     },
     upperContent: {
@@ -139,11 +153,13 @@ const styles = StyleSheet.create({
         gap: 12,
         alignItems: 'flex-start'
     },
-    input: {
+    inputField: {
         width: '100%',
         paddingHorizontal: 16,
+        height: 56,
         borderWidth: 1,
         borderRadius: 8,
-        borderColor: '#4C454D'
-    }
+        borderColor: '#4C454D',
+        backgroundColor: "#FFFFFF1A"
+    },
 })

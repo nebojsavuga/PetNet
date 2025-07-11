@@ -30,11 +30,12 @@
     },
     "extra": {
       "eas": {
-        "projectId": "16611ff8-7f04-4eff-8677-4b1cb511c270"
+        "projectId": "4a8e7f6c-fdf9-43c4-ba01-7ec5c69e1df8"
       }
     },
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "owner": "petnet"
   }
 }

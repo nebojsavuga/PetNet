@@ -7,4 +7,6 @@ export const Images = {
     topLeftBlueEllipse: require('../../assets/images/TopLeftBlueEllipse.png'),
     strongCentralPinkEllipse: require('../../assets/images/StrongCentralPinkEllipse.png'),
     MailSent: require('../../assets/images/MailSentImg.png'),
+    OnboardingFinishedIcon: require('../../assets/images/OnboardingFinishedIcon.png'),
+
 };

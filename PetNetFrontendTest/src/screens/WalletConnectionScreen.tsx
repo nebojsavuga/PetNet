@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 24,
-        paddingVertical: 48,
+        paddingVertical: 32,
         position: 'relative'
     },
     textArea: {

@@ -35,7 +35,7 @@ const Step2Screen = () => {
                 </View>
             </View>
             <View style={styles.connectionSection}>
-                <Pressable style={styles.openMailButton} onPress={() => navigation.navigate("Step2")}>
+                <Pressable style={styles.openMailButton} onPress={() => navigation.navigate("Step3")}>
                     <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Open Mail</Text>
                 </Pressable>
                 <Pressable style={styles.resendButton} onPress={() => navigation.navigate("Step2")}>
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 24,
-        paddingVertical: 48,
+        paddingVertical: 32,
         position: 'relative'
     },
     mailSentImg: {
