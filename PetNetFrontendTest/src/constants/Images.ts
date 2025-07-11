@@ -8,5 +8,5 @@ export const Images = {
     strongCentralPinkEllipse: require('../../assets/images/StrongCentralPinkEllipse.png'),
     MailSent: require('../../assets/images/MailSentImg.png'),
     OnboardingFinishedIcon: require('../../assets/images/OnboardingFinishedIcon.png'),
-
+    ChoosePhotoIcon: require('../../assets/images/ChoosePhotoIcon.png')
 };

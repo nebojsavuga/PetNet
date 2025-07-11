@@ -17,7 +17,6 @@ import {
   MD3LightTheme,
   adaptNavigationTheme,
 } from "react-native-paper";
-import { AppNavigator } from "./src/navigators/AppNavigator";
 import RootNavigator from "./src/navigators/RootNavigator";
 import { ClusterProvider } from "./src/components/cluster/cluster-data-access";
 import { useFonts } from 'expo-font';
@@ -25,7 +24,7 @@ import { useFonts } from 'expo-font';
 const queryClient = new QueryClient();
 
 export default function App() {
-  const [fontsLoaded] = useFonts({
+  const [] = useFonts({
     'SchibstedGrotesk-Regular': require('./assets/fonts/SchibstedGrotesk-Regular.ttf'),
     'SchibstedGrotesk-Medium': require('./assets/fonts/SchibstedGrotesk-Medium.ttf'),
     'SchibstedGrotesk-Bold': require('./assets/fonts/SchibstedGrotesk-Bold.ttf'),

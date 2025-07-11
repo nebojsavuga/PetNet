@@ -13,7 +13,7 @@ const Tab = createBottomTabNavigator();
  * Each tab is a stack navigator with its own set of screens.
  *
  * More info: https://reactnavigation.org/docs/bottom-tab-navigator/
- */
+ */ 
 export function HomeNavigator() {
   const theme = useTheme();
   return (
