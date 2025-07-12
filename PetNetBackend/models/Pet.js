@@ -60,8 +60,83 @@ const petSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Pet',
             default: null,
-        }
+        },
+        children: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Pet',
+            }
+        ],
+        awards: [
+            {
+                awardName: {
+                    type: String,
+                    required: true,
+                    trim: true,
+                    maxlength: 100
+                },
+                showName: {
+                    type: String,
+                    required: true,
+                    trim: true,
+                    maxlength: 100
+                },
+                date: {
+                    type: Date,
+                    required: true
+                },
+            },
+        ],
+        interventions: [
+            {
+                interventionName: {
+                    type: String,
+                    required: true,
+                    trim: true,
+                    maxlength: 100
+                },
+                clinicName: {
+                    type: String,
+                    required: true,
+                    trim: true,
+                    maxlength: 100
+                },
+                vetName: {
+                    type: String,
+                    required: true,
+                    trim: true,
+                    maxlength: 100
+                },
+                date: {
+                    type: Date,
+                    required: true
+                },
+            },
+        ],
+        vaccinations: [
+            {
+                name: {
+                    type: String,
+                    required: true,
+                    trim: true,
+                    maxlength: 100
+                },
+                timestamp: {
+                    type: Date,
+                    required: true
+                },
+                nextDue: {
+                    type: Date
+                },
+                completed: {
+                    type: Boolean,
+                    required: true,
+                    default: false
+                },
+            },
+        ]
     },
+
     {
         timestamps: true,
     }
