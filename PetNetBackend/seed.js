@@ -33,8 +33,37 @@ async function seed() {
             race: 'Dog',
             breed: 'Golden Retriever',
             dateOfBirth: new Date('2020-06-15'),
-            imageUrl:'https://your-ipfs-gateway.com/ipfs/Qm...Hash',
+            imageUrl: 'https://your-ipfs-gateway.com/ipfs/Qm...Hash',
             owner: user._id,
+            awards: [
+                {
+                    awardName: 'Best Junior Dog',
+                    showName: 'National Dog Show 2022',
+                    date: new Date('2022-08-10'),
+                },
+            ],
+            vaccinations: [
+                {
+                    name: 'Rabies',
+                    timestamp: new Date('2024-01-15'),
+                    nextDue: new Date('2025-01-15'),
+                    completed: true,
+                },
+            ],
+            interventions: [
+                {
+                    interventionName: 'Neutering',
+                    clinicName: 'Happy Paws Veterinary Clinic',
+                    vetName: 'Dr. Ana Markovic',
+                    date: new Date('2021-03-12'),
+                },
+                {
+                    interventionName: 'Dental Cleaning',
+                    clinicName: 'Healthy Pets Clinic',
+                    vetName: 'Dr. Luka Petrovic',
+                    date: new Date('2023-10-05'),
+                },
+            ]
         });
 
         await pet.save();
