@@ -2,11 +2,14 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const User = require('./models/User');
+const Pet = require('./models/Pet')
 
-async function seedUser() {
+async function seed() {
     try {
         await mongoose.connect(process.env.MONGODB_URI);
         await User.deleteMany({});
+        await Pet.deleteMany({});
+
         const user = new User({
             fullName: 'Nebojsa Vuga',
             email: 'nebojsavuga01@gmail.com',
@@ -22,6 +25,21 @@ async function seedUser() {
 
         await user.save();
         console.log('User seeded.');
+
+        const pet = new Pet({
+            name: 'Buddy',
+            gender: 'Male',
+            chipNumber: 'CHIP123456789',
+            race: 'Dog',
+            breed: 'Golden Retriever',
+            dateOfBirth: new Date('2020-06-15'),
+            imageUrl:'https://your-ipfs-gateway.com/ipfs/Qm...Hash',
+            owner: user._id,
+        });
+
+        await pet.save();
+        console.log('Pet seeded.');
+
         process.exit(0);
     } catch (err) {
         console.error('Error seeding user:', err.message);
@@ -29,4 +47,4 @@ async function seedUser() {
     }
 }
 
-seedUser();
+seed();
