@@ -44,15 +44,23 @@ const petSchema = new mongoose.Schema(
             },
         },
         imageUrl: {
-            type: String,
-            // optional regex for URL validation
-            // match: /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i,
+            type: String
         },
         owner: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
             required: true,
         },
+        fatherId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Pet',
+            default: null,
+        },
+        motherId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Pet',
+            default: null,
+        }
     },
     {
         timestamps: true,
