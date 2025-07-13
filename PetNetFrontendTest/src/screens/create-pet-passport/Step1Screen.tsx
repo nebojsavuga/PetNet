@@ -1,13 +1,16 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { CreatingPetPassportStackParamList } from "../../types/CreatingPetPassportStackParamList";
 import { useNavigation } from "@react-navigation/native";
-import { useState } from "react";
+import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet, Image, View, Pressable, Text } from "react-native";
 import { Images } from "../../constants/Images";
 import { Ionicons } from '@expo/vector-icons';
 import { Typography } from "../../constants/Typography";
 import { TextInput } from "react-native-paper";
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Platform } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 
 type Step1NavProp = NativeStackNavigationProp<CreatingPetPassportStackParamList, "Step1">;
 
@@ -15,10 +18,18 @@ const Step1Screen = () => {
     const navigation = useNavigation<Step1NavProp>();
 
     const [name, setName] = useState<string>('');
-    const [species, setSpecies] = useState<'Dog' | 'Cat' | ''>('');
+    const [species, setSpecies] = useState<string>('');
     const [breed, setBreed] = useState<string | undefined>('');
-    const [gender, setGender] = useState<'Male' | 'Female' | 'Castrated Male' | 'Sterilized Female' | 'Unknown' | 'Sterilized Unknown' | ''>('');
-    const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(new Date(2001, 1, 1));
+    const [gender, setGender] = useState<
+        | 'Male'
+        | 'Female'
+        | 'Castrated Male'
+        | 'Sterilized Female'
+        | 'Unknown'
+        | 'Sterilized Unknown'
+        | ''
+    >(''); const [dateOfBirth, setDateOfBirth] = useState<Date | null>(new Date(2020, 1, 1));
+    const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
     return (
@@ -33,9 +44,11 @@ const Step1Screen = () => {
             <Text style={[Typography.h2, { color: '#F7F7F7' }]}>Your pet's basic info</Text>
             <View style={styles.dataSection}>
                 <View style={styles.input}>
-                    <Text style={[Typography.bodyExtraSmall, { color: '$F1EFF2' }]}>Name</Text>
+                    <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>Name</Text>
                     <TextInput placeholder="Your pet's name"
                         placeholderTextColor={'#D8D5D9'}
+                        value={name}
+                        onChangeText={setName}
                         onFocus={() => setFocusedInput('name')}
                         onBlur={() => setFocusedInput(null)}
                         style={[
@@ -48,15 +61,29 @@ const Step1Screen = () => {
                     />
                 </View>
                 <View style={styles.input}>
-                    <Text style={[Typography.bodyExtraSmall, { color: '$F1EFF2' }]}>Pet</Text>
-                    <TextInput placeholderTextColor={'#D8D5D9'} placeholder='Dog' style={[Typography.bodySmall, styles.inputField]} />
+                    <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>Kind</Text>
+                    <TextInput
+                        placeholderTextColor={'#D8D5D9'}
+                        placeholder='Dog'
+                        value={species}
+                        onChangeText={setSpecies}
+                        style={[
+                            Typography.bodySmall,
+                            styles.inputField,
+                            {
+                                borderColor: focusedInput === 'species' ? '#BF38F2' : '#4C454D'
+                            }
+                        ]}
+                    />
                 </View>
                 <View style={styles.input}>
-                    <Text style={[Typography.bodyExtraSmall, { color: '$F1EFF2' }]}>Breed</Text>
+                    <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>Breed</Text>
                     <TextInput placeholder="Golder Retriever"
                         placeholderTextColor={'#D8D5D9'}
                         onFocus={() => setFocusedInput('breed')}
                         onBlur={() => setFocusedInput(null)}
+                        value={breed}
+                        onChangeText={setBreed}
                         style={[
                             Typography.bodySmall,
                             styles.inputField,
@@ -67,12 +94,46 @@ const Step1Screen = () => {
                     />
                 </View>
                 <View style={styles.input}>
-                    <Text style={[Typography.bodyExtraSmall, { color: '$F1EFF2' }]}>Gender</Text>
-                    <TextInput placeholderTextColor={'#D8D5D9'} placeholder='Male' style={[Typography.bodySmall, styles.inputField]} />
+                    <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2', marginBottom: 4 }]}>Gender</Text>
+                    <View style={[styles.inputField, { paddingHorizontal: 0, justifyContent: 'center' }]}>
+                        <Picker
+                            selectedValue={gender}
+                            onValueChange={(itemValue) => setGender(itemValue)}
+                            style={styles.picker}
+                            dropdownIconColor="#D8D5D9"
+                            itemStyle={{ color: '#F1EFF2', fontSize: 14 }}
+                            mode="dropdown"
+                        >
+                            <Picker.Item label="Select gender..." value="" color="#D8D5D9" />
+                            <Picker.Item label="Male" value="Male" />
+                            <Picker.Item label="Female" value="Female" />
+                            <Picker.Item label="Castrated Male" value="Castrated Male" />
+                            <Picker.Item label="Sterilized Female" value="Sterilized Female" />
+                            <Picker.Item label="Unknown" value="Unknown" />
+                            <Picker.Item label="Sterilized Unknown" value="Sterilized Unknown" />
+                        </Picker>
+                    </View>
                 </View>
                 <View style={styles.input}>
                     <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>Date of birth</Text>
-                    <TextInput placeholderTextColor={'#D8D5D9'} placeholder='Your date of birth' style={[Typography.bodySmall, styles.inputField]} />
+                    <Pressable onPress={() => setIsDatePickerOpen(true)} style={styles.inputField}>
+                        <Text style={[Typography.bodySmall, { color: dateOfBirth ? '#F7F7F7' : '#D8D5D9', marginTop: 15 }]}>
+                            {dateOfBirth ? dateOfBirth.toLocaleDateString() : "Your date of birth"}
+                        </Text>
+                    </Pressable>
+                    {isDatePickerOpen && (
+                        <DateTimePicker
+                            value={dateOfBirth || new Date()}
+                            mode="date"
+                            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                            maximumDate={new Date()}
+                            onChange={(event, selectedDate) => {
+                                setIsDatePickerOpen(Platform.OS === 'ios');
+                                if (selectedDate) setDateOfBirth(selectedDate);
+                            }}
+                            themeVariant="dark"
+                        />
+                    )}
                 </View>
             </View>
             <View style={styles.connectionSection}>
@@ -111,6 +172,15 @@ const styles = StyleSheet.create({
         gap: 24,
         width: '100%'
     },
+    picker: {
+        color: '#F1EFF2',
+        width: '100%',
+        height: 56,
+        backgroundColor: 'transparent',
+        fontSize: 14,
+        paddingHorizontal: 16
+    },
+
     connectWalletButton: {
         display: 'flex',
         width: '100%',

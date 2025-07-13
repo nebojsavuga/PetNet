@@ -22,10 +22,10 @@ const Step2Screen = () => {
                 <Image source={Images.ChoosePhotoIcon} style={styles.mailSentImg} resizeMode="contain" />
             </View>
             <View style={styles.connectionSection}>
-                <Pressable style={styles.openMailButton} onPress={() => navigation.navigate("Step1")}>
+                <Pressable style={styles.openMailButton} onPress={() => navigation.navigate("Step3")}>
                     <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Take a photo</Text>
                 </Pressable>
-                <Pressable style={styles.resendButton} onPress={() => navigation.navigate("Step1")}>
+                <Pressable style={styles.resendButton} onPress={() => navigation.navigate("Step3")}>
                     <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Upload existing photo</Text>
                 </Pressable> 
             </View>

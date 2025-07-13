@@ -3,9 +3,9 @@ import SplashScreen from "../screens/SplashScreen";
 import WalletConnectionScreen from "../screens/WalletConnectionScreen";
 import { useState } from "react";
 import OnboardingNavigator from "./OnboardingNavigator";
-import { HomeNavigator } from "./HomeNavigator";
 import { RootStackParamList } from "../types/RootStackParamList";
 import CreatePetPassportNavigator from "./CreatePetPassportNavigator";
+import HomeScreen from "../screens/HomeScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const RootNavigator = () => {
@@ -16,7 +16,7 @@ const RootNavigator = () => {
             <Stack.Screen name="Splash" component={SplashScreen} />
             <Stack.Screen name="WalletConnectionScreen" component={WalletConnectionScreen} />
             <Stack.Screen name="Onboarding" component={OnboardingNavigator} />
-            <Stack.Screen name="HomeScreen" component={HomeNavigator} />
+            <Stack.Screen name="HomeScreen" component={HomeScreen} />
             <Stack.Screen name="CreatePetPassport" component={CreatePetPassportNavigator} />
         </Stack.Navigator>
     );

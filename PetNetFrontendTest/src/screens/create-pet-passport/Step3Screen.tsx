@@ -1,6 +1,6 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { CreatingPetPassportStackParamList } from "../../types/CreatingPetPassportStackParamList";
-import { useNavigation } from "@react-navigation/native";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet, Image, View, Pressable, Text } from "react-native";
@@ -8,15 +8,21 @@ import { Images } from "../../constants/Images";
 import { Ionicons } from '@expo/vector-icons';
 import { Typography } from "../../constants/Typography";
 import { TextInput } from "react-native-paper";
+import { RootStackParamList } from "../../types/RootStackParamList";
 
-type Step3NavProp = NativeStackNavigationProp<CreatingPetPassportStackParamList, "Step3">;
 
 const Step3Screen = () => {
-    const navigation = useNavigation<Step3NavProp>();
+    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
     const [chip, setChip] = useState<string>('');
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
+    const handleFinish = () => {
+        navigation.reset({
+            index: 0,
+            routes: [{ name: 'HomeScreen' }]
+        });
+    }
     return (
         <SafeAreaView style={styles.container}>
             <Image source={Images.topLeftGreenEllipse} style={styles.topLeftGlow} resizeMode="contain" />
@@ -29,11 +35,13 @@ const Step3Screen = () => {
             <Text style={[Typography.h2, { color: '#F7F7F7' }]}>Your pet's basic info</Text>
             <View style={styles.dataSection}>
                 <View style={styles.input}>
-                    <Text style={[Typography.bodyExtraSmall, { color: '$F1EFF2' }]}>Chip ID</Text>
+                    <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>Chip ID</Text>
                     <TextInput placeholder="Your pet's Chip ID"
                         placeholderTextColor={'#D8D5D9'}
                         onFocus={() => setFocusedInput('chip')}
                         onBlur={() => setFocusedInput(null)}
+                        value={chip}
+                        onChangeText={setChip}
                         style={[
                             Typography.bodySmall,
                             styles.inputField,
@@ -45,11 +53,11 @@ const Step3Screen = () => {
                 </View>
             </View>
             <View style={styles.connectionSection}>
-                <Pressable style={styles.createNewAccountButton} onPress={() => navigation.navigate("Step1")}>
+                <Pressable style={styles.createNewAccountButton} onPress={() => handleFinish()}>
                     <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Finish</Text>
                 </Pressable>
             </View>
-        </SafeAreaView>
+        </SafeAreaView >
     )
 }
 
