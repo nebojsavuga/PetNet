@@ -1,36 +1,77 @@
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, Image, View, Pressable, Text } from "react-native";
+import { StyleSheet, Image, View, Pressable, Text, Alert } from "react-native";
 import { Images } from "../../constants/Images";
 import { Ionicons } from '@expo/vector-icons';
 import { Typography } from "../../constants/Typography";
 import { TextInput } from "react-native-paper";
 import { RootStackParamList } from "../../types/RootStackParamList";
 import { usePetPassport } from "../../contexts/CreatePetPassportContext";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 
+const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 
 const Step3Screen = () => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const { updateData, data } = usePetPassport();
 
-    const [chip, setChip] = useState<string>('');
+    const [chipNumber, setChipNumber] = useState<string>('');
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
     const handleSubmit = async () => {
-        updateData({ chip });
+        updateData({ chipNumber });
+        const token = await AsyncStorage.getItem('jwtToken');
+        if (!token) {
+            Alert.alert('Unauthorized', 'You must be logged in.');
+            return;
+        }
+        let ipfsUrl = data.imageUrl;
+        if (data.imageUrl?.startsWith('file://')) {
+            const formData = new FormData();
+            formData.append('image', {
+                uri: data.imageUrl,
+                type: 'image/jpeg',
+                name: 'photo.jpg',
+            } as any);
 
-        // Send the full form to your API
-        // const fullPet = {
-        //     ...data,
-        //     chip,
-        // };
+            const ipfsRes = await fetch(`${API_URL}/pets/image`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data',
+                },
+                body: formData,
+            });
 
-        // await submitPetPassport(fullPet); // POST to your backend
-        console.log(data);
+            const ipfsData = await ipfsRes.json();
+            if (!ipfsRes.ok) {
+                Alert.alert('Error', ipfsData.error || 'Failed to upload image');
+                return;
+            }
+            ipfsUrl = ipfsData.url;
+            updateData({ imageUrl: ipfsUrl });
+        }
+        const petResponse = await fetch(`${API_URL}/pets`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ...data,
+                chipNumber: chipNumber,
+                imageUrl: ipfsUrl,
+            }),
+        });
+        const petData = await petResponse.json();
+        if (!petResponse.ok) {
+            Alert.alert('Error', petData.error || 'Could not create pet');
+            return;
+        }
         navigation.reset({
             index: 0,
-            routes: [{ name: 'HomeScreen' }]
+            routes: [{ name: 'HomeScreen' }],
         });
     };
 
@@ -51,8 +92,8 @@ const Step3Screen = () => {
                         placeholderTextColor={'#D8D5D9'}
                         onFocus={() => setFocusedInput('chip')}
                         onBlur={() => setFocusedInput(null)}
-                        value={chip}
-                        onChangeText={setChip}
+                        value={chipNumber}
+                        onChangeText={setChipNumber}
                         style={[
                             Typography.bodySmall,
                             styles.inputField,

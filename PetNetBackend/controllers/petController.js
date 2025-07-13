@@ -1,23 +1,28 @@
 const Pet = require('../models/Pet');
-const ipfs = require('../config/ipfs');
+require('dotenv').config();
 const fs = require('fs');
+
+const { pinata } = require('../config/pinata');
 
 exports.uploadImageToIpfs = async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' });
         }
+        const timestamp = Date.now();
+        const randomFileName = `${timestamp}.jpg`;
+        const blob = new Blob([fs.readFileSync(req.file.path)]);
+        const file = new File([blob], randomFileName, { type: "image/jpeg" });
 
-        const fileBuffer = fs.readFileSync(req.file.path);
-
-        const result = await ipfs.add(fileBuffer);
-        const ipfsUrl = `https://ipfs.io/ipfs/${result.path}`;
-
-        fs.unlinkSync(req.file.path);
-        res.status(200).json({ ipfsUrl });
+        const response = await pinata.upload.public.file(file);
+        const url = await pinata.gateways.public.convert(response.cid);
+        fs.unlink(req.file.path, (err) => {
+            if (err) console.error('Failed to delete temp file:', err);
+        });
+        return res.status(200).json({ url });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Failed to upload image to IPFS' });
+        console.error('Pinata upload error:', err);
+        return res.status(500).json({ error: 'Failed to upload image to IPFS' });
     }
 };
 

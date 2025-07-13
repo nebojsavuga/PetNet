@@ -21,7 +21,7 @@ const Step1Screen = () => {
     const navigation = useNavigation<Step1NavProp>();
 
     const [name, setName] = useState<string>('');
-    const [species, setSpecies] = useState<string>('');
+    const [race, setRace] = useState<string>('');
     const [breed, setBreed] = useState<string | undefined>('');
     const [gender, setGender] = useState<
         | 'Male'
@@ -35,7 +35,7 @@ const Step1Screen = () => {
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
     const handleNext = () => {
-        updateData({ name, gender, dateOfBirth, species, breed });
+        updateData({ name, gender, dateOfBirth, race, breed });
         navigation.navigate('Step2');
     };
     return (
@@ -71,8 +71,8 @@ const Step1Screen = () => {
                     <TextInput
                         placeholderTextColor={'#D8D5D9'}
                         placeholder='Dog'
-                        value={species}
-                        onChangeText={setSpecies}
+                        value={race}
+                        onChangeText={setRace}
                         style={[
                             Typography.bodySmall,
                             styles.inputField,

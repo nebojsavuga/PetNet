@@ -10,7 +10,7 @@ const petSchema = new mongoose.Schema(
         },
         gender: {
             type: String,
-            enum: ['Male', 'Female', 'Castrated Male', 'Sterilized Female', 'Unknown'],
+            enum: ['Male', 'Female', 'Castrated Male', 'Sterilized Female', 'Unknown', 'Sterilized Unknown'],
             required: true,
         },
         chipNumber: {

@@ -2,11 +2,11 @@ import { createContext, useContext, useState } from "react";
 
 type PetPassportData = {
     name?: string;
-    species?: string,
+    race?: string,
     breed?: string,
     gender?: string,
     dateOfBirth?: Date,
-    chip?: string,
+    chipNumber?: string,
     imageUrl?: string
 };
 

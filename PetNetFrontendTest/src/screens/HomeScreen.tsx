@@ -17,6 +17,9 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { Pet } from '../types/Pet';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
+
+const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 
 dayjs.extend(relativeTime);
 
@@ -31,6 +34,7 @@ const HomeScreen = () => {
   useEffect(() => {
     const fetchUserAndPets = async () => {
       try {
+        // Get stored user info
         const userJson = await AsyncStorage.getItem('user');
         if (userJson) {
           const user = JSON.parse(userJson);
@@ -39,41 +43,28 @@ const HomeScreen = () => {
           }
         }
 
-        // Set dummy pets (replace with actual API call)
-        setPets([
-          {
-            _id: '1',
-            name: 'Bella',
-            imageUrl: 'https://www.borrowmydoggy.com/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2F4ij0poqn%2Fproduction%2Fda89d930fc320dd912a2a25487b9ca86b37fcdd6-800x600.jpg&w=1080&q=80',
-            breed: 'Golden Retriever',
-            gender: 'Female',
-            dateOfBirth: '2021-12-01',
-            race: 'Dog',
-            owner: '1',
-            children: [],
-            awards: [],
-            vaccinations: [],
-            interventions: [],
-            createdAt: '',
-            updatedAt: ''
+        // Get stored JWT token
+        const token = await AsyncStorage.getItem('jwtToken'); // Adjust key to whatever you use
+        if (!token) {
+          console.warn('No JWT token found');
+          return;
+        }
+
+        const response = await fetch(`${API_URL}/pets`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
           },
-          {
-            _id: '2',
-            name: 'Cathy',
-            imageUrl: 'https://i.pinimg.com/736x/0c/11/8e/0c118e6b7af51cf3718f5682a701f466.jpg',
-            breed: 'Ugly cat',
-            gender: 'Male',
-            dateOfBirth: '2018-09-15',
-            race: 'Cat',
-            owner: '1',
-            children: [],
-            awards: [],
-            vaccinations: [],
-            interventions: [],
-            createdAt: '',
-            updatedAt: ''
-          },
-        ]);
+        });
+
+        if (!response.ok) {
+          console.error('Failed to fetch pets:', response.status);
+          return;
+        }
+
+        const petsFromApi = await response.json();
+        setPets(petsFromApi);
+
       } catch (error) {
         console.error('Failed to load user or pets:', error);
       }
