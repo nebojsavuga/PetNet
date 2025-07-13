@@ -1,5 +1,5 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Typography } from '../constants/Typography'
 import { Images } from '../constants/Images'
@@ -10,22 +10,70 @@ import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { RootStackParamList } from '../types/RootStackParamList'
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
+
+const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 
 type WalletNavProp = NativeStackNavigationProp<RootStackParamList, "WalletConnectionScreen">;
+
 
 const WalletConnectionScreen = () => {
     const navigation = useNavigation<WalletNavProp>();
     const { authorizeSession } = useAuthorization();
     const { connect } = useMobileWallet();
     const [authorizationInProgress, setAuthorizationInProgress] = useState(false);
-    const handleConnectPress = useCallback(async () => {
-        try {
-            if (authorizationInProgress) {
-                return;
+    useEffect(() => {
+        const checkLogin = async () => {
+            try {
+                const token = await AsyncStorage.getItem('jwtToken');
+                const user = await AsyncStorage.getItem('user');
+
+                if (token && user) {
+                    navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'HomeScreen' }],
+                    });
+                }
+            } catch (err) {
+                console.warn('Error checking login state:', err);
             }
-            setAuthorizationInProgress(true);
-            await connect();
-        } catch (err: any) {
+        };
+
+        checkLogin();
+    }, []);
+    const loginWithWalletAddress = async (walletAddress: string) => {
+        try {
+            const response = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ walletAddress }),
+            });
+            if (!response.ok) {
+                // user not found or other error
+                return null;
+            }
+
+            const data = await response.json();
+
+            await AsyncStorage.setItem('jwtToken', data.token);
+            await AsyncStorage.setItem('user', JSON.stringify(data.user));
+
+            return data;
+        } catch (err) {
+
+            return null;
+        }
+    };
+    const handleConnectPress = useCallback(async () => {
+        if (authorizationInProgress) return;
+
+        setAuthorizationInProgress(true);
+
+        let account;
+        try {
+            account = await connect();
+        } catch (err) {
             alertAndLog(
                 "Error during connect",
                 err instanceof Error ? err.message : err
@@ -33,7 +81,24 @@ const WalletConnectionScreen = () => {
         } finally {
             setAuthorizationInProgress(false);
         }
+
+        if (!account || !account.publicKey) {
+            alert("Wallet connection failed.");
+            return;
+        }
+
+        const loginResult = await loginWithWalletAddress(account.publicKey.toString());
+
+        if (loginResult) {
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'HomeScreen' }],
+            });
+        } else {
+            navigation.navigate("Onboarding");
+        }
     }, [authorizationInProgress, authorizeSession]);
+
     return (
         <SafeAreaView style={styles.container}>
             {/* <Pressable onPress={handleBack} className='flex flex-row w-full'>
