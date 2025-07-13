@@ -16,7 +16,7 @@ const RootNavigator = () => {
             <Stack.Screen name="Splash" component={SplashScreen} />
             <Stack.Screen name="WalletConnectionScreen" component={WalletConnectionScreen} />
             <Stack.Screen name="Onboarding" component={OnboardingNavigator} />
-            <Stack.Screen name="HomeStack" component={HomeNavigator} />
+            <Stack.Screen name="HomeScreen" component={HomeNavigator} />
             <Stack.Screen name="CreatePetPassport" component={CreatePetPassportNavigator} />
         </Stack.Navigator>
     );

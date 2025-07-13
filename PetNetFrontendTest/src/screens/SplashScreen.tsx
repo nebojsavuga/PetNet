@@ -33,6 +33,10 @@ const SplashScreen = () => {
             <Pressable onPress={() => navigation.navigate("WalletConnectionScreen")} style={styles.continueButton}>
                 <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Continue</Text>
             </Pressable>
+            <Pressable onPress={() => navigation.navigate("HomeScreen")} style={styles.continueButton}>
+                <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Home</Text>
+            </Pressable>
+
         </SafeAreaView>
     )
 }

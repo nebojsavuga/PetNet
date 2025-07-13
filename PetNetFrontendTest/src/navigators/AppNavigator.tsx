@@ -51,7 +51,7 @@ const AppStack = () => {
   return (
     <Stack.Navigator initialRouteName={"Home"}>
       <Stack.Screen
-        name="HomeStack"
+        name="HomeScreen"
         component={HomeNavigator}
         options={{ headerShown: false }}
       />

@@ -2,6 +2,6 @@ export type RootStackParamList = {
     Splash: undefined;
     WalletConnectionScreen: undefined;
     Onboarding: undefined;
-    HomeStack: undefined;
+    HomeScreen: undefined;
     CreatePetPassport: undefined;
 };
