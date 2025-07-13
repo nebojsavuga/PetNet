@@ -34,7 +34,6 @@ const HomeScreen = () => {
   useEffect(() => {
     const fetchUserAndPets = async () => {
       try {
-        // Get stored user info
         const userJson = await AsyncStorage.getItem('user');
         if (userJson) {
           const user = JSON.parse(userJson);
@@ -43,8 +42,7 @@ const HomeScreen = () => {
           }
         }
 
-        // Get stored JWT token
-        const token = await AsyncStorage.getItem('jwtToken'); // Adjust key to whatever you use
+        const token = await AsyncStorage.getItem('jwtToken');
         if (!token) {
           console.warn('No JWT token found');
           return;
@@ -79,7 +77,41 @@ const HomeScreen = () => {
   };
 
   const renderPetCard = (pet: Pet) => {
-    const vaccineText = 'Vaccination in 3 days';
+    const incompleteVaccinations = pet.vaccinations.filter(vac => !vac.completed);
+
+    if (incompleteVaccinations.length === 0) {
+      // No incomplete vaccinations - don't show badge
+      return (
+        <SafeAreaView key={pet._id} style={styles.petCard}>
+          <Image source={{ uri: pet.imageUrl }} style={styles.petImage} />
+          <SafeAreaView style={styles.petInfo}>
+            <Text style={styles.petName}>{pet.name}</Text>
+            <Text style={styles.petDetails}>
+              {pet.breed} • {calculateAge(pet.dateOfBirth)} • {pet.gender}
+            </Text>
+            {/* No badge */}
+          </SafeAreaView>
+        </SafeAreaView>
+      );
+    }
+    const latestVaccination = incompleteVaccinations[0];
+
+    incompleteVaccinations.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    const now = dayjs();
+    const vacDate = dayjs(latestVaccination.timestamp);
+
+    let vaccineBadgeText = '';
+    if (vacDate.isBefore(now, 'day')) {
+      vaccineBadgeText = `Last Vaccination: ${vacDate.format('MMM D, YYYY')}`;
+    } else {
+      const diffDays = vacDate.diff(now, 'day');
+      if (diffDays < 30) {
+        vaccineBadgeText = `Next Vaccination in: ${diffDays}d`;
+      } else {
+        const diffMonths = vacDate.diff(now, 'month');
+        vaccineBadgeText = `Next Vaccination in: ${diffMonths}m`;
+      }
+    }
     return (
       <SafeAreaView key={pet._id} style={styles.petCard}>
         <Image source={{ uri: pet.imageUrl }} style={styles.petImage} />
@@ -88,8 +120,9 @@ const HomeScreen = () => {
           <Text style={styles.petDetails}>
             {pet.breed} • {calculateAge(pet.dateOfBirth)} • {pet.gender}
           </Text>
-          <View style={styles.vaccineBadge}>
-            <Text style={styles.vaccineBadgeText}>{vaccineText}</Text>
+
+          <View style={[styles.vaccineBadge, { backgroundColor: vacDate.isBefore(now, 'day') ? '#888888' : '#E8B23C' }]}>
+            <Text style={styles.vaccineBadgeText}>{vaccineBadgeText}</Text>
           </View>
         </SafeAreaView>
       </SafeAreaView>
@@ -197,7 +230,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   vaccineBadge: {
-    backgroundColor: '#E8B23C',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 16,
@@ -206,9 +238,10 @@ const styles = StyleSheet.create({
   },
   vaccineBadgeText: {
     fontSize: 12,
-    color: '#242424',
     fontWeight: '600',
+    color: '#242424',
   },
+
   newPetButton: {
     backgroundColor: '#BF38F2',
     borderRadius: 8,

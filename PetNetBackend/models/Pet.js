@@ -125,9 +125,6 @@ const petSchema = new mongoose.Schema(
                     type: Date,
                     required: true
                 },
-                nextDue: {
-                    type: Date
-                },
                 completed: {
                     type: Boolean,
                     required: true,

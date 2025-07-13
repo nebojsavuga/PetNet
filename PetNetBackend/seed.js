@@ -45,9 +45,8 @@ async function seed() {
             vaccinations: [
                 {
                     name: 'Rabies',
-                    timestamp: new Date('2024-01-15'),
-                    nextDue: new Date('2025-01-15'),
-                    completed: true,
+                    timestamp: new Date('2024-08-15'),
+                    completed: false,
                 },
             ],
             interventions: [
