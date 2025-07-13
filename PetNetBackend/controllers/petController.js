@@ -1,6 +1,5 @@
 const Pet = require('../models/Pet');
-const path = require('path');
-const ipfs = require('../utils/ipfs');
+const ipfs = require('../config/ipfs');
 const fs = require('fs');
 
 exports.uploadImageToIpfs = async (req, res) => {
