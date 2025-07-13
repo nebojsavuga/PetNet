@@ -16,6 +16,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { Pet } from '../types/Pet';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 dayjs.extend(relativeTime);
 
@@ -28,41 +29,57 @@ const HomeScreen = () => {
   const [pets, setPets] = useState<Pet[]>([]);
 
   useEffect(() => {
-    // TODO: Fetch real pets data from API
-    setPets([
-      {
-        _id: '1',
-        name: 'Bella',
-        imageUrl: 'https://place-puppy.com/200x200',
-        breed: 'Golden Retriever',
-        gender: 'Female',
-        dateOfBirth: '2021-12-01',
-        race: 'Test',
-        owner: '1',
-        children: [],
-        awards: [],
-        vaccinations: [],
-        interventions: [],
-        createdAt: '',
-        updatedAt: ''
-      },
-      {
-        _id: '2',
-        name: 'Goldie',
-        imageUrl: 'https://place-puppy.com/201x200',
-        breed: 'Golden Retriever',
-        gender: 'Male',
-        dateOfBirth: '2018-09-15',
-        race: 'Test',
-        owner: '1',
-        children: [],
-        awards: [],
-        vaccinations: [],
-        interventions: [],
-        createdAt: '',
-        updatedAt: ''
-      },
-    ]);
+    const fetchUserAndPets = async () => {
+      try {
+        const userJson = await AsyncStorage.getItem('user');
+        if (userJson) {
+          const user = JSON.parse(userJson);
+          if (user?.fullName) {
+            setName(user.fullName);
+          }
+        }
+
+        // Set dummy pets (replace with actual API call)
+        setPets([
+          {
+            _id: '1',
+            name: 'Bella',
+            imageUrl: 'https://www.borrowmydoggy.com/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2F4ij0poqn%2Fproduction%2Fda89d930fc320dd912a2a25487b9ca86b37fcdd6-800x600.jpg&w=1080&q=80',
+            breed: 'Golden Retriever',
+            gender: 'Female',
+            dateOfBirth: '2021-12-01',
+            race: 'Dog',
+            owner: '1',
+            children: [],
+            awards: [],
+            vaccinations: [],
+            interventions: [],
+            createdAt: '',
+            updatedAt: ''
+          },
+          {
+            _id: '2',
+            name: 'Cathy',
+            imageUrl: 'https://i.pinimg.com/736x/0c/11/8e/0c118e6b7af51cf3718f5682a701f466.jpg',
+            breed: 'Ugly cat',
+            gender: 'Male',
+            dateOfBirth: '2018-09-15',
+            race: 'Cat',
+            owner: '1',
+            children: [],
+            awards: [],
+            vaccinations: [],
+            interventions: [],
+            createdAt: '',
+            updatedAt: ''
+          },
+        ]);
+      } catch (error) {
+        console.error('Failed to load user or pets:', error);
+      }
+    };
+
+    fetchUserAndPets();
   }, []);
   const calculateAge = (dob: string) => {
     const years = dayjs().diff(dayjs(dob), 'year');
@@ -90,7 +107,7 @@ const HomeScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={Typography.h3}>Hello, {name}</Text>
+        <Text style={[Typography.h1, styles.sectionTitle]}>Hello, {name}</Text>
         <View style={styles.icons}>
           <Ionicons name="notifications-outline" size={22} color="#fff" />
           <Ionicons name="settings-outline" size={22} color="#fff" style={{ marginLeft: 16 }} />
@@ -101,12 +118,23 @@ const HomeScreen = () => {
         <Text style={styles.sectionTitle}>Your Pets Passports</Text>
       </View>
 
-      <FlatList
-        data={pets}
-        keyExtractor={(item) => item._id}
-        renderItem={({ item }) => renderPetCard(item)}
-        style={{ flexGrow: 0 }}
-      />
+      {pets.length === 0 ? (
+        <View style={{ padding: 16, alignItems: 'center' }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#F7F7F7', marginBottom: 8 }}>
+            Create Pet Passport
+          </Text>
+          <Text style={{ fontSize: 14, color: '#BBB', textAlign: 'center' }}>
+            Create your pet’s passport and unlock access to their health records anytime, anywhere.
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={pets}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => renderPetCard(item)}
+          style={{ flexGrow: 0 }}
+        />
+      )}
 
       <Pressable style={styles.newPetButton} onPress={() => navigation.navigate('CreatePetPassport')}>
         <Text style={styles.newPetButtonText}>+ New Pet Passport</Text>
@@ -159,8 +187,8 @@ const styles = StyleSheet.create({
     borderColor: '#3A3A3D',
   },
   petImage: {
-    width: 60,
-    height: 60,
+    width: 90,
+    height: 90,
     borderRadius: 8,
     marginRight: 12,
   },

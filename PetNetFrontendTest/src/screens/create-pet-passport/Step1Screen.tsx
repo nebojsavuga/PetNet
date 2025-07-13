@@ -11,10 +11,13 @@ import { TextInput } from "react-native-paper";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { usePetPassport } from "../../contexts/CreatePetPassportContext";
 
 type Step1NavProp = NativeStackNavigationProp<CreatingPetPassportStackParamList, "Step1">;
 
 const Step1Screen = () => {
+    const { updateData } = usePetPassport();
+
     const navigation = useNavigation<Step1NavProp>();
 
     const [name, setName] = useState<string>('');
@@ -28,10 +31,13 @@ const Step1Screen = () => {
         | 'Unknown'
         | 'Sterilized Unknown'
         | ''
-    >(''); const [dateOfBirth, setDateOfBirth] = useState<Date | null>(new Date(2020, 1, 1));
+    >(''); const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(new Date(2020, 1, 1));
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
-
+    const handleNext = () => {
+        updateData({ name, gender, dateOfBirth, species, breed });
+        navigation.navigate('Step2');
+    };
     return (
         <SafeAreaView style={styles.container}>
             <Image source={Images.topLeftGreenEllipse} style={styles.topLeftGlow} resizeMode="contain" />
@@ -137,11 +143,11 @@ const Step1Screen = () => {
                 </View>
             </View>
             <View style={styles.connectionSection}>
-                <Pressable style={styles.createNewAccountButton} onPress={() => navigation.navigate("Step2")}>
+                <Pressable style={styles.createNewAccountButton} onPress={() => handleNext()}>
                     <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Continue</Text>
                 </Pressable>
             </View>
-        </SafeAreaView>
+        </SafeAreaView >
     )
 }
 

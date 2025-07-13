@@ -2,8 +2,39 @@ import 'dotenv/config';
 
 export default {
     expo: {
-        extra: {
-            apiUrl: process.env.EXPO_PUBLIC_API_URL,
+        name: "solana-mobile-expo-template",
+        slug: "solana-mobile-expo-template",
+        version: "1.0.0",
+        orientation: "portrait",
+        icon: "./assets/images/icon.png",
+        userInterfaceStyle: "automatic",
+        splash: {
+            image: "./assets/images/splash.png",
+            resizeMode: "contain",
+            backgroundColor: "#ffffff",
         },
+        assetBundlePatterns: ["**/*"],
+        ios: {
+            supportsTablet: true,
+            bundleIdentifier: "com.solana.mobile.expo.template",
+        },
+        android: {
+            adaptiveIcon: {
+                foregroundImage: "./assets/images/adaptive-icon.png",
+                backgroundColor: "#ffffff",
+            },
+            package: "com.solana.mobile.expo.template",
+        },
+        web: {
+            favicon: "./assets/images/favicon.png",
+        },
+        extra: {
+            eas: {
+                projectId: "4a8e7f6c-fdf9-43c4-ba01-7ec5c69e1df8",
+            },
+            apiUrl: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api',
+        },
+        plugins: ["expo-font"],
+        owner: "petnet",
     },
 };

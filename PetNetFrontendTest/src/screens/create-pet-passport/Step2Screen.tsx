@@ -6,28 +6,80 @@ import { Typography } from '../../constants/Typography'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { CreatingPetPassportStackParamList } from '../../types/CreatingPetPassportStackParamList'
+import * as ImagePicker from 'expo-image-picker';
+import { Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { usePetPassport } from '../../contexts/CreatePetPassportContext'
 
 type Step2NavProp = NativeStackNavigationProp<CreatingPetPassportStackParamList, "Step2">;
 
+
 const Step2Screen = () => {
+    const { updateData } = usePetPassport();
     const navigation = useNavigation<Step2NavProp>();
+    const handleImageSelected = (imageUri: string, navigation: Step2NavProp) => {
+        updateData({ imageUrl: imageUri });
+        navigation.navigate('Step3');
+    };
+    const openCamera = async (navigation: Step2NavProp) => {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert('Permission required', 'Camera access is needed to take a photo.');
+            return;
+        }
+
+        const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            const imageUri = result.assets[0].uri;
+            handleImageSelected(imageUri, navigation);
+        }
+    };
+
+    const openGallery = async (navigation: Step2NavProp) => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert('Permission required', 'Media library access is needed.');
+            return;
+        }
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            const imageUri = result.assets[0].uri;
+            handleImageSelected(imageUri, navigation);
+        }
+    };
 
     return (
         <SafeAreaView style={styles.container}>
             <Image source={Images.topLeftGreenEllipse} style={styles.topLeftGlow} resizeMode="contain" />
             <Image source={Images.centralPinkEllipse} style={styles.centerGlow} resizeMode="contain" />
-            <View style={styles.backButton}>
+            <View style={styles.leftGoBack}>
+                <Pressable onPress={() => navigation.goBack()}>
+                    <Ionicons name="arrow-back" size={24} color="#F7F7F7" />
+                </Pressable>
             </View>
             <View style={styles.upperContent}>
                 <Image source={Images.ChoosePhotoIcon} style={styles.mailSentImg} resizeMode="contain" />
             </View>
             <View style={styles.connectionSection}>
-                <Pressable style={styles.openMailButton} onPress={() => navigation.navigate("Step3")}>
+                <Pressable style={styles.openMailButton} onPress={() => openCamera(navigation)}>
                     <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Take a photo</Text>
                 </Pressable>
-                <Pressable style={styles.resendButton} onPress={() => navigation.navigate("Step3")}>
+                <Pressable style={styles.resendButton} onPress={() => openGallery(navigation)}>
                     <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Upload existing photo</Text>
-                </Pressable> 
+                </Pressable>
             </View>
         </SafeAreaView>
     )
@@ -66,6 +118,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         width: '100%',
         alignItems: 'flex-start'
+    },
+    leftGoBack: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 32,
+        width: '100%'
     },
     upperContent: {
         display: 'flex',

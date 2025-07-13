@@ -33,7 +33,7 @@ async function seed() {
             race: 'Dog',
             breed: 'Golden Retriever',
             dateOfBirth: new Date('2020-06-15'),
-            imageUrl: 'https://your-ipfs-gateway.com/ipfs/Qm...Hash',
+            imageUrl: 'https://www.borrowmydoggy.com/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2F4ij0poqn%2Fproduction%2Fda89d930fc320dd912a2a25487b9ca86b37fcdd6-800x600.jpg&w=1080&q=80',
             owner: user._id,
             awards: [
                 {

@@ -1,5 +1,4 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { CreatingPetPassportStackParamList } from "../../types/CreatingPetPassportStackParamList";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -9,20 +8,32 @@ import { Ionicons } from '@expo/vector-icons';
 import { Typography } from "../../constants/Typography";
 import { TextInput } from "react-native-paper";
 import { RootStackParamList } from "../../types/RootStackParamList";
+import { usePetPassport } from "../../contexts/CreatePetPassportContext";
 
 
 const Step3Screen = () => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+    const { updateData, data } = usePetPassport();
 
     const [chip, setChip] = useState<string>('');
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
+    const handleSubmit = async () => {
+        updateData({ chip });
 
-    const handleFinish = () => {
+        // Send the full form to your API
+        // const fullPet = {
+        //     ...data,
+        //     chip,
+        // };
+
+        // await submitPetPassport(fullPet); // POST to your backend
+        console.log(data);
         navigation.reset({
             index: 0,
             routes: [{ name: 'HomeScreen' }]
         });
-    }
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <Image source={Images.topLeftGreenEllipse} style={styles.topLeftGlow} resizeMode="contain" />
@@ -53,7 +64,7 @@ const Step3Screen = () => {
                 </View>
             </View>
             <View style={styles.connectionSection}>
-                <Pressable style={styles.createNewAccountButton} onPress={() => handleFinish()}>
+                <Pressable style={styles.createNewAccountButton} onPress={() => handleSubmit()}>
                     <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Finish</Text>
                 </Pressable>
             </View>
