@@ -4,4 +4,5 @@ export type RootStackParamList = {
     Onboarding: undefined;
     HomeScreen: undefined;
     CreatePetPassport: undefined;
+    PetPassport: { petId: string };
 };

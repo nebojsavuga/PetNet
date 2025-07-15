@@ -6,6 +6,7 @@ import OnboardingNavigator from "./OnboardingNavigator";
 import { RootStackParamList } from "../types/RootStackParamList";
 import CreatePetPassportNavigator from "./CreatePetPassportNavigator";
 import HomeScreen from "../screens/HomeScreen";
+import PetPassport from "../screens/pet-passport/PetPassport";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const RootNavigator = () => {
@@ -18,6 +19,7 @@ const RootNavigator = () => {
             <Stack.Screen name="Onboarding" component={OnboardingNavigator} />
             <Stack.Screen name="HomeScreen" component={HomeScreen} />
             <Stack.Screen name="CreatePetPassport" component={CreatePetPassportNavigator} />
+            <Stack.Screen name="PetPassport" component={PetPassport} />
         </Stack.Navigator>
     );
 };

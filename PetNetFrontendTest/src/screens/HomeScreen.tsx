@@ -76,22 +76,27 @@ const HomeScreen = () => {
     return `${years}y ${months}m`;
   };
 
-  const renderPetCard = (pet: Pet) => {
+  const renderPetCard = (pet: Pet, navigation: NavProp) => {
     const incompleteVaccinations = pet.vaccinations.filter(vac => !vac.completed);
 
     if (incompleteVaccinations.length === 0) {
       // No incomplete vaccinations - don't show badge
       return (
-        <SafeAreaView key={pet._id} style={styles.petCard}>
-          <Image source={{ uri: pet.imageUrl }} style={styles.petImage} />
-          <SafeAreaView style={styles.petInfo}>
-            <Text style={styles.petName}>{pet.name}</Text>
-            <Text style={styles.petDetails}>
-              {pet.breed} • {calculateAge(pet.dateOfBirth)} • {pet.gender}
-            </Text>
-            {/* No badge */}
+        <Pressable
+          key={pet._id}
+          onPress={() => navigation.navigate('PetPassport', { petId: pet._id })}
+        >
+          <SafeAreaView key={pet._id} style={styles.petCard}>
+            <Image source={{ uri: pet.imageUrl }} style={styles.petImage} />
+            <SafeAreaView style={styles.petInfo}>
+              <Text style={styles.petName}>{pet.name}</Text>
+              <Text style={styles.petDetails}>
+                {pet.breed} • {calculateAge(pet.dateOfBirth)} • {pet.gender}
+              </Text>
+              {/* No badge */}
+            </SafeAreaView>
           </SafeAreaView>
-        </SafeAreaView>
+        </Pressable>
       );
     }
     const latestVaccination = incompleteVaccinations[0];
@@ -113,19 +118,24 @@ const HomeScreen = () => {
       }
     }
     return (
-      <SafeAreaView key={pet._id} style={styles.petCard}>
-        <Image source={{ uri: pet.imageUrl }} style={styles.petImage} />
-        <SafeAreaView style={styles.petInfo}>
-          <Text style={styles.petName}>{pet.name}</Text>
-          <Text style={styles.petDetails}>
-            {pet.breed} • {calculateAge(pet.dateOfBirth)} • {pet.gender}
-          </Text>
+      <Pressable
+        key={pet._id}
+        onPress={() => navigation.navigate('PetPassport', { petId: pet._id })}
+      >
+        <SafeAreaView key={pet._id} style={styles.petCard}>
+          <Image source={{ uri: pet.imageUrl }} style={styles.petImage} />
+          <SafeAreaView style={styles.petInfo}>
+            <Text style={styles.petName}>{pet.name}</Text>
+            <Text style={styles.petDetails}>
+              {pet.breed} • {calculateAge(pet.dateOfBirth)} • {pet.gender}
+            </Text>
 
-          <View style={[styles.vaccineBadge, { backgroundColor: vacDate.isBefore(now, 'day') ? '#888888' : '#E8B23C' }]}>
-            <Text style={styles.vaccineBadgeText}>{vaccineBadgeText}</Text>
-          </View>
+            <View style={[styles.vaccineBadge, { backgroundColor: vacDate.isBefore(now, 'day') ? '#888888' : '#E8B23C' }]}>
+              <Text style={styles.vaccineBadgeText}>{vaccineBadgeText}</Text>
+            </View>
+          </SafeAreaView>
         </SafeAreaView>
-      </SafeAreaView>
+      </Pressable >
     );
   };
   return (
@@ -155,7 +165,7 @@ const HomeScreen = () => {
         <FlatList
           data={pets}
           keyExtractor={(item) => item._id}
-          renderItem={({ item }) => renderPetCard(item)}
+          renderItem={({ item }) => renderPetCard(item, navigation)}
           style={{ flexGrow: 0 }}
         />
       )}
