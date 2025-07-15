@@ -84,7 +84,10 @@ const HomeScreen = () => {
       return (
         <Pressable
           key={pet._id}
-          onPress={() => navigation.navigate('PetPassport', { petId: pet._id })}
+          onPress={() => navigation.navigate('PetPassportStack', {
+            screen: 'PetPassport',
+            params: { petId: pet._id }
+          })}
         >
           <SafeAreaView key={pet._id} style={styles.petCard}>
             <Image source={{ uri: pet.imageUrl }} style={styles.petImage} />
@@ -120,7 +123,10 @@ const HomeScreen = () => {
     return (
       <Pressable
         key={pet._id}
-        onPress={() => navigation.navigate('PetPassport', { petId: pet._id })}
+        onPress={() => navigation.navigate('PetPassportStack', {
+          screen: 'PetPassport',
+          params: { petId: pet._id }
+        })}
       >
         <SafeAreaView key={pet._id} style={styles.petCard}>
           <Image source={{ uri: pet.imageUrl }} style={styles.petImage} />

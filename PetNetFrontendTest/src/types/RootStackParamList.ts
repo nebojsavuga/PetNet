@@ -1,8 +1,11 @@
+import { NavigatorScreenParams } from "@react-navigation/native";
+import { PetPassportStackParamList } from "../navigators/PetPassportNavigator";
+
 export type RootStackParamList = {
     Splash: undefined;
     WalletConnectionScreen: undefined;
     Onboarding: undefined;
     HomeScreen: undefined;
     CreatePetPassport: undefined;
-    PetPassport: { petId: string };
+    PetPassportStack: NavigatorScreenParams<PetPassportStackParamList>;
 };

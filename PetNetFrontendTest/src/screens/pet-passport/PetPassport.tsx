@@ -16,10 +16,11 @@ import Constants from 'expo-constants';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import dayjs from 'dayjs';
 import { Ionicons, MaterialIcons, Entypo } from '@expo/vector-icons';
+import { PetPassportStackParamList } from "../../navigators/PetPassportNavigator";
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 
-type PetPassportRouteProp = RouteProp<RootStackParamList, 'PetPassport'>;
+type PetPassportRouteProp = RouteProp<PetPassportStackParamList, 'PetPassport'>;
 
 const PetPassport = () => {
     const route = useRoute<PetPassportRouteProp>();
@@ -35,7 +36,7 @@ const PetPassport = () => {
     const handleSharePress = () => {
         console.log('Share QR');
     };
-    const navItems = [
+    const navItems: { label: string; icon: string; screen: keyof PetPassportStackParamList }[] = [
         { label: 'Owner data', icon: 'person-outline', screen: 'OwnerData' },
         { label: 'Family Pedigree', icon: 'people-outline', screen: 'FamilyPedigree' },
         { label: 'Vaccines', icon: 'medkit-outline', screen: 'Vaccines' },
@@ -121,7 +122,7 @@ const PetPassport = () => {
                                     styles.navRow,
                                     index === navItems.length - 1 && styles.lastNavRow,
                                 ]}
-                                onPress={() => navigation.navigate(screen as never)}
+                                onPress={() => navigation.navigate(screen, { petId: pet._id })}
                             >
                                 <View style={styles.navRowInner}>
                                     <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={20} color="#D988F7" style={{ marginRight: 12 }} />
