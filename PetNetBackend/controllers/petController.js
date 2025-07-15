@@ -86,3 +86,36 @@ exports.getAll = async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 };
+
+exports.getFamily = async (req, res) => {
+    try {
+        const pet = await Pet.findOne({ _id: req.params.id, owner: req.userId });
+        if (!pet) {
+            return res.status(404).json({ error: 'Pet not found.' });
+        }
+        let mother = null;
+        let father = null;
+        if (pet.motherId != null) {
+            mother = await Pet.findOne({ _id: pet.motherId });
+        }
+        if (pet.fatherId != null) {
+            father = await Pet.findOne({ _id: pet.fatherId });
+        }
+
+        const children = await Pet.find({
+            $or: [
+                { fatherId: req.params.id },
+                { motherId: req.params.id }
+            ]
+        });
+
+        res. json({
+            mother,
+            father,
+            children
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+};

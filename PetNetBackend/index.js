@@ -31,4 +31,5 @@ app.listen(PORT, () => {
     console.log(`Post /api/pets -> Creates pet`);
     console.log(`Get /api/pets -> Gets all pets for user`);
     console.log(`Get /api/pets/:id -> Gets single pet for user\n`);
+    console.log(`Get /api/pets/family -> Gets family info\ n`);
 });
