@@ -109,11 +109,119 @@ exports.getFamily = async (req, res) => {
             ]
         });
 
-        res. json({
+        res.json({
             mother,
             father,
             children
         });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+exports.createOrUpdateVaccination = async (req, res) => {
+    try {
+        const {
+            vaccinationId,
+            name,
+            date,
+            completed
+        } = req.body;
+        const pet = await Pet.findOne({ _id: req.params.id, owner: req.userId });
+
+        if (!pet) {
+            return res.status(404).json({ error: 'Pet not found.' });
+        }
+        const vaccinationDate = date ? new Date(date) : new Date();
+        const isCompleted = completed ?? false;
+        const existingVaccinationIndex = pet.vaccinations.findIndex(vac => vac._id === vaccinationId);
+        if (existingVaccinationIndex !== -1) {
+            pet.vaccinations[existingVaccinationIndex].completed = isCompleted;
+            pet.vaccinations[existingVaccinationIndex].name = name;
+        } else {
+            pet.vaccinations.push({
+                name,
+                timestamp: vaccinationDate,
+                completed: isCompleted
+            });
+        }
+        await pet.save();
+
+        res.status(201).json({ message: 'Pet vaccination created successfully', pet });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+exports.createOrUpdateIntervention = async (req, res) => {
+    try {
+        const {
+            interventionId,
+            interventionName,
+            clinicName,
+            vetName,
+            date
+        } = req.body;
+        const pet = await Pet.findOne({ _id: req.params.id, owner: req.userId });
+
+        if (!pet) {
+            return res.status(404).json({ error: 'Pet not found.' });
+        }
+        const interventionDate = date ? new Date(date) : new Date();
+        const existingIntervention = pet.interventions.findIndex(inter => inter._id === interventionId);
+        if (existingIntervention !== -1) {
+            pet.interventions[existingIntervention].interventionName = interventionName;
+            pet.interventions[existingIntervention].date = interventionDate;
+            pet.interventions[existingIntervention].vetName = vetName;
+            pet.interventions[existingIntervention].clinicName = clinicName;
+        } else {
+            pet.interventions.push({
+                interventionName,
+                date: interventionDate,
+                vetName,
+                clinicName
+            });
+        }
+        await pet.save();
+
+        res.status(201).json({ message: 'Pet intervention created successfully', pet });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+exports.createOrUpdateAward = async (req, res) => {
+    try {
+        const {
+            awardId,
+            awardName,
+            showName,
+            date
+        } = req.body;
+        const pet = await Pet.findOne({ _id: req.params.id, owner: req.userId });
+
+        if (!pet) {
+            return res.status(404).json({ error: 'Pet not found.' });
+        }
+        const awardDate = date ? new Date(date) : new Date();
+        const existingAward = pet.awards.findIndex(award => award._id === awardId);
+        if (existingAward !== -1) {
+            pet.awards[existingAward].awardName = awardName;
+            pet.awards[existingAward].date = awardDate;
+            pet.awards[existingAward].showName = showName;
+        } else {
+            pet.awards.push({
+                awardName,
+                date: awardDate,
+                showName
+            });
+        }
+        await pet.save();
+
+        res.status(201).json({ message: 'Pet award created successfully', pet });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Server error' });
