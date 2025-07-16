@@ -47,7 +47,7 @@ const Step1Screen = () => {
                     <Ionicons name="arrow-back" size={24} color="#F7F7F7" />
                 </Pressable>
             </View>
-            <Text style={[Typography.h2, { color: '#F7F7F7' }]}>Your pet's basic info</Text>
+            <Text style={[Typography.h3, { color: '#F7F7F7' }]}>Your pet's basic info</Text>
             <View style={styles.dataSection}>
                 <View style={styles.input}>
                     <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>Name</Text>

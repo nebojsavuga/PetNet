@@ -19,7 +19,8 @@ import { Pet } from '../types/Pet';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 
-const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
+//const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
+const API_URL = 'http://192.168.0.31:3000/api';
 
 dayjs.extend(relativeTime);
 
@@ -30,7 +31,6 @@ const HomeScreen = () => {
 
   const [name, setName] = useState('Aleksa');
   const [pets, setPets] = useState<Pet[]>([]);
-
   useEffect(() => {
     const fetchUserAndPets = async () => {
       try {
@@ -41,25 +41,23 @@ const HomeScreen = () => {
             setName(user.fullName);
           }
         }
-
         const token = await AsyncStorage.getItem('jwtToken');
         if (!token) {
           console.warn('No JWT token found');
           return;
         }
-
+        
         const response = await fetch(`${API_URL}/pets`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         });
-
         if (!response.ok) {
           console.error('Failed to fetch pets:', response.status);
           return;
         }
-
+        
         const petsFromApi = await response.json();
         setPets(petsFromApi);
 

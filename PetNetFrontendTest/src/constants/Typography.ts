@@ -95,4 +95,12 @@ export const Typography = StyleSheet.create({
         letterSpacing: 0,
         color: '#FFFFFF',
     },
+
+    heading: {
+        fontFamily: 'Inter',
+        fontWeight: 600,
+        fontSize: 16,
+        letterSpacing: 0,
+        textAlign: 'left'
+    }
 });

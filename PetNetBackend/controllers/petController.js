@@ -37,7 +37,6 @@ exports.create = async (req, res) => {
             dateOfBirth,
             imageUrl
         } = req.body;
-
         if (!name || !gender || !race || !breed || !dateOfBirth) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
