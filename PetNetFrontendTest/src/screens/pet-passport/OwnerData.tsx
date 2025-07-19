@@ -74,7 +74,7 @@ const OwnerData = () => {
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <View style={styles.container}>
                     <PetHeaderSection
-                        title="Pet Passport"
+                        title="Owner data"
                         pet={pet}
                         onBack={() => navigation.goBack()}
                     />

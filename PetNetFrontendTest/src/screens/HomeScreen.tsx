@@ -46,7 +46,7 @@ const HomeScreen = () => {
           console.warn('No JWT token found');
           return;
         }
-        
+
         const response = await fetch(`${API_URL}/pets`, {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -57,7 +57,7 @@ const HomeScreen = () => {
           console.error('Failed to fetch pets:', response.status);
           return;
         }
-        
+
         const petsFromApi = await response.json();
         setPets(petsFromApi);
 

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const User = require('./models/User');
-const Pet = require('./models/Pet')
+const Pet = require('./models/Pet');
 
 async function seed() {
     try {
@@ -26,14 +26,14 @@ async function seed() {
         await user.save();
         console.log('User seeded.');
 
-        const pet = new Pet({
+        const buddy = new Pet({
             name: 'Buddy',
             gender: 'Male',
             chipNumber: 'CHIP123456789',
             race: 'Dog',
             breed: 'Golden Retriever',
             dateOfBirth: new Date('2020-06-15'),
-            imageUrl: 'https://www.borrowmydoggy.com/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2F4ij0poqn%2Fproduction%2Fda89d930fc320dd912a2a25487b9ca86b37fcdd6-800x600.jpg&w=1080&q=80',
+            imageUrl: 'https://cdn.sanity.io/images/4ij0poqn/production/da89d930fc320dd912a2a25487b9ca86b37fcdd6-800x600.jpg',
             owner: user._id,
             awards: [
                 {
@@ -65,12 +65,39 @@ async function seed() {
             ]
         });
 
-        await pet.save();
-        console.log('Pet seeded.');
+        const max = new Pet({
+            name: 'Max',
+            gender: 'Male',
+            chipNumber: 'CHIP987654321',
+            race: 'Dog',
+            breed: 'Labrador Retriever',
+            dateOfBirth: new Date('2021-01-10'),
+            imageUrl: 'https://images.dog.ceo/breeds/labrador/n02099712_1577.jpg',
+            owner: user._id,
+        });
+
+        await buddy.save();
+        await max.save();
+        console.log('Buddy and Max seeded.');
+
+        const luna = new Pet({
+            name: 'Luna',
+            gender: 'Female',
+            chipNumber: 'CHIP555888999',
+            race: 'Dog',
+            breed: 'German Shepherd',
+            dateOfBirth: new Date('2019-11-25'),
+            imageUrl: 'https://images.dog.ceo/breeds/germanshepherd/n02106662_1870.jpg',
+            owner: user._id,
+            children: [buddy._id, max._id],
+        });
+
+        await luna.save();
+        console.log('Luna seeded with Buddy and Max as children.');
 
         process.exit(0);
     } catch (err) {
-        console.error('Error seeding user:', err.message);
+        console.error('Error seeding data:', err.message);
         process.exit(1);
     }
 }

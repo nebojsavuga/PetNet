@@ -5,12 +5,12 @@ const { authenticate } = require('../middlewares/auth');
 const upload = require('../middlewares/multer');
 
 router.post('', authenticate, create);
-router.get('/:id', authenticate, getById);
+router.get('/family/:id', authenticate, getFamily);
 router.get('', authenticate, getAll);
-router.get('/family', authenticate, getFamily);
 router.post('/image', authenticate, upload.single('image'), uploadImageToIpfs);
 router.post('/vaccination', authenticate, createOrUpdateVaccination);
 router.post('/intervention', authenticate, createOrUpdateIntervention);
 router.post('/award', authenticate, createOrUpdateAward);
+router.get('/:id', authenticate, getById);
 
 module.exports = router;

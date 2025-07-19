@@ -1,4 +1,5 @@
 export interface Award {
+    _id: string;
     awardName: string;
     showName: string;
     date: string;
