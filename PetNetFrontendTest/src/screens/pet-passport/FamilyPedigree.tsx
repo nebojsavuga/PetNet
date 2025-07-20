@@ -137,6 +137,7 @@ const FamilyPedigree = () => {
                                 title="Family Pedigree"
                                 pet={pet}
                                 onBack={() => navigation.goBack()}
+                                onShare={() => navigation.navigate('PetQrScreen', { petId: pet?._id })}
                             />
                         </View>
 

@@ -92,6 +92,7 @@ const MedicalInterventions = () => {
                                 title="Medical Interventions"
                                 pet={pet}
                                 onBack={() => navigation.goBack()}
+                                onShare={() => navigation.navigate('PetQrScreen', { petId: pet?._id })}
                             />
                         </View>
 

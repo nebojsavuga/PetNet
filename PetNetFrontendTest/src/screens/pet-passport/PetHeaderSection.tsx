@@ -14,17 +14,15 @@ interface PetHeaderSectionProps {
     title: string;
     pet: Pet | undefined;
     onBack: () => void;
+    onShare: () => void;
 }
 
 
-const PetHeaderSection: React.FC<PetHeaderSectionProps> = ({ title, pet, onBack }) => {
+const PetHeaderSection: React.FC<PetHeaderSectionProps> = ({ title, pet, onBack, onShare }) => {
     const calculateAge = (dob?: string) => {
         const years = dayjs().diff(dayjs(dob), 'year');
         const months = dayjs().diff(dayjs(dob).add(years, 'year'), 'month');
         return `${years}y ${months}m`;
-    };
-    const handleSharePress = () => {
-        console.log('Share QR');
     };
     return (
         <>
@@ -33,7 +31,7 @@ const PetHeaderSection: React.FC<PetHeaderSectionProps> = ({ title, pet, onBack 
                     <Ionicons name="arrow-back" size={24} color="#F7F7F7" />
                 </Pressable>
                 <Text style={styles.headerTitle}>{title}</Text>
-                <Pressable onPress={handleSharePress}>
+                <Pressable onPress={onShare}>
                     <Ionicons name="qr-code-outline" size={24} color="#F1EFF2" />
                 </Pressable>
             </View>
@@ -128,7 +126,7 @@ const styles = StyleSheet.create({
     dataSection: {
         display: 'flex',
         flexDirection: 'column',
-        gap: 16,
+        gap: 8,
         width: '100%',
     },
     rowInputs: {

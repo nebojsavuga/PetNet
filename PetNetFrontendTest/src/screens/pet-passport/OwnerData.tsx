@@ -76,6 +76,7 @@ const OwnerData = () => {
                         title="Owner data"
                         pet={pet}
                         onBack={() => navigation.goBack()}
+                        onShare={() => navigation.navigate('PetQrScreen', { petId: pet?._id })}
                     />
                 </View>
                 <Text style={[Typography.heading, { color: '#F7F7F7', marginLeft: 10, marginTop: 20 }]}>Owner information</Text>

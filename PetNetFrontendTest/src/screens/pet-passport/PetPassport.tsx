@@ -71,6 +71,7 @@ const PetPassport = () => {
                         title="Pet Passport"
                         pet={pet}
                         onBack={() => navigation.goBack()}
+                        onShare={() => navigation.navigate('PetQrScreen', { petId: pet?._id })}
                     />
                     <View style={styles.emergencyBlock}>
                         <View style={styles.emergencyRow}>

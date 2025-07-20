@@ -7,6 +7,7 @@ import Awards from '../screens/pet-passport/Awards';
 import MedicalInterventions from '../screens/pet-passport/MedicalInterventions';
 import OwnerData from '../screens/pet-passport/OwnerData';
 import Vaccines from '../screens/pet-passport/Vaccines';
+import PetQrScreen from '../screens/pet-passport/PetQrScreen';
 
 export type PetPassportStackParamList = {
     PetPassport: { petId: string };
@@ -15,6 +16,7 @@ export type PetPassportStackParamList = {
     MedicalInterventions: { petId: string };
     Vaccines: { petId: string };
     OwnerData: { petId: string };
+    PetQrScreen: { petId: string };
 };
 
 const Stack = createNativeStackNavigator<PetPassportStackParamList>();
@@ -28,6 +30,7 @@ const PetPassportNavigator = () => {
             <Stack.Screen name="MedicalInterventions" component={MedicalInterventions} />
             <Stack.Screen name="Vaccines" component={Vaccines} />
             <Stack.Screen name="OwnerData" component={OwnerData} />
+            <Stack.Screen name="PetQrScreen" component={PetQrScreen} />
         </Stack.Navigator>
     );
 };

@@ -116,6 +116,7 @@ const Vaccines = () => {
                                 title="Vaccines"
                                 pet={pet}
                                 onBack={() => navigation.goBack()}
+                                onShare={() => navigation.navigate('PetQrScreen', { petId: pet?._id })}
                             />
                         </View>
 
