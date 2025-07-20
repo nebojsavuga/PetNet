@@ -20,8 +20,7 @@ import { Typography } from '../../constants/Typography';
 import { User } from '../../types/User';
 import dayjs from 'dayjs';
 
-//const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
-const API_URL = 'http://192.168.0.31:3000/api';
+const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 type AwardsDataRouteProp = RouteProp<PetPassportStackParamList, 'Awards'>;
 
 const Awards = () => {

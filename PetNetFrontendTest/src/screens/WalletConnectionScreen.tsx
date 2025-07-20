@@ -12,6 +12,7 @@ import { RootStackParamList } from '../types/RootStackParamList'
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
+import { isTokenExpired } from '../utils/jwt';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 
@@ -30,6 +31,13 @@ const WalletConnectionScreen = () => {
                 const user = await AsyncStorage.getItem('user');
 
                 if (token && user) {
+                    const isExpired = isTokenExpired(token);
+                    if (isExpired) {
+                        await AsyncStorage.removeItem('jwtToken');
+                        await AsyncStorage.removeItem('user');
+                        await handleConnectPress();
+                        return;
+                    }
                     navigation.reset({
                         index: 0,
                         routes: [{ name: 'HomeScreen' }],

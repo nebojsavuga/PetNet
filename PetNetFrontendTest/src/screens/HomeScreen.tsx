@@ -19,8 +19,7 @@ import { Pet } from '../types/Pet';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 
-//const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
-const API_URL = 'http://192.168.0.31:3000/api';
+const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 
 dayjs.extend(relativeTime);
 

@@ -15,8 +15,7 @@ import { Ionicons, MaterialIcons, Entypo } from '@expo/vector-icons';
 import { PetPassportStackParamList } from "../../navigators/PetPassportNavigator";
 import PetHeaderSection from "./PetHeaderSection";
 
-//const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
-const API_URL = 'http://192.168.0.31:3000/api';
+const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 type PetPassportRouteProp = RouteProp<PetPassportStackParamList, 'PetPassport'>;
 
 const PetPassport = () => {
