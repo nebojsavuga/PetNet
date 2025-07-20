@@ -5,7 +5,6 @@ import {
     StyleSheet,
     Pressable,
     SafeAreaView,
-    ScrollView,
     Image,
     FlatList
 } from 'react-native';
@@ -17,7 +16,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { PetPassportStackParamList } from "../../navigators/PetPassportNavigator";
 import PetHeaderSection from "./PetHeaderSection";
 import { Typography } from '../../constants/Typography';
-import { User } from '../../types/User';
 import dayjs from 'dayjs';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';

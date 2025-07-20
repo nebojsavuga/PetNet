@@ -5,8 +5,6 @@ import {
     StyleSheet,
     Pressable,
     SafeAreaView,
-    ScrollView,
-    Image,
     FlatList
 } from 'react-native';
 import { Award, Pet } from "../../types/Pet";
@@ -17,7 +15,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { PetPassportStackParamList } from "../../navigators/PetPassportNavigator";
 import PetHeaderSection from "./PetHeaderSection";
 import { Typography } from '../../constants/Typography';
-import { User } from '../../types/User';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 type AwardsDataRouteProp = RouteProp<PetPassportStackParamList, 'Awards'>;

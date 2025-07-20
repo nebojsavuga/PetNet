@@ -14,6 +14,7 @@ export interface Intervention {
 }
 
 export interface Vaccination {
+    _id: string;
     name: string;
     timestamp: string;
     nextDue?: string;
