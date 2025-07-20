@@ -6,6 +6,7 @@ export interface Award {
 }
 
 export interface Intervention {
+    _id: string;
     interventionName: string;
     clinicName: string;
     vetName: string;

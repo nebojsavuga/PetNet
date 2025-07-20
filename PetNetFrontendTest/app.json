@@ -15,7 +15,7 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": true, 
       "bundleIdentifier": "com.solana.mobile.expo.template"
     },
     "android": {

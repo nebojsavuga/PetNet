@@ -18,7 +18,6 @@ import { PetPassportStackParamList } from "../../navigators/PetPassportNavigator
 import PetHeaderSection from "./PetHeaderSection";
 import { Typography } from '../../constants/Typography';
 import { User } from '../../types/User';
-import dayjs from 'dayjs';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 type AwardsDataRouteProp = RouteProp<PetPassportStackParamList, 'Awards'>;
@@ -28,19 +27,8 @@ const Awards = () => {
     const { petId } = route.params as { petId: string };
     const navigation = useNavigation();
     const [pet, setPet] = useState<Pet>();
-    const [user, setUser] = useState<User | null>(null);
 
     useEffect(() => {
-        const loadUser = async () => {
-            try {
-                const userJson = await AsyncStorage.getItem('user');
-                if (userJson) {
-                    setUser(JSON.parse(userJson) as User);
-                }
-            } catch (err) {
-                console.error('Failed to load user from AsyncStorage:', err);
-            }
-        };
         const fetchPet = async () => {
             try {
                 const token = await AsyncStorage.getItem('jwtToken');
@@ -68,7 +56,6 @@ const Awards = () => {
             }
         };
         fetchPet();
-        loadUser();
     }, []);
 
     const RenderAward = (award: Award, navigation: any) => {

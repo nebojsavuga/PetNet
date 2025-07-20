@@ -31,19 +31,8 @@ const FamilyPedigree = () => {
     const [father, setFather] = useState<Pet>();
     const [mother, setMother] = useState<Pet>();
     const [children, setChildren] = useState<Pet[]>([]);
-    const [user, setUser] = useState<User | null>(null);
 
     useEffect(() => {
-        const loadUser = async () => {
-            try {
-                const userJson = await AsyncStorage.getItem('user');
-                if (userJson) {
-                    setUser(JSON.parse(userJson) as User);
-                }
-            } catch (err) {
-                console.error('Failed to load user from AsyncStorage:', err);
-            }
-        };
         const fetchPet = async () => {
             try {
                 const token = await AsyncStorage.getItem('jwtToken');
@@ -100,7 +89,6 @@ const FamilyPedigree = () => {
 
         fetchPet();
         fetchFamily();
-        loadUser();
     }, []);
     const calculateAge = (dob: string) => {
         const years = dayjs().diff(dayjs(dob), 'year');
