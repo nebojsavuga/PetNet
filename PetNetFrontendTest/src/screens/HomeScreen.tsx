@@ -77,7 +77,6 @@ const HomeScreen = () => {
     const incompleteVaccinations = pet.vaccinations.filter(vac => !vac.completed);
 
     if (incompleteVaccinations.length === 0) {
-      // No incomplete vaccinations - don't show badge
       return (
         <Pressable
           key={pet._id}
@@ -93,7 +92,6 @@ const HomeScreen = () => {
               <Text style={styles.petDetails}>
                 {pet.breed} • {calculateAge(pet.dateOfBirth)} • {pet.gender}
               </Text>
-              {/* No badge */}
             </SafeAreaView>
           </SafeAreaView>
         </Pressable>
