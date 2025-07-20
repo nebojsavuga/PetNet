@@ -14,6 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons, MaterialIcons, Entypo } from '@expo/vector-icons';
 import { PetPassportStackParamList } from "../../navigators/PetPassportNavigator";
 import PetHeaderSection from "./PetHeaderSection";
+import { Typography } from '../../constants/Typography';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 type PetPassportRouteProp = RouteProp<PetPassportStackParamList, 'PetPassport'>;
@@ -108,6 +109,7 @@ const PetPassport = () => {
                         ))}
                     </View>
                 </View>
+                <Text style={[Typography.bodySmall, { color: "#F1EFF2", textAlign: 'center' }]}>Data verified on Solana blockchain</Text>
             </ScrollView>
         </SafeAreaView>
     );
