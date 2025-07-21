@@ -46,6 +46,12 @@ const petSchema = new mongoose.Schema(
         imageUrl: {
             type: String
         },
+        nftMintAddress: {
+            type: String
+        },
+        nftUri: {
+            type: String
+        },
         owner: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',

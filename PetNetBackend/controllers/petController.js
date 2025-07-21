@@ -1,8 +1,20 @@
 const Pet = require('../models/Pet');
 require('dotenv').config();
 const fs = require('fs');
+const bs58 = require("bs58");
+const {
+    Connection,
+    Keypair,
+    clusterApiUrl,
+} = require("@solana/web3.js");
+const {
+    Metaplex,
+    keypairIdentity,
+    bundlrStorage,
+} = require("@metaplex-foundation/js");
 
 const { pinata } = require('../config/pinata');
+
 
 exports.uploadImageToIpfs = async (req, res) => {
     try {
@@ -51,6 +63,45 @@ exports.create = async (req, res) => {
             imageUrl,
             owner: req.userId,
         });
+
+        await pet.save();
+
+        const secretKey = bs58.decode(process.env.SOLANA_SECRET_KEY);
+        const wallet = Keypair.fromSecretKey(secretKey);
+        const connection = new Connection(clusterApiUrl(process.env.SOLANA_CLUSTER), "confirmed");
+        const metaplex = Metaplex.make(connection)
+            .use(keypairIdentity(wallet))
+            .use(bundlrStorage());
+        const metadata = {
+            name: `${name}'s Pet Passport`,
+            symbol: 'PET',
+            description: `NFT Passport for ${name}, the ${breed}.`,
+            image: imageUrl,
+            attributes: [
+                { trait_type: "Gender", value: gender },
+                { trait_type: "Breed", value: breed },
+                { trait_type: "Race", value: race },
+                { trait_type: "Chip Number", value: chipNumber },
+                { trait_type: "Date of Birth", value: dateOfBirth }
+            ]
+        };
+        const response = await pinata.upload.public.json(metadata);
+        const metadataUrl = await pinata.gateways.public.convert(response.cid);
+
+        const { nft } = await metaplex.nfts().create({
+            uri: metadataUrl,
+            name: metadata.name,
+            sellerFeeBasisPoints: 0,
+            symbol: metadata.symbol,
+            creators: [
+                {
+                    address: wallet.publicKey,
+                    share: 100
+                }
+            ]
+        });
+        pet.nftMintAddress = nft.address.toBase58();
+        pet.nftUri = nft.uri;
 
         await pet.save();
 
