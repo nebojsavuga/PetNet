@@ -7,13 +7,21 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { OnboardingStackParamList } from '../../types/OnboardingStackParamList'
+import { useOnboarding } from '../../contexts/OnboardingContext'
 
 type Step1NavProp = NativeStackNavigationProp<OnboardingStackParamList, "Step1">;
 
 const Step1Screen = () => {
+    // TODO: get wallet address from previous screen
     const navigation = useNavigation<Step1NavProp>();
+    const { updateData } = useOnboarding();
 
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
+    const [email, setEmail] = useState<string>('');
+    const handleNext = () => {
+        updateData({ email });
+        navigation.navigate("Step2");
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -29,25 +37,27 @@ const Step1Screen = () => {
                     <TextInput
                         placeholder='Your email address'
                         placeholderTextColor={'#D8D5D9'}
-                        onFocus={() => setFocusedInput('fullName')}
+                        onFocus={() => setFocusedInput('email')}
                         onBlur={() => setFocusedInput(null)}
+                        value={email}
+                        onChangeText={setEmail}
                         style={[
                             Typography.bodySmall,
                             styles.inputField,
                             {
                                 color: '#F7F7F7',
-                                borderColor: focusedInput === 'fullName' ? '#D988F7' : '#4C454D',
+                                borderColor: focusedInput === 'email' ? '#D988F7' : '#4C454D',
                             },
                         ]}
                     />
                     <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>
-                        By submitting your email you confirm{'\n'}you’ve read the{' '}
+                        By submitting your email you confirm{'\n'}you’ve read the{'  '}
                         <Text style={{ color: '#BF38F2', fontWeight: '600' }}>Privacy Notice</Text>
                     </Text>
                 </View>
             </View>
             <View style={styles.connectionSection}>
-                <Pressable style={styles.createNewAccountButton} onPress={() => navigation.navigate("Step2")}>
+                <Pressable style={styles.createNewAccountButton} onPress={() => handleNext()}>
                     <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Create New Account</Text>
                 </Pressable>
                 <View style={styles.dividerContainer}>

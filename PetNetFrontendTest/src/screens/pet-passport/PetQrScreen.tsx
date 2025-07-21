@@ -10,6 +10,7 @@ export default function PetQrScreen() {
     const route = useRoute<PetQrScreenDataRouteProp>();
     const { petId } = route.params as { petId: string };
 
+    // TODO: make it navigate to pet passport and add 1 more req param with isPetOwner flag to not be able to add stuff 
     const qrValue = `https://yourapp.com/pet/${petId}`;
     return (
         <ImageBackground

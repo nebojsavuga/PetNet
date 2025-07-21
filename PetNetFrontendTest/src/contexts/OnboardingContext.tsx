@@ -15,7 +15,7 @@ type OnboardingContextType = {
     data: OnboardingData,
     updateData: (newData: Partial<OnboardingData>) => void;
     resetData: () => void;
-}
+}  
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
 

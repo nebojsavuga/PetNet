@@ -7,6 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import { OnboardingStackParamList } from '../../types/OnboardingStackParamList';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { CountryPicker } from "react-native-country-codes-picker";
+import { useOnboarding } from '../../contexts/OnboardingContext';
 
 
 type Step3NavProp = NativeStackNavigationProp<OnboardingStackParamList, "Step3">;
@@ -14,12 +15,18 @@ type Step3NavProp = NativeStackNavigationProp<OnboardingStackParamList, "Step3">
 const Step3Screen = () => {
     const [show, setShow] = useState(false);
     const navigation = useNavigation<Step3NavProp>();
+    const { updateData } = useOnboarding();
+
     const [selectedCountry, setSelectedCountry] = useState({
         dial_code: '+381',
         flag: '🇷🇸',
     });
-    const [phoneNumber, setPhoneNumber] = useState('')
+    const [phoneNumber, setPhoneNumber] = useState('');
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
+    const handleNext = () => {
+        updateData({ phoneNumber });
+        navigation.navigate("Step4");
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -54,17 +61,18 @@ const Step3Screen = () => {
                             placeholder='Your mobile number'
                             placeholderTextColor={'#D8D5D9'}
                             keyboardType='phone-pad'
-                            onFocus={() => setFocusedInput('fullName')}
+                            onFocus={() => setFocusedInput('phoneNumber')}
                             onBlur={() => setFocusedInput(null)}
+                            value={phoneNumber}
+                            onChangeText={setPhoneNumber}
                             style={[
                                 Typography.bodySmall,
                                 styles.inputField,
                                 {
                                     color: '#F7F7F7',
-                                    borderColor: focusedInput === 'fullName' ? '#D988F7' : '#4C454D',
+                                    borderColor: focusedInput === 'phoneNumber' ? '#D988F7' : '#4C454D',
                                 },
                             ]}
-                            onChangeText={setPhoneNumber}
                         />
                         <CountryPicker
                             lang="en"
@@ -99,7 +107,7 @@ const Step3Screen = () => {
                             },
                         ]}
                         disabled={phoneNumber.replace(/\D/g, '').length < 7}
-                        onPress={() => navigation.navigate("Step4")}>
+                        onPress={() => handleNext()}>
                         <Text
                             style={[
                                 Typography.bodySmall,

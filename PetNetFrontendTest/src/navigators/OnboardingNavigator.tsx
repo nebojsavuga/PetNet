@@ -5,18 +5,21 @@ import Step3Screen from "../screens/onboarding/Step3Screen";
 import Step4Screen from "../screens/onboarding/Step4Screen";
 import Step5Screen from "../screens/onboarding/Step5Screen";
 import Step6Screen from "../screens/onboarding/Step6Screen";
+import { OnboardingProvider } from "../contexts/OnboardingContext";
 
 const Stack = createNativeStackNavigator();
 
 const OnboardingNavigator = () => (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Step1" component={Step1Screen} />
-        <Stack.Screen name="Step2" component={Step2Screen} />
-        <Stack.Screen name="Step3" component={Step3Screen} />
-        <Stack.Screen name="Step4" component={Step4Screen} />
-        <Stack.Screen name="Step5" component={Step5Screen} />
-        <Stack.Screen name="Step6" component={Step6Screen} />
-    </Stack.Navigator>
+    <OnboardingProvider>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Step1" component={Step1Screen} />
+            <Stack.Screen name="Step2" component={Step2Screen} />
+            <Stack.Screen name="Step3" component={Step3Screen} />
+            <Stack.Screen name="Step4" component={Step4Screen} />
+            <Stack.Screen name="Step5" component={Step5Screen} />
+            <Stack.Screen name="Step6" component={Step6Screen} />
+        </Stack.Navigator>
+    </OnboardingProvider>
 );
 
 export default OnboardingNavigator;

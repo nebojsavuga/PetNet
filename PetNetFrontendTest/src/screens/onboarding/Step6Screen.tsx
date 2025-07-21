@@ -6,12 +6,25 @@ import { Typography } from '../../constants/Typography'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { OnboardingStackParamList } from '../../types/OnboardingStackParamList'
+import { useOnboarding } from '../../contexts/OnboardingContext'
+import Constants from 'expo-constants';
 
 type Step6NavProp = NativeStackNavigationProp<OnboardingStackParamList, "Step6">;
+const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 
 const Step6Screen = () => {
     const navigation = useNavigation<Step6NavProp>();
+    const { updateData, data } = useOnboarding();
 
+    const handleSubmit = async () => {
+
+        // TODO
+        // create register user from data 
+        // call api
+        // get new token + user
+        // set in jwt
+        // after navigate to HomeScreen
+    }
     return (
         <SafeAreaView style={styles.container}>
             <Image source={Images.topLeftGreenEllipse} style={styles.topLeftGlow} resizeMode="contain" />
@@ -28,7 +41,7 @@ const Step6Screen = () => {
                 </View>
             </View>
             <View style={styles.connectionSection}>
-                <Pressable style={styles.openMailButton} onPress={() => navigation.navigate("Step1")}>
+                <Pressable style={styles.openMailButton} onPress={() => handleSubmit()}>
                     <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Continue to App</Text>
                 </Pressable>
             </View>

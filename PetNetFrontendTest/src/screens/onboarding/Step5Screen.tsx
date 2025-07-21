@@ -8,11 +8,13 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { OnboardingStackParamList } from '../../types/OnboardingStackParamList';
 import { Platform } from 'react-native';
 import { CountryPicker } from 'react-native-country-codes-picker';
+import { useOnboarding } from '../../contexts/OnboardingContext';
 
 type Step5NavProp = NativeStackNavigationProp<OnboardingStackParamList, "Step5">;
 
 const Step5Screen = () => {
     const navigation = useNavigation<Step5NavProp>();
+    const { updateData } = useOnboarding();
 
     const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(undefined);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
@@ -20,7 +22,7 @@ const Step5Screen = () => {
     const [sex, setSex] = useState<'Male' | 'Female' | ''>('');
     const [showCountryPicker, setShowCountryPicker] = useState(false);
     const [country, setCountry] = useState({ name: 'Serbia', flag: '🇷🇸' });
-
+   
     return (
         <SafeAreaView style={styles.container}>
             <Image source={Images.topLeftGreenEllipse} style={styles.topLeftGlow} resizeMode="contain" />

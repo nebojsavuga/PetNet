@@ -7,17 +7,18 @@ import { useNavigation } from '@react-navigation/native';
 import { Typography } from '../../constants/Typography';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { OnboardingStackParamList } from '../../types/OnboardingStackParamList';
+import { useOnboarding } from '../../contexts/OnboardingContext';
 
 type Step4NavProp = NativeStackNavigationProp<OnboardingStackParamList, "Step4">;
 
 const Step4Screen = () => {
 
     const navigation = useNavigation<Step4NavProp>();
-    const [code, setCode] = useState(['', '', '', '', '', '']);
+
+    const [code, setCode]  = useState(['', '', '', '', '', '']);
     const inputs = useRef<Array<TextInput | null>>([]);
     const [resendAvailable, setResendAvailable] = useState(false);
     const [timer, setTimer] = useState(28);
-
     useEffect(() => {
         const isComplete = code.every((digit) => digit !== '');
 
