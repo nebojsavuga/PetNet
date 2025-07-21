@@ -87,7 +87,6 @@ exports.create = async (req, res) => {
         };
         const response = await pinata.upload.public.json(metadata);
         const metadataUrl = await pinata.gateways.public.convert(response.cid);
-
         const { nft } = await metaplex.nfts().create({
             uri: metadataUrl,
             name: metadata.name,
@@ -101,7 +100,7 @@ exports.create = async (req, res) => {
             ]
         });
         pet.nftMintAddress = nft.address.toBase58();
-        pet.nftUri = nft.uri;
+        pet.nftUri = metadataUrl;
 
         await pet.save();
 
