@@ -75,6 +75,11 @@ const petSchema = new mongoose.Schema(
         ],
         awards: [
             {
+                place: {
+                    type: String,
+                    enum: ['1st', '2nd', '3rd', 'Participated'],
+                    required: true,
+                },
                 awardName: {
                     type: String,
                     required: true,
