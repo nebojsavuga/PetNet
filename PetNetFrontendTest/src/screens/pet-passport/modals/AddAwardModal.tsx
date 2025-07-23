@@ -168,11 +168,13 @@ const AddAwardModal = ({ visible, onClose, onSave, awardToEdit }: {
 const styles = StyleSheet.create({
     backdrop: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.6)',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         justifyContent: 'center'
     },
     modalBackground: {
-        backgroundColor: '#4C454D',
+        backgroundColor: '#262326',
+        borderColor: '#4C454D',
+        borderWidth: 1,
         borderRadius: 16,
         padding: 20,
         width: '90%',
