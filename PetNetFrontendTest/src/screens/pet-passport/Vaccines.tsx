@@ -128,7 +128,7 @@ const Vaccines = () => {
                                 <SafeAreaView style={styles.petInfo}>
                                     <Text style={[Typography.heading, { color: "#F1EFF2" }]}>Add new vaccination</Text>
                                     <Text style={[Typography.bodySmall, { color: "#D8D5D9" }]}>
-                                        Get a link for veterinarian
+                                        Get a link for  
                                     </Text>
                                 </SafeAreaView>
                                 <Pressable onPress={() => console.log('Add icon pressed')} style={{ marginRight: 5 }}>

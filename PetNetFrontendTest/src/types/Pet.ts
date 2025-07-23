@@ -1,5 +1,6 @@
 export interface Award {
-    _id: string;
+    _id: string | null;
+    place: '1st' | '2nd' | '3rd' | 'Participated';
     awardName: string;
     showName: string;
     date: string;

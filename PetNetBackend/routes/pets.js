@@ -6,11 +6,11 @@ const upload = require('../middlewares/multer');
 
 router.post('', authenticate, create);
 router.get('/family/:id', authenticate, getFamily);
+router.post('/award/:id', authenticate, createOrUpdateAward);
 router.get('', authenticate, getAll);
 router.post('/image', authenticate, upload.single('image'), uploadImageToIpfs);
 router.post('/vaccination', authenticate, createOrUpdateVaccination);
 router.post('/intervention', authenticate, createOrUpdateIntervention);
-router.post('/award', authenticate, createOrUpdateAward);
 router.get('/:id', authenticate, getById);
 
 module.exports = router;

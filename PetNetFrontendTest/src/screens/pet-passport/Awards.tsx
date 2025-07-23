@@ -5,6 +5,7 @@ import {
     StyleSheet,
     Pressable,
     SafeAreaView,
+    Image,
     FlatList
 } from 'react-native';
 import { Award, Pet } from "../../types/Pet";
@@ -15,6 +16,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { PetPassportStackParamList } from "../../navigators/PetPassportNavigator";
 import PetHeaderSection from "./PetHeaderSection";
 import { Typography } from '../../constants/Typography';
+import AddAwardModal from './modals/AddAwardModal';
+import { Images } from '../../constants/Images';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 type AwardsDataRouteProp = RouteProp<PetPassportStackParamList, 'Awards'>;
@@ -24,7 +27,40 @@ const Awards = () => {
     const { petId } = route.params as { petId: string };
     const navigation = useNavigation();
     const [pet, setPet] = useState<Pet>();
+    const [isModalVisible, setModalVisible] = useState(false);
+    const [selectedAward, setSelectedAward] = useState<Award | undefined>(undefined);
+    const handleClose = () => {
+        setSelectedAward(undefined);
+        setModalVisible(false);
+    }
+    const handleSaveAward = async (award: Award) => {
+        try {
+            const token = await AsyncStorage.getItem('jwtToken');
+            const response = await fetch(`${API_URL}/pets/award/${petId}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(award),
+            });
+            if (!response.ok) {
+                console.error('Failed to add award');
+                return;
+            }
 
+            const responseValue = await response.json();
+            if (responseValue?.pet) {
+                responseValue.pet.awards = (responseValue.pet.awards ?? []).sort((a: Award, b: Award) =>
+                    new Date(b.date).getTime() - new Date(a.date).getTime()
+                );
+            }
+            setPet(responseValue?.pet);
+            setModalVisible(false);
+        } catch (error) {
+            console.error('Error saving award:', error);
+        }
+    };
     useEffect(() => {
         const fetchPet = async () => {
             try {
@@ -46,6 +82,9 @@ const Awards = () => {
                 }
 
                 const pet = await response.json();
+                pet.awards = (pet.awards ?? []).sort((a: Award, b: Award) =>
+                    new Date(b.date).getTime() - new Date(a.date).getTime()
+                );
                 setPet(pet);
 
             } catch (error) {
@@ -59,14 +98,40 @@ const Awards = () => {
         return (
             <Pressable
                 key={award._id}
-                onPress={() => navigation.navigate('PetPassportStack', {
-                    screen: 'PetPassport',
-                    params: { petId: award._id }
-                })}
+                onPress={() => {
+                    setSelectedAward(award);
+                    setModalVisible(true);
+                }}
                 style={styles.navRow}
             >
                 <SafeAreaView key={award._id} style={styles.navRowInner}>
-                    <Ionicons name='ribbon' size={20} color="#F7F7F7" style={{ marginRight: 10 }} />
+                    {award.place === '1st' ? (
+                        <Image
+                            source={Images.FirstPlace}
+                            style={styles.awardImage}
+                            resizeMode="contain"
+                        />
+                    ) : award.place === '2nd' ? (
+                        <Image
+                            source={Images.SecondPlace}
+                            style={styles.awardImage}
+                            resizeMode="contain"
+                        />
+                    ) : award.place === '3rd' ? (
+                        <Image
+                            source={Images.ThirdPlace}
+                            style={styles.awardImage}
+                            resizeMode="contain"
+                        />
+                    ) : (
+                        <Ionicons
+                            name="ribbon"
+                            size={40}
+                            color="#F7F7F7"
+                            style={{ marginRight: 10 }}
+                        />
+                    )}
+
                     <SafeAreaView style={styles.petInfo}>
                         <Text style={[Typography.heading, { color: "#F7F7F7" }]}>{award.awardName}</Text>
                         <Text style={[Typography.bodySmall, { color: "#F7F7F7" }]}>
@@ -76,7 +141,6 @@ const Awards = () => {
                             {new Date(award.date).toLocaleDateString('en-GB')}
                         </Text>
                     </SafeAreaView>
-                    <Ionicons name='chevron-forward-outline' size={20} color="#B2ABB3" style={styles.rightArrow} />
                 </SafeAreaView>
             </Pressable>
         );
@@ -85,7 +149,7 @@ const Awards = () => {
         <SafeAreaView style={{ flex: 1 }}>
             <FlatList
                 data={pet?.awards ?? []}
-                keyExtractor={(item) => item._id}
+                keyExtractor={(item) => item._id!}
                 renderItem={({ item }) => RenderAward(item, navigation)}
                 contentContainerStyle={styles.scrollContent}
                 ListHeaderComponent={
@@ -98,12 +162,26 @@ const Awards = () => {
                                 onShare={() => navigation.navigate('PetQrScreen', { petId: pet?._id })}
                             />
                         </View>
-                        <Text style={[
-                            Typography.heading,
-                            { color: '#F7F7F7', marginLeft: 10, marginTop: 20, marginBottom: 10 }
-                        ]}>
-                            Awards ({pet?.awards?.length ?? 0})
-                        </Text>
+                        <View style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginHorizontal: 10,
+                            marginTop: 20,
+                            marginBottom: 10
+                        }}>
+                            <Text style={[
+                                Typography.heading,
+                                { color: '#F7F7F7' }
+                            ]}>
+                                Awards ({pet?.awards?.length ?? 0})
+                            </Text>
+
+                            <Pressable onPress={() => setModalVisible(true)} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <Text style={{ color: '#71BA54', marginRight: 5, fontSize: 16 }}>Add</Text>
+                                <Ionicons name='add-circle-outline' size={36} color="#71BA54" />
+                            </Pressable>
+                        </View>
                     </>
                 }
                 ListEmptyComponent={
@@ -122,6 +200,12 @@ const Awards = () => {
                     </SafeAreaView>
                 }
             />
+            <AddAwardModal
+                visible={isModalVisible}
+                onClose={() => handleClose()}
+                onSave={handleSaveAward}
+                awardToEdit={selectedAward}
+            />
         </SafeAreaView>
     );
 
@@ -130,6 +214,11 @@ const Awards = () => {
 export default Awards;
 
 const styles = StyleSheet.create({
+    awardImage: {
+        width: 40,
+        height: 40,
+        marginRight: 10
+    },
     container: {
         flex: 1,
         flexDirection: 'column',
@@ -226,7 +315,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#3A3A3D',
     },
-    petImage: {
+    pet: {
         width: 45,
         height: 45,
         borderRadius: 75,

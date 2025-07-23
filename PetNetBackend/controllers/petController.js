@@ -12,7 +12,7 @@ const {
     keypairIdentity,
     bundlrStorage,
 } = require("@metaplex-foundation/js");
-
+const mongoose = require('mongoose');
 const { pinata } = require('../config/pinata');
 
 
@@ -245,7 +245,8 @@ exports.createOrUpdateIntervention = async (req, res) => {
 exports.createOrUpdateAward = async (req, res) => {
     try {
         const {
-            awardId,
+            _id,
+            place,
             awardName,
             showName,
             date
@@ -256,16 +257,18 @@ exports.createOrUpdateAward = async (req, res) => {
             return res.status(404).json({ error: 'Pet not found.' });
         }
         const awardDate = date ? new Date(date) : new Date();
-        const existingAward = pet.awards.findIndex(award => award._id === awardId);
+        const existingAward = pet.awards.findIndex(award => award._id.equals(new mongoose.Types.ObjectId(_id)));
         if (existingAward !== -1) {
             pet.awards[existingAward].awardName = awardName;
             pet.awards[existingAward].date = awardDate;
             pet.awards[existingAward].showName = showName;
+            pet.awards[existingAward].place = place;
         } else {
             pet.awards.push({
                 awardName,
                 date: awardDate,
-                showName
+                showName,
+                place
             });
         }
         await pet.save();
