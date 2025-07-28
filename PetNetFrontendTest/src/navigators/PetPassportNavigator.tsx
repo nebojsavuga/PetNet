@@ -8,15 +8,20 @@ import MedicalInterventions from '../screens/pet-passport/MedicalInterventions';
 import OwnerData from '../screens/pet-passport/OwnerData';
 import Vaccines from '../screens/pet-passport/Vaccines';
 import PetQrScreen from '../screens/pet-passport/PetQrScreen';
+import EditFamilyPedigree from '../screens/pet-passport/EditFamilyPedigree';
+import PetParentsBasicInfo from '../screens/pet-passport/PetParentsBasicInfo';
+import { Pet } from '../types/Pet';
 
 export type PetPassportStackParamList = {
     PetPassport: { petId: string };
-    FamilyPedigree: { petId: string };
-    Awards: { petId: string };
-    MedicalInterventions: { petId: string };
-    Vaccines: { petId: string };
-    OwnerData: { petId: string };
-    PetQrScreen: { petId: string };
+    FamilyPedigree: { pet: Pet };
+    Awards: { pet: Pet };
+    MedicalInterventions: { pet: Pet };
+    Vaccines: { pet: Pet };
+    OwnerData: { pet: Pet };
+    PetQrScreen: { pet: Pet };
+    EditFamilyPedigree: { pet: Pet }
+    PetParentsBasicInfo: { pet: Pet }
 };
 
 const Stack = createNativeStackNavigator<PetPassportStackParamList>();
@@ -31,6 +36,8 @@ const PetPassportNavigator = () => {
             <Stack.Screen name="Vaccines" component={Vaccines} />
             <Stack.Screen name="OwnerData" component={OwnerData} />
             <Stack.Screen name="PetQrScreen" component={PetQrScreen} />
+            <Stack.Screen name="EditFamilyPedigree" component={EditFamilyPedigree} />
+            <Stack.Screen name="PetParentsBasicInfo" component={PetParentsBasicInfo} />
         </Stack.Navigator>
     );
 };

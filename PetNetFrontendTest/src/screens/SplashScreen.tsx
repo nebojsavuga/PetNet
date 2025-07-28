@@ -6,11 +6,15 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Typography } from '../constants/Typography';
 import { Images } from '../constants/Images';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type SplashNavProp = NativeStackNavigationProp<RootStackParamList, "Splash">;
 
 const SplashScreen = () => {
     const navigation = useNavigation<SplashNavProp>();
+
+    // AsyncStorage.removeItem('user');
+    // AsyncStorage.getItem('jwtToken');
 
     const [ready, setReady] = useState(false);
     useEffect(() => {

@@ -20,7 +20,7 @@ async function seed() {
                 latitude: 44.998617,
                 longitude: 19.563195
             },
-            walletAddress: '2kPDhXqAuGGUinUx2se1qkF7qM5N8btwuHKgQdZHYmwK',
+            walletAddress: '3XFKoAdCCNPxToXCz2sLfHFzwRybANfBMTSGsur4oAHP',
         });
 
         await user.save();
@@ -40,6 +40,7 @@ async function seed() {
                     awardName: 'Best Junior Dog',
                     showName: 'National Dog Show 2022',
                     date: new Date('2022-08-10'),
+                    place: '1st'
                 },
             ],
             vaccinations: [

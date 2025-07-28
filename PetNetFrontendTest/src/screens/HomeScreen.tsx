@@ -30,14 +30,16 @@ const HomeScreen = () => {
 
   const [name, setName] = useState('Aleksa');
   const [pets, setPets] = useState<Pet[]>([]);
+
   useEffect(() => {
     const fetchUserAndPets = async () => {
       try {
         const userJson = await AsyncStorage.getItem('user');
+
         if (userJson) {
           const user = JSON.parse(userJson);
           if (user?.fullName) {
-            setName(user.fullName);
+            setName(user.fullName.split(' ')[0]);
           }
         }
         const token = await AsyncStorage.getItem('jwtToken');
@@ -142,7 +144,7 @@ const HomeScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={[Typography.h1, styles.sectionTitle]}>Hello, {name}</Text>
+        <Text style={[Typography.h6, { color: "#fff" }]}>Hello, {name}</Text>
         <View style={styles.icons}>
           <Ionicons name="notifications-outline" size={22} color="#fff" />
           <Ionicons name="settings-outline" size={22} color="#fff" style={{ marginLeft: 16 }} />
@@ -150,7 +152,8 @@ const HomeScreen = () => {
       </View>
 
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Your Pets Passports</Text>
+        <Text style={[Typography.body, { color: "#fff" }]}>Your Pets Passports</Text>
+        <Text style={[Typography.bodySmall, { color: "#fff" }]}>View All</Text>
       </View>
 
       {pets.length === 0 ? (
@@ -198,9 +201,10 @@ const styles = StyleSheet.create({
   },
   sectionHeader: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
     marginTop: 20,
-    marginBottom: 8,
+    marginBottom: 16,
   },
   sectionTitle: {
     color: '#fff',

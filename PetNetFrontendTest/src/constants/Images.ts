@@ -12,4 +12,5 @@ export const Images = {
     FirstPlace: require('../../assets/images/1st.png'),
     SecondPlace: require('../../assets/images/2nd.png'),
     ThirdPlace: require('../../assets/images/3rd.png'),
+    qrCodeIcon: require('../../assets/images/QRIcon.png')
 };

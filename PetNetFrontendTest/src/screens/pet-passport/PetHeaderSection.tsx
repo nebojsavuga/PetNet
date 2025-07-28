@@ -9,16 +9,19 @@ import {
 } from 'react-native';
 import dayjs from 'dayjs';
 import { Pet } from '../../types/Pet';
+import { Typography } from '../../constants/Typography';
 
 interface PetHeaderSectionProps {
     title: string;
     pet: Pet | undefined;
+    editable?: boolean;
     onBack: () => void;
-    onShare: () => void;
+    onShare?: () => void;
+    onEdit?: () => void;
 }
 
 
-const PetHeaderSection: React.FC<PetHeaderSectionProps> = ({ title, pet, onBack, onShare }) => {
+const PetHeaderSection: React.FC<PetHeaderSectionProps> = ({ title, pet, editable, onBack, onShare, onEdit }) => {
     const calculateAge = (dob?: string) => {
         const years = dayjs().diff(dayjs(dob), 'year');
         const months = dayjs().diff(dayjs(dob).add(years, 'year'), 'month');
@@ -31,17 +34,24 @@ const PetHeaderSection: React.FC<PetHeaderSectionProps> = ({ title, pet, onBack,
                     <Ionicons name="arrow-back" size={24} color="#F7F7F7" />
                 </Pressable>
                 <Text style={styles.headerTitle}>{title}</Text>
-                <Pressable onPress={onShare}>
-                    <Ionicons name="qr-code-outline" size={24} color="#F1EFF2" />
-                </Pressable>
+                {editable ? (
+                    <Pressable onPress={onEdit}>
+                        <Ionicons name="pencil-outline" size={24} color="#F1EFF2" />
+                    </Pressable>
+                ) : (
+                    <Pressable onPress={onShare}>
+                        <Ionicons name="qr-code-outline" size={24} color="#F1EFF2" />
+                    </Pressable>
+                )}
             </View>
             <View style={styles.dataSection}>
                 <Image source={{ uri: pet?.imageUrl }} style={styles.petImage} />
-                <Text style={styles.petName}>{pet?.name}</Text>
-                <Text style={styles.petDetails}>
-                    {pet?.breed} • {calculateAge(pet?.dateOfBirth)} • {pet?.gender}
-                </Text>
-                <Text style={styles.chipId}>Chip ID: {pet?.chipNumber}</Text>
+                <View style={styles.data}>
+                    <Text style={[Typography.h6, { color: '#F1EFF2' }]}>{pet?.name}</Text>
+                    <Text style={[Typography.bodySmall, { color: '#D8D5D9', marginTop: 8 }]}>{pet?.breed}</Text>
+                    <Text style={[Typography.bodySmall, { color: '#D8D5D9', marginBottom: 8 }]}>{calculateAge(pet?.dateOfBirth)} • {pet?.gender}</Text>
+                    <Text style={[Typography.bodyExtraSmall, styles.chipData]}>Chip ID: {pet?.chipNumber}</Text>
+                </View>
             </View>
         </>
     );
@@ -61,18 +71,8 @@ const styles = StyleSheet.create({
         width: 112,
         height: 112,
         borderRadius: 75,
-        marginTop: 50,
         alignSelf: 'center',
-        borderWidth: 6,
         borderColor: '#322E33'
-    },
-    petName: {
-        fontSize: 30,
-        fontWeight: 700,
-        textAlign: 'center',
-        lineHeight: 38,
-        letterSpacing: 0,
-        color: '#F1EFF2'
     },
     petDetails: {
         fontSize: 16,
@@ -82,28 +82,11 @@ const styles = StyleSheet.create({
         fontWeight: 500,
         lineHeight: 24
     },
-    chipId: {
-        fontSize: 14,
-        color: '#D8D5D9',
-        textAlign: 'center',
-        lineHeight: 22,
-        fontWeight: 500,
-        backgroundColor: '#262326',
-        gap: 10,
-        paddingTop: 4,
-        paddingRight: 12,
-        paddingBottom: 4,
-        paddingLeft: 12,
-        borderRadius: 999,
-        width: '70%',
-        marginHorizontal: 'auto'
-    },
     upperContent: {
         display: 'flex',
         flexDirection: 'row',
         gap: 32,
         width: '100%',
-        backgroundColor: '#322E33',
         paddingHorizontal: 16,
         paddingVertical: 24
     },
@@ -125,9 +108,13 @@ const styles = StyleSheet.create({
     },
     dataSection: {
         display: 'flex',
-        flexDirection: 'column',
-        gap: 8,
+        flexDirection: 'row',
+        gap: 24,
+        alignItems: 'center',
+        justifyContent: 'center',
         width: '100%',
+        paddingHorizontal: 16,
+        paddingVertical: 24
     },
     rowInputs: {
         display: 'flex',
@@ -135,5 +122,19 @@ const styles = StyleSheet.create({
         gap: 16,
         alignItems: 'center',
         width: '100%'
+    },
+    data: {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start'
+    },
+    chipData: {
+        borderRadius: 100,
+        borderWidth: 0.5,
+        borderColor: '#4C454D',
+        paddingVertical: 4,
+        paddingHorizontal: 12,
+        color: '#D8D5D9'
     }
 })

@@ -1,6 +1,8 @@
-import { PinataSDK } from "pinata"
+const { PinataSDK } = require("pinata");
 
-export const pinata = new PinataSDK({
-    pinataJwt: `${process.env.PINATA_JWT}`,
-    pinataGateway: `${process.env.PINATA_API_URL}`
-})
+const pinata = new PinataSDK({
+    pinataJwt: process.env.PINATA_JWT,
+    pinataGateway: process.env.PINATA_API_URL,
+});
+
+module.exports = { pinata };

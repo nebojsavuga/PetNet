@@ -5,7 +5,8 @@ import {
     StyleSheet,
     Pressable,
     SafeAreaView,
-    ScrollView
+    ScrollView,
+    Image
 } from 'react-native';
 import { Pet } from "../../types/Pet";
 import { useEffect, useState } from "react";
@@ -15,6 +16,8 @@ import { Ionicons, MaterialIcons, Entypo } from '@expo/vector-icons';
 import { PetPassportStackParamList } from "../../navigators/PetPassportNavigator";
 import PetHeaderSection from "./PetHeaderSection";
 import { Typography } from '../../constants/Typography';
+import { Images } from '../../constants/Images';
+import { getPetById } from '../../services/PetService';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 type PetPassportRouteProp = RouteProp<PetPassportStackParamList, 'PetPassport'>;
@@ -32,44 +35,33 @@ const PetPassport = () => {
         { label: 'Medical interventions', icon: 'bandage-outline', screen: 'MedicalInterventions' },
         { label: 'Awards', icon: 'ribbon-outline', screen: 'Awards' },
     ];
+
     useEffect(() => {
         const fetchPet = async () => {
-            try {
-                const token = await AsyncStorage.getItem('jwtToken');
-                if (!token) {
-                    console.warn('No JWT token found');
-                    return;
-                }
-                const response = await fetch(`${API_URL}/pets/${petId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
+            const { pet, error } = await getPetById(petId);
 
-                if (!response.ok) {
-                    console.error('Failed to fetch pets:', response.status);
-                    return;
-                }
-
-                const pet = await response.json();
-                setPet(pet);
-
-            } catch (error) {
-                console.error('Failed to load user or pets:', error);
+            if (error) {
+                console.warn(error);
+                return;
             }
-        };
 
+            if (pet) {
+                setPet(pet);
+            }
+        }
         fetchPet();
-    }, []);
+    }, [])
 
     return (
         <SafeAreaView>
             <ScrollView contentContainerStyle={styles.scrollContent}>
+                <Image source={Images.topLeftGreenEllipse} style={styles.topLeftGlow} resizeMode="contain" />
+                <Image source={Images.centralPinkEllipse} style={styles.centerGlow} resizeMode="contain" />
                 <View style={styles.container}>
                     <PetHeaderSection
                         title="Pet Passport"
                         pet={pet}
+                        editable={false}
                         onBack={() => navigation.goBack()}
                         onShare={() => navigation.navigate('PetQrScreen', { petId: pet?._id })}
                     />
@@ -241,5 +233,21 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-    }
+    },
+    topLeftGlow: {
+        position: 'absolute',
+        top: -400,
+        left: -400,
+        width: 800,
+        height: 800,
+        opacity: 0.8,
+    },
+    centerGlow: {
+        position: 'absolute',
+        top: 70,
+        left: -150,
+        width: 700,
+        height: 700,
+        opacity: 0.6,
+    },
 })

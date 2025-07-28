@@ -30,6 +30,13 @@ export const Typography = StyleSheet.create({
         lineHeight: 24,
         letterSpacing: -0.5,
     },
+    h6: {
+        fontFamily: 'SchibstedGrotesk-Medium',
+        fontWeight: '500' as TextStyle['fontWeight'],
+        fontSize: 24,
+        lineHeight: 30,
+        letterSpacing: 0,
+    },
     hTranslate: {
         fontFamily: 'SchibstedGrotesk-SemiBold',
         fontWeight: '600' as TextStyle['fontWeight'],
@@ -50,7 +57,7 @@ export const Typography = StyleSheet.create({
         fontFamily: 'SchibstedGrotesk-Regular',
         fontWeight: '400' as TextStyle['fontWeight'],
         fontSize: 14,
-        lineHeight: 20,
+        lineHeight: 22,
         letterSpacing: 0,
     },
     bodyExtraSmall: {
@@ -67,11 +74,32 @@ export const Typography = StyleSheet.create({
         lineHeight: 24,
         letterSpacing: 0,
     },
+    bodyMediumBold: {
+        fontFamily: 'SchibstedGrotesk-Medium',
+        fontWeight: '700' as TextStyle['fontWeight'],
+        fontSize: 16,
+        lineHeight: 24,
+        letterSpacing: 0,
+    },
     bodyLarge: {
         fontFamily: 'SchibstedGrotesk-SemiBold',
         fontWeight: '700' as TextStyle['fontWeight'],
         fontSize: 18,
         lineHeight: 26,
+        letterSpacing: 0,
+    },
+    bodyMedium: {
+        fontFamily: 'SchibstedGrotesk-Regular',
+        fontWeight: '400' as TextStyle['fontWeight'],
+        fontSize: 16,
+        lineHeight: 24,
+        letterSpacing: 0,
+    },
+    bodyMediumSemiBold: {
+        fontFamily: 'SchibstedGrotesk-SemiBold',
+        fontWeight: '600' as TextStyle['fontWeight'],
+        fontSize: 16,
+        lineHeight: 24,
         letterSpacing: 0,
     },
 

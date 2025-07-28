@@ -31,7 +31,8 @@ const Step1Screen = () => {
         | 'Unknown'
         | 'Sterilized Unknown'
         | ''
-    >(''); const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(new Date(2020, 1, 1));
+    >('');
+    const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(new Date(2020, 1, 1));
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
     const handleNext = () => {

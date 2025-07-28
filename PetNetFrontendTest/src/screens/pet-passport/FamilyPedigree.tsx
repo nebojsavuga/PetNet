@@ -17,6 +17,7 @@ import { PetPassportStackParamList } from "../../navigators/PetPassportNavigator
 import PetHeaderSection from "./PetHeaderSection";
 import { Typography } from '../../constants/Typography';
 import dayjs from 'dayjs';
+import { Images } from '../../constants/Images';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 type FamilyPedigreeDataRouteProp = RouteProp<PetPassportStackParamList, 'FamilyPedigree'>;
@@ -97,9 +98,14 @@ const FamilyPedigree = () => {
     const RenderPet = (selectedPet: Pet | undefined, navigation: any, typeOfFamilyMember: string) => {
         if (!selectedPet) {
             return (<SafeAreaView style={styles.petCard}>
-                <Ionicons name='close-circle-outline' size={45} color="#F7F7F7" style={{ marginHorizontal: 6 }} />
-                <SafeAreaView style={styles.petInfo}>
+                {/* <Text style={[Typography.bodyMedium, { color: '#D8D5D9' }]}>Currently no parrents assigned</Text>
+                <Pressable style={styles.petInfo}>
+                    <Ionicons name='add' size={20} color="#F7F7F7" style={{ marginHorizontal: 6 }} />
                     <Text style={[Typography.heading, { color: '#F1EFF2' }]}>This pet doesn't have a {typeOfFamilyMember}</Text>
+                </Pressable> */}
+                <Ionicons name='close-circle-outline' size={30} color="#F7F7F7" style={{ marginHorizontal: 6 }} />
+                <SafeAreaView style={styles.petInfo}>
+                    <Text style={[Typography.bodyMediumSemiBold, { color: '#F1EFF2' }]}>This pet doesn't have parents</Text>
                 </SafeAreaView>
             </SafeAreaView>)
         }
@@ -127,6 +133,8 @@ const FamilyPedigree = () => {
     };
     return (
         <SafeAreaView style={{ flex: 1 }}>
+            <Image source={Images.topLeftGreenEllipse} style={styles.topLeftGlow} resizeMode="contain" />
+            <Image source={Images.centralPinkEllipse} style={styles.centerGlow} resizeMode="contain" />
             <FlatList
                 data={children}
                 keyExtractor={(item) => item._id}
@@ -136,26 +144,27 @@ const FamilyPedigree = () => {
                             <PetHeaderSection
                                 title="Family Pedigree"
                                 pet={pet}
+                                editable={true}
                                 onBack={() => navigation.goBack()}
-                                onShare={() => navigation.navigate('PetQrScreen', { petId: pet?._id })}
+                                // onShare={() => navigation.navigate('PetQrScreen', { petId: pet?._id })}
+                                onEdit={() => navigation.navigate('EditFamilyPedigree', { petId: pet?._id })}
                             />
                         </View>
 
                         <Text style={[Typography.heading, { color: '#F7F7F7', marginLeft: 10, marginTop: 20, marginBottom: 10 }]}>Parents</Text>
                         <View>
                             {RenderPet(father, navigation, 'father')}
-                            {RenderPet(mother, navigation, 'mother')}
                         </View>
 
-                        <Text style={[Typography.heading, { color: '#F7F7F7', marginLeft: 10, marginTop: 30, marginBottom: 10 }]}>Children</Text>
+                        <Text style={[Typography.heading, { color: '#F7F7F7', marginLeft: 10, marginTop: 24, marginBottom: 10 }]}>Children</Text>
                     </>
                 }
                 renderItem={({ item }) => RenderPet(item, navigation, 'children')}
                 ListEmptyComponent={
                     <SafeAreaView style={styles.petCard}>
-                        <Ionicons name='close-circle-outline' size={45} color="#F7F7F7" style={{ marginHorizontal: 6 }} />
+                        <Ionicons name='close-circle-outline' size={30} color="#F7F7F7" style={{ marginHorizontal: 6 }} />
                         <SafeAreaView style={styles.petInfo}>
-                            <Text style={[Typography.heading, { color: '#F1EFF2' }]}>This pet doesn't have children</Text>
+                            <Text style={[Typography.bodyMediumSemiBold, { color: '#F1EFF2' }]}>This pet doesn't have children</Text>
                         </SafeAreaView>
                     </SafeAreaView>
                 }
@@ -255,15 +264,16 @@ const styles = StyleSheet.create({
     },
     petCard: {
         flexDirection: 'row',
-        backgroundColor: '#322E33',
-        borderRadius: 12,
-        paddingVertical: 20,
+        backgroundColor: '#262326',
+        borderRadius: 8,
+        padding: 16,
         marginBottom: 12,
         width: '95%',
         marginHorizontal: 'auto',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#3A3A3D',
+        borderColor: '#322E33',
+        gap: 16
     },
     petImage: {
         width: 45,
@@ -274,5 +284,21 @@ const styles = StyleSheet.create({
     },
     petInfo: {
         flex: 1,
-    }
+    },
+    topLeftGlow: {
+        position: 'absolute',
+        top: -400,
+        left: -400,
+        width: 800,
+        height: 800,
+        opacity: 0.8,
+    },
+    centerGlow: {
+        position: 'absolute',
+        top: 70,
+        left: -150,
+        width: 700,
+        height: 700,
+        opacity: 0.6,
+    },
 })
