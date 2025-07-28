@@ -53,7 +53,7 @@ const PetPassport = () => {
     }, [])
 
     return (
-        <SafeAreaView>
+        <SafeAreaView style={{ position: 'relative', width: '100%', height: '100%' }}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <Image source={Images.topLeftGreenEllipse} style={styles.topLeftGlow} resizeMode="contain" />
                 <Image source={Images.centralPinkEllipse} style={styles.centerGlow} resizeMode="contain" />
@@ -63,7 +63,7 @@ const PetPassport = () => {
                         pet={pet}
                         editable={false}
                         onBack={() => navigation.goBack()}
-                        onShare={() => navigation.navigate('PetQrScreen', { petId: pet?._id })}
+                        onShare={() => navigation.navigate('PetQrScreen', { pet: pet })}
                     />
                     <View style={styles.emergencyBlock}>
                         <View style={styles.emergencyRow}>
@@ -91,7 +91,7 @@ const PetPassport = () => {
                                     styles.navRow,
                                     index === navItems.length - 1 && styles.lastNavRow,
                                 ]}
-                                onPress={() => navigation.navigate(screen, { petId: pet._id })}
+                                onPress={() => navigation.navigate(screen, { pet: pet })}
                             >
                                 <View style={styles.navRowInner}>
                                     <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={20} color="#D988F7" style={{ marginRight: 12 }} />
@@ -116,7 +116,6 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         width: '100%',
         height: '100%',
-        backgroundColor: '#19171A',
         alignItems: 'center',
         justifyContent: 'space-between',
         position: 'relative'
@@ -224,6 +223,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         paddingBottom: 16,
+        position: 'relative'
     },
     lastNavRow: {
         borderBottomWidth: 0,

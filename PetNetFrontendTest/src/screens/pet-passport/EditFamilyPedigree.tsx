@@ -4,12 +4,19 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Images } from '../../constants/Images'
 import { Typography } from '../../constants/Typography'
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useNavigation } from '@react-navigation/native'
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native'
 import SelectAddParentModal from './modals/SelectAddParentModal'
 import AddParentWithPetNetModal from './modals/AddParentWithPetNetModal'
+import { PetPassportStackParamList } from '../../navigators/PetPassportNavigator'
+import Constants from 'expo-constants';
+import { Pet } from '../../types/Pet'
 
+const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
+type FamilyPedigreeDataRouteProp = RouteProp<PetPassportStackParamList, 'EditFamilyPedigree'>;
 const EditFamilyPedigree = () => {
 
+    const route = useRoute<FamilyPedigreeDataRouteProp>();
+    const { pet } = route.params as { pet: Pet };
     const navigation = useNavigation();
     const [isInitialModalVisible, setInitialModalVisible] = useState(false);
     const [isSelectingModalVisible, setSelectingModalVisible] = useState(false);

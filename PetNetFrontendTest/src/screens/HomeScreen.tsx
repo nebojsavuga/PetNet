@@ -18,6 +18,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import { Pet } from '../types/Pet';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
+import { Images } from '../constants/Images';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 
@@ -143,6 +144,8 @@ const HomeScreen = () => {
   };
   return (
     <SafeAreaView style={styles.container}>
+      <Image source={Images.topLeftGreenEllipse} style={styles.topLeftGlow} resizeMode="contain" />
+      <Image source={Images.centralPinkEllipse} style={styles.centerGlow} resizeMode="contain" />
       <View style={styles.header}>
         <Text style={[Typography.h6, { color: "#fff" }]}>Hello, {name}</Text>
         <View style={styles.icons}>
@@ -187,9 +190,9 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#19171A',
     paddingHorizontal: 20,
     paddingTop: 20,
+    position: 'relative'
   },
   header: {
     flexDirection: 'row',
@@ -268,5 +271,21 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  topLeftGlow: {
+    position: 'absolute',
+    top: -400,
+    left: -400,
+    width: 800,
+    height: 800,
+    opacity: 0.8,
+  },
+  centerGlow: {
+    position: 'absolute',
+    top: 70,
+    left: -150,
+    width: 700,
+    height: 700,
+    opacity: 0.6,
   },
 });

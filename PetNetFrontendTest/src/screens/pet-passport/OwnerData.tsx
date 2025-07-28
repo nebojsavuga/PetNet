@@ -22,9 +22,8 @@ type OwnerDataRouteProp = RouteProp<PetPassportStackParamList, 'OwnerData'>;
 
 const OwnerData = () => {
     const route = useRoute<OwnerDataRouteProp>();
-    const { petId } = route.params as { petId: string };
+    const { pet } = route.params as { pet: Pet };
     const navigation = useNavigation();
-    const [pet, setPet] = useState<Pet>();
     const [user, setUser] = useState<User | null>(null);
 
     useEffect(() => {
@@ -38,34 +37,6 @@ const OwnerData = () => {
                 console.error('Failed to load user from AsyncStorage:', err);
             }
         };
-        const fetchPet = async () => {
-            try {
-                const token = await AsyncStorage.getItem('jwtToken');
-                if (!token) {
-                    console.warn('No JWT token found');
-                    return;
-                }
-                const response = await fetch(`${API_URL}/pets/${petId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                if (!response.ok) {
-                    console.error('Failed to fetch pets:', response.status);
-                    return;
-                }
-
-                const pet = await response.json();
-                setPet(pet);
-
-            } catch (error) {
-                console.error('Failed to load user or pets:', error);
-            }
-        };
-
-        fetchPet();
         loadUser();
     }, []);
     return (
@@ -76,7 +47,7 @@ const OwnerData = () => {
                         title="Owner data"
                         pet={pet}
                         onBack={() => navigation.goBack()}
-                        onShare={() => navigation.navigate('PetQrScreen', { petId: pet?._id })}
+                        onShare={() => navigation.navigate('PetQrScreen', { pet: pet })}
                     />
                 </View>
                 <Text style={[Typography.heading, { color: '#F7F7F7', marginLeft: 10, marginTop: 20 }]}>Owner information</Text>

@@ -24,40 +24,40 @@ type FamilyPedigreeDataRouteProp = RouteProp<PetPassportStackParamList, 'FamilyP
 
 const FamilyPedigree = () => {
     const route = useRoute<FamilyPedigreeDataRouteProp>();
-    const { petId } = route.params as { petId: string };
+    const { pet } = route.params as { pet: Pet };
     const navigation = useNavigation();
-    const [pet, setPet] = useState<Pet>();
+    // const [pet, setPet] = useState<Pet>();
     const [father, setFather] = useState<Pet>();
     const [mother, setMother] = useState<Pet>();
     const [children, setChildren] = useState<Pet[]>([]);
 
     useEffect(() => {
-        const fetchPet = async () => {
-            try {
-                const token = await AsyncStorage.getItem('jwtToken');
-                if (!token) {
-                    console.warn('No JWT token found');
-                    return;
-                }
-                const response = await fetch(`${API_URL}/pets/${petId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
+        // const fetchPet = async () => {
+        //     try {
+        //         const token = await AsyncStorage.getItem('jwtToken');
+        //         if (!token) {
+        //             console.warn('No JWT token found');
+        //             return;
+        //         }
+        //         const response = await fetch(`${API_URL}/pets/${petId}`, {
+        //             headers: {
+        //                 'Authorization': `Bearer ${token}`,
+        //                 'Content-Type': 'application/json',
+        //             },
+        //         });
 
-                if (!response.ok) {
-                    console.error('Failed to fetch pets:', response.status);
-                    return;
-                }
+        //         if (!response.ok) {
+        //             console.error('Failed to fetch pets:', response.status);
+        //             return;
+        //         }
 
-                const pet = await response.json();
-                setPet(pet);
+        //         const pet = await response.json();
+        //         setPet(pet);
 
-            } catch (error) {
-                console.error('Failed to load user or pets:', error);
-            }
-        };
+        //     } catch (error) {
+        //         console.error('Failed to load user or pets:', error);
+        //     }
+        // };
         const fetchFamily = async () => {
             try {
                 const token = await AsyncStorage.getItem('jwtToken');
@@ -65,7 +65,7 @@ const FamilyPedigree = () => {
                     console.warn('No JWT token found');
                     return;
                 }
-                const response = await fetch(`${API_URL}/pets/family/${petId}`, {
+                const response = await fetch(`${API_URL}/pets/family/${pet._id}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
@@ -86,7 +86,7 @@ const FamilyPedigree = () => {
             }
         };
 
-        fetchPet();
+        // fetchPet();
         fetchFamily();
     }, []);
     const calculateAge = (dob: string) => {

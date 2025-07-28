@@ -24,9 +24,9 @@ type AwardsDataRouteProp = RouteProp<PetPassportStackParamList, 'Awards'>;
 
 const Awards = () => {
     const route = useRoute<AwardsDataRouteProp>();
-    const { petId } = route.params as { petId: string };
+    const { pet } = route.params as { pet: Pet };
+    const [fetchedPet, setFetchedPet] = useState(pet);
     const navigation = useNavigation();
-    const [pet, setPet] = useState<Pet>();
     const [isModalVisible, setModalVisible] = useState(false);
     const [selectedAward, setSelectedAward] = useState<Award | undefined>(undefined);
     const handleClose = () => {
@@ -36,7 +36,7 @@ const Awards = () => {
     const handleSaveAward = async (award: Award) => {
         try {
             const token = await AsyncStorage.getItem('jwtToken');
-            const response = await fetch(`${API_URL}/pets/award/${petId}`, {
+            const response = await fetch(`${API_URL}/pets/award/${pet._id}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -55,44 +55,13 @@ const Awards = () => {
                     new Date(b.date).getTime() - new Date(a.date).getTime()
                 );
             }
-            setPet(responseValue?.pet);
+            console.log("Successfully awarded");
+            setFetchedPet(responseValue?.pet);
             setModalVisible(false);
         } catch (error) {
             console.error('Error saving award:', error);
         }
     };
-    useEffect(() => {
-        const fetchPet = async () => {
-            try {
-                const token = await AsyncStorage.getItem('jwtToken');
-                if (!token) {
-                    console.warn('No JWT token found');
-                    return;
-                }
-                const response = await fetch(`${API_URL}/pets/${petId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                if (!response.ok) {
-                    console.error('Failed to fetch pets:', response.status);
-                    return;
-                }
-
-                const pet = await response.json();
-                pet.awards = (pet.awards ?? []).sort((a: Award, b: Award) =>
-                    new Date(b.date).getTime() - new Date(a.date).getTime()
-                );
-                setPet(pet);
-
-            } catch (error) {
-                console.error('Failed to load user or pets:', error);
-            }
-        };
-        fetchPet();
-    }, []);
 
     const RenderAward = (award: Award, navigation: any) => {
         return (
@@ -148,7 +117,7 @@ const Awards = () => {
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <FlatList
-                data={pet?.awards ?? []}
+                data={fetchedPet?.awards ?? []}
                 keyExtractor={(item) => item._id!}
                 renderItem={({ item }) => RenderAward(item, navigation)}
                 contentContainerStyle={styles.scrollContent}
@@ -159,7 +128,7 @@ const Awards = () => {
                                 title="Awards"
                                 pet={pet}
                                 onBack={() => navigation.goBack()}
-                                onShare={() => navigation.navigate('PetQrScreen', { petId: pet?._id })}
+                                onShare={() => navigation.navigate('PetQrScreen', { pet: pet })}
                             />
                         </View>
                         <View style={{
