@@ -57,16 +57,12 @@ const petSchema = new mongoose.Schema(
             ref: 'User',
             required: true,
         },
-        fatherId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Pet',
-            default: null,
-        },
-        motherId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Pet',
-            default: null,
-        },
+        parents: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Pet',
+            }
+        ],
         children: [
             {
                 type: mongoose.Schema.Types.ObjectId,

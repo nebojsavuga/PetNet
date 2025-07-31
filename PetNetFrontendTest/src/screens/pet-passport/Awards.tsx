@@ -18,13 +18,14 @@ import PetHeaderSection from "./PetHeaderSection";
 import { Typography } from '../../constants/Typography';
 import AddAwardModal from './modals/AddAwardModal';
 import { Images } from '../../constants/Images';
+import { usePet } from '../../contexts/PetContext';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 type AwardsDataRouteProp = RouteProp<PetPassportStackParamList, 'Awards'>;
 
 const Awards = () => {
     const route = useRoute<AwardsDataRouteProp>();
-    const { pet } = route.params as { pet: Pet };
+    const { pet, setPet } = usePet();
     const [fetchedPet, setFetchedPet] = useState(pet);
     const navigation = useNavigation();
     const [isModalVisible, setModalVisible] = useState(false);
@@ -36,7 +37,7 @@ const Awards = () => {
     const handleSaveAward = async (award: Award) => {
         try {
             const token = await AsyncStorage.getItem('jwtToken');
-            const response = await fetch(`${API_URL}/pets/award/${pet._id}`, {
+            const response = await fetch(`${API_URL}/pets/award/${pet?._id}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

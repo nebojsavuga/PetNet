@@ -6,23 +6,22 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { PetPassportStackParamList } from '../../../navigators/PetPassportNavigator';
 import { Pet } from '../../../types/Pet';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-type PedigreeDataRouteProp = RouteProp<PetPassportStackParamList, 'PetParentsBasicInfo'>;
-const SelectAddParentModal = ({ visible, onClose, onExistingSelected }: {
+const SelectAddParentModal = ({ visible, onClose, onExistingSelected, pet }: {
     visible: boolean;
     onClose: () => void;
     onExistingSelected: () => void;
+    pet: Pet | undefined;
 }) => {
 
-    const [pet, setPet] = useState<Pet>();
-    const route = useRoute<PedigreeDataRouteProp>();
-    const { petId } = route.params as { petId: string };
-    const navigator = useNavigation();
+    const navigator = useNavigation<NativeStackNavigationProp<PetPassportStackParamList>>();
 
     const handleTemporaryPetNavigation = () => {
+        console.log('Navigating to PetParentsBasicInfo with pet:', pet);
         onClose();
-        navigator.navigate('PetParentsBasicInfo', { petId: pet?._id })
-    }
+        navigator.navigate('PetParentsBasicInfo', { pet });
+    };
 
     return (
         <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>

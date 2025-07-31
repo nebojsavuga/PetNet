@@ -31,8 +31,10 @@ const WalletConnectionScreen = () => {
                 const user = await AsyncStorage.getItem('user');
 
                 if (token && user) {
+                    console.log('imaga');
                     const isExpired = isTokenExpired(token);
                     if (isExpired) {
+                        console.log('isteko!');
                         await AsyncStorage.removeItem('jwtToken');
                         await AsyncStorage.removeItem('user');
                         await handleConnectPress();
@@ -43,6 +45,8 @@ const WalletConnectionScreen = () => {
                         routes: [{ name: 'HomeScreen' }],
                     });
                 }
+
+                console.log('nemaga');
             } catch (err) {
                 console.warn('Error checking login state:', err);
             }
@@ -52,18 +56,22 @@ const WalletConnectionScreen = () => {
     }, []);
     const loginWithWalletAddress = async (walletAddress: string) => {
         try {
+            console.log("API_URL: ", API_URL);
             const response = await fetch(`${API_URL}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ walletAddress }),
             });
+            console.log("RESPONSE: ", response);
             if (!response.ok) {
                 // user not found or other error
+                console.log('not ok')
                 return null;
             }
 
+            console.log('ok');
             const data = await response.json();
-
+            console.log('datara: ', data);
             await AsyncStorage.setItem('jwtToken', data.token);
             await AsyncStorage.setItem('user', JSON.stringify(data.user));
 
@@ -81,6 +89,7 @@ const WalletConnectionScreen = () => {
         let account;
         try {
             account = await connect();
+            console.log("account: ", account);
         } catch (err) {
             alertAndLog(
                 "Error during connect",
@@ -95,8 +104,10 @@ const WalletConnectionScreen = () => {
             return;
         }
 
+        console.log('Wallet address: ', account.publicKey.toString());
         const loginResult = await loginWithWalletAddress(account.publicKey.toString());
 
+        console.log("login result: ", loginResult);
         if (loginResult) {
             navigation.reset({
                 index: 0,

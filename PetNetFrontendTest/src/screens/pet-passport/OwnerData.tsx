@@ -6,6 +6,7 @@ import {
     Pressable,
     SafeAreaView,
     ScrollView,
+    Image,
 } from 'react-native';
 import { Pet } from "../../types/Pet";
 import { useEffect, useState } from "react";
@@ -16,13 +17,15 @@ import { PetPassportStackParamList } from "../../navigators/PetPassportNavigator
 import PetHeaderSection from "./PetHeaderSection";
 import { Typography } from '../../constants/Typography';
 import { User } from '../../types/User';
+import { Images } from '../../constants/Images';
+import { usePet } from '../../contexts/PetContext';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 type OwnerDataRouteProp = RouteProp<PetPassportStackParamList, 'OwnerData'>;
 
 const OwnerData = () => {
     const route = useRoute<OwnerDataRouteProp>();
-    const { pet } = route.params as { pet: Pet };
+    const { pet, setPet } = usePet();
     const navigation = useNavigation();
     const [user, setUser] = useState<User | null>(null);
 
@@ -41,6 +44,9 @@ const OwnerData = () => {
     }, []);
     return (
         <SafeAreaView>
+            <Image source={Images.topLeftGreenEllipse} style={styles.topLeftGlow} resizeMode="contain" />
+            <Image source={Images.centralPinkEllipse} style={styles.centerGlow} resizeMode="contain" />
+            <Image source={Images.centralPinkEllipse} style={styles.bottomGlow} resizeMode="contain" />
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <View style={styles.container}>
                     <PetHeaderSection
@@ -50,23 +56,23 @@ const OwnerData = () => {
                         onShare={() => navigation.navigate('PetQrScreen', { pet: pet })}
                     />
                 </View>
-                <Text style={[Typography.heading, { color: '#F7F7F7', marginLeft: 10, marginTop: 20 }]}>Owner information</Text>
+                <Text style={[Typography.bodyMediumSemiBold, { color: '#F7F7F7', marginLeft: 10, marginTop: 20 }]}>Owner’s Contact Information</Text>
                 <View style={styles.ownerInfoSection}>
                     <View style={styles.input}>
-                        <Text style={[Typography.body, { color: '#F1EFF2' }]}>Name</Text>
-                        <Text style={[Typography.heading, { color: '#F1EFF2' }]}>{user?.fullName}</Text>
+                        <Text style={[Typography.bodySmall, { color: '#D8D5D9' }]}>Name</Text>
+                        <Text style={[Typography.bodyMediumSemiBold, { color: '#F1EFF2' }]}>{user?.fullName}</Text>
                     </View>
                     <View style={styles.input}>
-                        <Text style={[Typography.body, { color: '#F1EFF2' }]}>Location</Text>
-                        <Text style={[Typography.heading, { color: '#F1EFF2' }]}>{user?.walletAddress}</Text>
+                        <Text style={[Typography.bodySmall, { color: '#D8D5D9' }]}>Location</Text>
+                        <Text style={[Typography.bodyMediumSemiBold, { color: '#F1EFF2' }]}>{user?.walletAddress}</Text>
                     </View>
                     <View style={styles.input}>
-                        <Text style={[Typography.body, { color: '#F1EFF2' }]}>Email</Text>
-                        <Text style={[Typography.heading, { color: '#F1EFF2' }]}>{user?.email}</Text>
+                        <Text style={[Typography.bodySmall, { color: '#D8D5D9' }]}>Email</Text>
+                        <Text style={[Typography.bodyMediumSemiBold, { color: '#F1EFF2' }]}>{user?.email}</Text>
                     </View>
                     <View style={styles.input}>
-                        <Text style={[Typography.body, { color: '#F1EFF2' }]}>Phone</Text>
-                        <Text style={[Typography.heading, { color: '#F1EFF2' }]}>{user?.phoneNumber}</Text>
+                        <Text style={[Typography.bodySmall, { color: '#D8D5D9' }]}>Phone</Text>
+                        <Text style={[Typography.bodyMediumSemiBold, { color: '#F1EFF2' }]}>{user?.phoneNumber}</Text>
                     </View>
                 </View>
                 <View style={{ marginTop: 6 }}>
@@ -97,7 +103,6 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         width: '100%',
         gap: 2,
-        marginBottom: 10,
         alignItems: 'flex-start'
     },
     inputField: {
@@ -138,9 +143,36 @@ const styles = StyleSheet.create({
     ownerInfoSection: {
         width: '95%',
         marginHorizontal: 'auto',
-        backgroundColor: '#322E33',
+        backgroundColor: '#262326',
         borderRadius: 8,
         marginVertical: 10,
-        padding: 10
+        padding: 16,
+        gap: 16,
+        borderWidth: 1,
+        borderColor: '#322E33'
+    },
+    topLeftGlow: {
+        position: 'absolute',
+        top: -400,
+        left: -400,
+        width: 800,
+        height: 800,
+        opacity: 0.8,
+    },
+    centerGlow: {
+        position: 'absolute',
+        top: 70,
+        left: -150,
+        width: 700,
+        height: 700,
+        opacity: 0.6,
+    },
+    bottomGlow: {
+        position: 'absolute',
+        top: 250,
+        left: -150,
+        width: 700,
+        height: 700,
+        opacity: 0.6,
     },
 })

@@ -15,15 +15,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { PetPassportStackParamList } from "../../navigators/PetPassportNavigator";
 import PetHeaderSection from "./PetHeaderSection";
 import { Typography } from '../../constants/Typography';
+import { usePet } from '../../contexts/PetContext';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 type VaccinesDataRouteProp = RouteProp<PetPassportStackParamList, 'Vaccines'>;
 
 const Vaccines = () => {
     const route = useRoute<VaccinesDataRouteProp>();
-    const { petId } = route.params as { petId: string };
+    const { pet, setPet } = usePet();
     const navigation = useNavigation();
-    const [pet, setPet] = useState<Pet>();
+    // const [pet, setPet] = useState<Pet>();
     const [vaccinations, setVaccinations] = useState<Vaccination[]>();
 
     useEffect(() => {
@@ -35,7 +36,7 @@ const Vaccines = () => {
                     console.warn('No JWT token found');
                     return;
                 }
-                const response = await fetch(`${API_URL}/pets/${petId}`, {
+                const response = await fetch(`${API_URL}/pets/${pet?._id}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
@@ -116,7 +117,7 @@ const Vaccines = () => {
                                 title="Vaccines"
                                 pet={pet}
                                 onBack={() => navigation.goBack()}
-                                onShare={() => navigation.navigate('PetQrScreen', { petId: pet?._id })}
+                                onShare={() => navigation.navigate('PetQrScreen', { pet: pet })}
                             />
                         </View>
 
@@ -128,7 +129,7 @@ const Vaccines = () => {
                                 <SafeAreaView style={styles.petInfo}>
                                     <Text style={[Typography.heading, { color: "#F1EFF2" }]}>Add new vaccination</Text>
                                     <Text style={[Typography.bodySmall, { color: "#D8D5D9" }]}>
-                                        Get a link for  
+                                        Get a link for
                                     </Text>
                                 </SafeAreaView>
                                 <Pressable onPress={() => console.log('Add icon pressed')} style={{ marginRight: 5 }}>

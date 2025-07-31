@@ -18,6 +18,7 @@ import PetHeaderSection from "./PetHeaderSection";
 import { Typography } from '../../constants/Typography';
 import { Images } from '../../constants/Images';
 import { getPetById } from '../../services/PetService';
+import { usePet } from '../../contexts/PetContext';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 type PetPassportRouteProp = RouteProp<PetPassportStackParamList, 'PetPassport'>;
@@ -25,9 +26,9 @@ type PetPassportRouteProp = RouteProp<PetPassportStackParamList, 'PetPassport'>;
 const PetPassport = () => {
     const route = useRoute<PetPassportRouteProp>();
     const { petId } = route.params as { petId: string };
-    const navigation = useNavigation();
+    const { pet, setPet } = usePet();
 
-    const [pet, setPet] = useState<Pet>();
+    const navigation = useNavigation();
     const navItems: { label: string; icon: string; screen: keyof PetPassportStackParamList }[] = [
         { label: 'Owner data', icon: 'person-outline', screen: 'OwnerData' },
         { label: 'Family Pedigree', icon: 'people-outline', screen: 'FamilyPedigree' },
@@ -50,7 +51,7 @@ const PetPassport = () => {
             }
         }
         fetchPet();
-    }, [])
+    }, [petId])
 
     return (
         <SafeAreaView style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -69,9 +70,9 @@ const PetPassport = () => {
                         <View style={styles.emergencyRow}>
                             <MaterialIcons name="error-outline" size={32} color="#FF3B30" />
                             <View style={styles.emergencyTextContainer}>
-                                <Text style={styles.emergencyTitle}>Emergency contact</Text>
-                                <Text style={styles.emergencySubtitle}>
-                                    If pet is found injured or lost
+                                <Text style={[Typography.bodyMediumSemiBold, { color: '#F1EFF2' }]}>Report missing</Text>
+                                <Text style={[Typography.bodySmall, { color: '#D8D5D9' }]}>
+                                    If pet is lost, people around you will be notified and ready to help
                                 </Text>
                             </View>
                         </View>
@@ -79,8 +80,8 @@ const PetPassport = () => {
                         <Pressable style={styles.emergencyButton} onPress={() => {
                             console.log('Emergency call pressed');
                         }}>
-                            <Entypo name="phone" size={20} color="#fff" />
-                            <Text style={styles.emergencyButtonText}>Emergency call</Text>
+                            <Entypo name="paper-plane" size={20} color="#fff" />
+                            <Text style={[Typography.bodyMediumMedium, styles.emergencyButtonText]}>Notify People</Text>
                         </Pressable>
                     </View>
                     <View style={styles.navSection}>
@@ -154,7 +155,6 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         padding: 16,
         marginTop: 40,
-        marginBottom: 20,
         width: '95%',
         marginHorizontal: 'auto'
     },
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 'auto',
         backgroundColor: '#322E33',
         borderRadius: 6,
-        marginVertical: 10
+        marginVertical: 16
     },
     navRow: {
         width: '100%',

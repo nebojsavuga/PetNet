@@ -20,6 +20,7 @@ import {
 import RootNavigator from "./src/navigators/RootNavigator";
 import { ClusterProvider } from "./src/components/cluster/cluster-data-access";
 import { useFonts } from 'expo-font';
+import { PetProvider } from "./src/contexts/PetContext";
 
 const queryClient = new QueryClient();
 
@@ -77,13 +78,16 @@ export default function App() {
                     : CombinedDefaultTheme
                 }
               >
-                <NavigationContainer theme={
-                  colorScheme === "dark"
-                    ? CombinedDarkTheme
-                    : CombinedDefaultTheme
-                }>
-                  <RootNavigator />
-                </NavigationContainer>
+
+                <PetProvider>
+                  <NavigationContainer theme={
+                    colorScheme === "dark"
+                      ? CombinedDarkTheme
+                      : CombinedDefaultTheme
+                  }>
+                    <RootNavigator />
+                  </NavigationContainer>
+                </PetProvider>
               </PaperProvider>
             </SafeAreaView>
           </TouchableWithoutFeedback>

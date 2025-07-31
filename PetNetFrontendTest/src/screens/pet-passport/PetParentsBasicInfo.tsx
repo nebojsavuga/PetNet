@@ -1,15 +1,25 @@
-import { Image, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Alert, Image, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Images } from '../../constants/Images'
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { Typography } from '../../constants/Typography';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Styles } from '../../constants/Styles';
+import { PetPassportStackParamList } from '../../navigators/PetPassportNavigator';
+import Constants from 'expo-constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Pet } from '../../types/Pet';
+import { usePet } from '../../contexts/PetContext';
+
+const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
+type PetTempParentDataRouteProp = RouteProp<PetPassportStackParamList, 'PetParentsBasicInfo'>;
 
 const PetParentsBasicInfo = () => {
+    const route = useRoute<PetTempParentDataRouteProp>();
+    const { pet, setPet } = usePet();
 
     const navigator = useNavigation();
 
@@ -28,7 +38,50 @@ const PetParentsBasicInfo = () => {
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
+    const handleAddParent = async () => {
+        try {
+            const token = await AsyncStorage.getItem('jwtToken');
+            if (!token) return { error: 'No JWT token found' };
 
+            const body = JSON.stringify({
+                name,
+                breed,
+                gender,
+                dateOfBirth: dateOfBirth?.toISOString()
+            })
+
+            console.log("BODY: ", body);
+            const response = await fetch(`${API_URL}/pets/${pet._id}/add-temporary-parent`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name,
+                    breed,
+                    gender,
+                    dateOfBirth: dateOfBirth?.toISOString(),
+                    owner: '000000000000000000000000'
+                })
+            })
+
+            const data = await response.json();
+            setPet(data.updatedPet);
+            console.log('datcina: ', data);
+            if (!response.ok) {
+                Alert.alert('Error', data.error || 'Failed to add parent.');
+                return;
+            }
+
+            Alert.alert('Success', 'Parent added and linked successfully.');
+            navigator.goBack();
+
+        } catch (error) {
+            console.error(error);
+            Alert.alert('Error', 'Something went wrong.');
+        }
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -64,15 +117,15 @@ const PetParentsBasicInfo = () => {
                         <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>Breed</Text>
                         <TextInput placeholder="e.g. Golden Retriever"
                             placeholderTextColor={'#D8D5D9'}
-                            value={name}
-                            onChangeText={setName}
-                            onFocus={() => setFocusedInput('name')}
+                            value={breed}
+                            onChangeText={setBreed}
+                            onFocus={() => setFocusedInput('breed')}
                             onBlur={() => setFocusedInput(null)}
                             style={[
                                 Typography.bodySmall,
                                 styles.inputField,
                                 {
-                                    borderColor: focusedInput === 'name' ? '#BF38F2' : '#4C454D'
+                                    borderColor: focusedInput === 'breed' ? '#BF38F2' : '#4C454D'
                                 }
                             ]}
                         />
@@ -123,7 +176,7 @@ const PetParentsBasicInfo = () => {
                     </View>
                 </View>
             </View>
-            <Pressable style={Styles.defaultButton}>
+            <Pressable style={Styles.defaultButton} onPress={handleAddParent}>
                 <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Add parent</Text>
             </Pressable>
         </SafeAreaView>

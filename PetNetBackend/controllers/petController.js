@@ -138,34 +138,23 @@ exports.getAll = async (req, res) => {
 
 exports.getFamily = async (req, res) => {
     try {
-        const pet = await Pet.findOne({ _id: req.params.id, owner: req.userId });
+        const { id } = req.params;
+
+        const pet = await Pet.findById(id)
+            .populate('parents')
+            .populate('children');
+
         if (!pet) {
-            return res.status(404).json({ error: 'Pet not found.' });
-        }
-        let mother = null;
-        let father = null;
-        if (pet.motherId != null) {
-            mother = await Pet.findOne({ _id: pet.motherId });
-        }
-        if (pet.fatherId != null) {
-            father = await Pet.findOne({ _id: pet.fatherId });
+            return res.status(404).json({ error: 'Pet not found' });
         }
 
-        const children = await Pet.find({
-            $or: [
-                { fatherId: req.params.id },
-                { motherId: req.params.id }
-            ]
+        return res.status(200).json({
+            parents: pet.parents,
+            children: pet.children,
         });
-
-        res.json({
-            mother,
-            father,
-            children
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Server error' });
+    } catch (error) {
+        console.error('Failed to fetch pet family:', error);
+        return res.status(500).json({ error: 'Internal server error' });
     }
 };
 
@@ -228,7 +217,7 @@ exports.createOrUpdateIntervention = async (req, res) => {
         } else {
             pet.interventions.push({
                 interventionName,
-                date: interventionDate,
+                date: iterventionDate,
                 vetName,
                 clinicName
             });
@@ -279,3 +268,74 @@ exports.createOrUpdateAward = async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 };
+
+exports.addTemporaryParent = async (req, res) => {
+    const { id } = req.params;
+    const { name, breed, gender, dateOfBirth } = req.body;
+
+    try {
+        const childPet = await Pet.findById(id);
+
+        if (!childPet) {
+            return res.status(404).json({ error: 'Child pet not found!' });
+        }
+
+        if (childPet.parents.length > 2) {
+            return res.status(400).json({ error: 'This pet already has 2 parents' });
+        }
+
+        const tempParent = new Pet({
+            name,
+            breed,
+            race: 'Unknown',
+            gender,
+            dateOfBirth,
+            owner: '000000000000000000000000'
+        });
+
+        await tempParent.save();
+
+        childPet.parents.push(tempParent._id);
+        await childPet.save();
+
+        return res.status(201).json({
+            message: 'Temporary parent created and assigned successfully',
+            parent: tempParent,
+            updatedPet: childPet
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+exports.deleteParent = async (req, res) => {
+    try {
+        const { petId, parentId } = req.params;
+
+        const child = await Pet.findById(petId);
+
+        if (!child) return res.status(404).json({ error: 'Pet not found' });
+
+        child.parents = child.parents.filter((pId) => pId.toString() !== parentId);
+        await child.save();
+
+        const parent = await Pet.findById(parentId);
+
+        parent.children = parent.children.filter(
+            (cId) => cId.toString() !== petId
+        );
+        await parent.save();
+
+        if (!parent) return res.status(404).json({ error: 'Parent not found' });
+
+        if (parent.owner?.toString() === '000000000000000000000000') {
+            await Pet.findByIdAndDelete(parentId);
+            return res.status(200).json({ message: 'Parent unlinked and deleted successfully', updatedPet: child });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+}

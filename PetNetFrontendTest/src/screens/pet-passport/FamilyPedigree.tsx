@@ -1,4 +1,4 @@
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { RouteProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import {
     View,
     Text,
@@ -9,7 +9,7 @@ import {
     FlatList
 } from 'react-native';
 import { Pet } from "../../types/Pet";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Constants from 'expo-constants';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from '@expo/vector-icons';
@@ -18,77 +18,54 @@ import PetHeaderSection from "./PetHeaderSection";
 import { Typography } from '../../constants/Typography';
 import dayjs from 'dayjs';
 import { Images } from '../../constants/Images';
+import { usePet } from '../../contexts/PetContext';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 type FamilyPedigreeDataRouteProp = RouteProp<PetPassportStackParamList, 'FamilyPedigree'>;
 
 const FamilyPedigree = () => {
     const route = useRoute<FamilyPedigreeDataRouteProp>();
-    const { pet } = route.params as { pet: Pet };
+    const { pet, setPet, updatePet } = usePet();
     const navigation = useNavigation();
     // const [pet, setPet] = useState<Pet>();
-    const [father, setFather] = useState<Pet>();
-    const [mother, setMother] = useState<Pet>();
+    const [parents, setParents] = useState<Pet[]>([]);
     const [children, setChildren] = useState<Pet[]>([]);
 
-    useEffect(() => {
-        // const fetchPet = async () => {
-        //     try {
-        //         const token = await AsyncStorage.getItem('jwtToken');
-        //         if (!token) {
-        //             console.warn('No JWT token found');
-        //             return;
-        //         }
-        //         const response = await fetch(`${API_URL}/pets/${petId}`, {
-        //             headers: {
-        //                 'Authorization': `Bearer ${token}`,
-        //                 'Content-Type': 'application/json',
-        //             },
-        //         });
 
-        //         if (!response.ok) {
-        //             console.error('Failed to fetch pets:', response.status);
-        //             return;
-        //         }
+    useFocusEffect(
+        useCallback(() => {
+            fetchFamily();
+            updatePet();
+        }, [pet?._id])
+    );
 
-        //         const pet = await response.json();
-        //         setPet(pet);
-
-        //     } catch (error) {
-        //         console.error('Failed to load user or pets:', error);
-        //     }
-        // };
-        const fetchFamily = async () => {
-            try {
-                const token = await AsyncStorage.getItem('jwtToken');
-                if (!token) {
-                    console.warn('No JWT token found');
-                    return;
-                }
-                const response = await fetch(`${API_URL}/pets/family/${pet._id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
-                if (!response.ok) {
-                    console.error('Failed to fetch pets:', response.status);
-                    return;
-                }
-
-                const family = await response.json();
-                setChildren(family?.children);
-                setFather(family?.father);
-                setMother(family?.mother);
-
-            } catch (error) {
-                console.error('Failed to load pet family:', error);
+    const fetchFamily = async () => {
+        try {
+            const token = await AsyncStorage.getItem('jwtToken');
+            if (!token) {
+                console.warn('No JWT token found');
+                return;
             }
-        };
+            const response = await fetch(`${API_URL}/pets/family/${pet._id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                console.error('Failed to fetch pets:', response.status);
+                return;
+            }
+            const family = await response.json();
+            setParents(family?.parents || []);
+            setChildren(family?.children || []);
+            console.log("Parents: ", parents);
 
-        // fetchPet();
-        fetchFamily();
-    }, []);
+        } catch (error) {
+            console.error('Failed to load pet family:', error);
+        }
+    };
+
     const calculateAge = (dob: string) => {
         const years = dayjs().diff(dayjs(dob), 'year');
         const months = dayjs().diff(dayjs(dob).add(years, 'year'), 'month');
@@ -97,17 +74,14 @@ const FamilyPedigree = () => {
 
     const RenderPet = (selectedPet: Pet | undefined, navigation: any, typeOfFamilyMember: string) => {
         if (!selectedPet) {
-            return (<SafeAreaView style={styles.petCard}>
-                {/* <Text style={[Typography.bodyMedium, { color: '#D8D5D9' }]}>Currently no parrents assigned</Text>
-                <Pressable style={styles.petInfo}>
-                    <Ionicons name='add' size={20} color="#F7F7F7" style={{ marginHorizontal: 6 }} />
-                    <Text style={[Typography.heading, { color: '#F1EFF2' }]}>This pet doesn't have a {typeOfFamilyMember}</Text>
-                </Pressable> */}
-                <Ionicons name='close-circle-outline' size={30} color="#F7F7F7" style={{ marginHorizontal: 6 }} />
-                <SafeAreaView style={styles.petInfo}>
-                    <Text style={[Typography.bodyMediumSemiBold, { color: '#F1EFF2' }]}>This pet doesn't have parents</Text>
+            return (
+                <SafeAreaView style={styles.petCard}>
+                    <Ionicons name='close-circle-outline' size={30} color="#F7F7F7" style={{ marginHorizontal: 6 }} />
+                    <SafeAreaView style={styles.petInfo}>
+                        <Text style={[Typography.bodyMediumSemiBold, { color: '#F1EFF2' }]}>This pet doesn't have parents</Text>
+                    </SafeAreaView>
                 </SafeAreaView>
-            </SafeAreaView>)
+            )
         }
         return (
             <Pressable
@@ -121,9 +95,9 @@ const FamilyPedigree = () => {
                 <SafeAreaView key={selectedPet._id} style={styles.navRowInner}>
                     <Image source={{ uri: selectedPet.imageUrl }} style={styles.petImage} />
                     <SafeAreaView style={styles.petInfo}>
-                        <Text style={[Typography.heading, { color: "#F7F7F7" }]}>{selectedPet.name}</Text>
-                        <Text style={[Typography.bodySmall, { color: "#F7F7F7" }]}>
-                            {typeOfFamilyMember} • {calculateAge(selectedPet.dateOfBirth)}
+                        <Text style={[Typography.bodyMediumSemiBold, { color: "#F7F7F7" }]}>{selectedPet.name}</Text>
+                        <Text style={[Typography.bodySmall, { color: "#D8D5D9" }]}>
+                            Parent • {calculateAge(selectedPet.dateOfBirth)}
                         </Text>
                     </SafeAreaView>
                     <Ionicons name='chevron-forward-outline' size={20} color="#B2ABB3" style={styles.rightArrow} />
@@ -147,13 +121,22 @@ const FamilyPedigree = () => {
                                 editable={true}
                                 onBack={() => navigation.goBack()}
                                 // onShare={() => navigation.navigate('PetQrScreen', { petId: pet?._id })}
-                                onEdit={() => navigation.navigate('EditFamilyPedigree', { petId: pet?._id })}
+                                onEdit={() => navigation.navigate('EditFamilyPedigree', { pet: pet })}
                             />
                         </View>
 
                         <Text style={[Typography.heading, { color: '#F7F7F7', marginLeft: 10, marginTop: 20, marginBottom: 10 }]}>Parents</Text>
                         <View>
-                            {RenderPet(father, navigation, 'father')}
+                            {parents.length > 0 ? (
+                                parents.map((parent) => RenderPet(parent, navigation, 'parent'))
+                            ) : (
+                                <SafeAreaView style={styles.petCard}>
+                                    <Ionicons name='close-circle-outline' size={30} color="#F7F7F7" style={{ marginHorizontal: 6 }} />
+                                    <SafeAreaView style={styles.petInfo}>
+                                        <Text style={[Typography.bodyMediumSemiBold, { color: '#F1EFF2' }]}>This pet doesn't have parents</Text>
+                                    </SafeAreaView>
+                                </SafeAreaView>
+                            )}
                         </View>
 
                         <Text style={[Typography.heading, { color: '#F7F7F7', marginLeft: 10, marginTop: 24, marginBottom: 10 }]}>Children</Text>
@@ -192,11 +175,13 @@ const styles = StyleSheet.create({
         marginHorizontal: 'auto',
         marginBottom: 10,
         borderRadius: 8,
-        backgroundColor: '#322E33',
-        padding: 10,
+        backgroundColor: '#262326',
+        padding: 16,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        borderWidth: 1,
+        borderColor: '#322E33'
     },
     input: {
         display: 'flex',

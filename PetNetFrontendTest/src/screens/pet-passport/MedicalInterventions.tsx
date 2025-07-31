@@ -15,15 +15,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { PetPassportStackParamList } from "../../navigators/PetPassportNavigator";
 import PetHeaderSection from "./PetHeaderSection";
 import { Typography } from '../../constants/Typography';
+import { usePet } from '../../contexts/PetContext';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 type MedicalInterventionsDataRouteProp = RouteProp<PetPassportStackParamList, 'MedicalInterventions'>;
 
 const MedicalInterventions = () => {
     const route = useRoute<MedicalInterventionsDataRouteProp>();
-    const { petId } = route.params as { petId: string };
+    // const { petId } = route.params as { petId: string };
+    const { pet, setPet } = usePet();
     const navigation = useNavigation();
-    const [pet, setPet] = useState<Pet>();
     const [medicalInterventions, setMedicalInterventions] = useState<Intervention[]>();
 
     useEffect(() => {
@@ -35,7 +36,7 @@ const MedicalInterventions = () => {
                     console.warn('No JWT token found');
                     return;
                 }
-                const response = await fetch(`${API_URL}/pets/${petId}`, {
+                const response = await fetch(`${API_URL}/pets/${pet?._id}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
@@ -47,8 +48,8 @@ const MedicalInterventions = () => {
                     return;
                 }
 
-                const pet = await response.json();
-                setPet(pet);
+                const fetchedPet = await response.json();
+                setPet(fetchedPet);
                 setMedicalInterventions(pet?.interventions ?? []);
 
             } catch (error) {

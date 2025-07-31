@@ -31,8 +31,8 @@ export const Typography = StyleSheet.create({
         letterSpacing: -0.5,
     },
     h6: {
-        fontFamily: 'SchibstedGrotesk-Medium',
-        fontWeight: '500' as TextStyle['fontWeight'],
+        fontFamily: 'SchibstedGrotesk-SemiBold',
+        fontWeight: '600' as TextStyle['fontWeight'],
         fontSize: 24,
         lineHeight: 30,
         letterSpacing: 0,
@@ -91,6 +91,13 @@ export const Typography = StyleSheet.create({
     bodyMedium: {
         fontFamily: 'SchibstedGrotesk-Regular',
         fontWeight: '400' as TextStyle['fontWeight'],
+        fontSize: 16,
+        lineHeight: 24,
+        letterSpacing: 0,
+    },
+    bodyMediumMedium: {
+        fontFamily: 'SchibstedGrotesk-Medium',
+        fontWeight: '500' as TextStyle['fontWeight'],
         fontSize: 16,
         lineHeight: 24,
         letterSpacing: 0,

@@ -32,8 +32,7 @@ export interface Pet {
     dateOfBirth: string;
     imageUrl?: string;
     owner: string; // User._id
-    fatherId?: string;
-    motherId?: string;
+    parents: string[];
     children: string[];
     awards: Award[];
     interventions: Intervention[];
