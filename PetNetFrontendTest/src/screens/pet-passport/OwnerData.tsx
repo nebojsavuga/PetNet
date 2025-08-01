@@ -19,15 +19,34 @@ import { Typography } from '../../constants/Typography';
 import { User } from '../../types/User';
 import { Images } from '../../constants/Images';
 import { usePet } from '../../contexts/PetContext';
+import { getPetById } from '../../services/PetService';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 type OwnerDataRouteProp = RouteProp<PetPassportStackParamList, 'OwnerData'>;
 
 const OwnerData = () => {
     const route = useRoute<OwnerDataRouteProp>();
-    const { pet, setPet } = usePet();
+    const { petId } = route.params as { petId: string };
+
+    const [pet, setPet] = useState<Pet>();
     const navigation = useNavigation();
     const [user, setUser] = useState<User | null>(null);
+
+    useEffect(() => {
+        const fetchPet = async () => {
+            const { pet, error } = await getPetById(petId);
+
+            if (error) {
+                console.warn(error);
+                return;
+            }
+
+            if (pet) {
+                setPet(pet);
+            }
+        }
+        fetchPet();
+    }, [petId])
 
     useEffect(() => {
         const loadUser = async () => {
@@ -53,7 +72,7 @@ const OwnerData = () => {
                         title="Owner data"
                         pet={pet}
                         onBack={() => navigation.goBack()}
-                        onShare={() => navigation.navigate('PetQrScreen', { pet: pet })}
+                        onShare={() => navigation.navigate('PetQrScreen', { petId: petId })}
                     />
                 </View>
                 <Text style={[Typography.bodyMediumSemiBold, { color: '#F7F7F7', marginLeft: 10, marginTop: 20 }]}>Owner’s Contact Information</Text>

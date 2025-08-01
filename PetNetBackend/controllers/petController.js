@@ -315,25 +315,32 @@ exports.deleteParent = async (req, res) => {
         const { petId, parentId } = req.params;
 
         const child = await Pet.findById(petId);
-
         if (!child) return res.status(404).json({ error: 'Pet not found' });
 
         child.parents = child.parents.filter((pId) => pId.toString() !== parentId);
         await child.save();
 
         const parent = await Pet.findById(parentId);
+        if (!parent) return res.status(404).json({ error: 'Parent not found' });
 
         parent.children = parent.children.filter(
             (cId) => cId.toString() !== petId
         );
         await parent.save();
 
-        if (!parent) return res.status(404).json({ error: 'Parent not found' });
+        // Check if this parent is still used by any other pet
+        const stillReferenced = await Pet.exists({
+            _id: { $ne: petId },
+            parents: parent._id
+        });
 
-        if (parent.owner?.toString() === '000000000000000000000000') {
+        if (!stillReferenced && parent.owner?.toString() === '000000000000000000000000') {
             await Pet.findByIdAndDelete(parentId);
             return res.status(200).json({ message: 'Parent unlinked and deleted successfully', updatedPet: child });
         }
+
+        return res.status(200).json({ message: 'Parent unlinked successfully', updatedPet: child });
+
     } catch (error) {
         console.error(error);
         return res.status(500).json({ error: 'Internal server error' });
@@ -364,6 +371,79 @@ exports.addExistingParent = async (req, res) => {
             parent: parentPet,
             updatedPet: childPet
         });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+exports.addExistingChild = async (req, res) => {
+    try {
+        const { id, childId } = req.params;
+
+        const parentPet = await Pet.findById(id);
+        if (!parentPet) return res.status(404).json({ error: 'Parent not found' });
+
+        const childPet = await Pet.findById(childId);
+        if (!childPet) return res.status(404).json({ error: 'Child not found' });
+
+        if (childPet.parents.length >= 2)
+            return res.status(400).json({ error: 'Child pet already has two parents' });
+
+        if (childPet.children.includes(parentPet._id))
+            return res.status(400).json({ error: 'Child pet is parent of the selected parent' });
+
+        if (!childPet.parents.includes(parentPet._id)) {
+            childPet.parents.push(parentPet._id);
+            await childPet.save();
+        }
+
+        if (!parentPet.children.includes(childPet._id)) {
+            parentPet.children.push(childPet._id);
+            await parentPet.save();
+        }
+
+        return res.status(201).json({
+            message: 'Child assigned successfully',
+            updatedParent: parentPet,
+            updatedPet: childPet
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+exports.deleteChild = async (req, res) => {
+    try {
+        const { petId, childId } = req.params;
+
+        const parent = await Pet.findById(petId);
+        if (!parent) return res.status(404).json({ error: 'Pet not found' });
+
+        parent.children = parent.children.filter((pId) => pId.toString() !== childId);
+        await parent.save();
+
+        const child = await Pet.findById(childId);
+        if (!child) return res.status(404).json({ error: 'Child not found' });
+
+        child.parents = parent.parents.filter(
+            (cId) => cId.toString() !== petId
+        );
+        await child.save();
+
+        const stillReferenced = await Pet.exists({
+            _id: { $ne: petId },
+            children: child._id
+        });
+
+        if (!stillReferenced && child.owner?.toString() === '000000000000000000000000') {
+            await Pet.findByIdAndDelete(childId);
+            return res.status(200).json({ message: 'Child unlinked and deleted successfully', updatedPet: parent });
+        }
+
+        return res.status(200).json({ message: 'Child unlinked successfully', updatedPet: parent });
+
     } catch (error) {
         console.error(error);
         return res.status(500).json({ error: 'Internal server error' });

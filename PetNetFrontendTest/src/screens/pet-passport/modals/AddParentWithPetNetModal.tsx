@@ -8,7 +8,7 @@ import QRScanModal from './QRScanModal';
 import { useCameraPermissions } from 'expo-image-picker';
 import { Camera, CameraView } from 'expo-camera';
 import { Overlay } from '../../../components/Overlay';
-import { fetchUserAndPets } from '../../../services/PetService';
+import { fetchUserAndPets, getPetById } from '../../../services/PetService';
 import { Pet } from '../../../types/Pet';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
@@ -21,16 +21,15 @@ const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/ap
 const AddParentWithPetNetModal = ({ visible, onClose, currentPetId }: {
     visible: boolean;
     onClose: () => void;
-    currentPetId: string | undefined
+    currentPetId: string
 }) => {
-
     const [isQRScanning, setIsQRScanning] = useState(false);
     const qrLock = useRef(false);
     const appState = useRef(AppState.currentState);
     const [pets, setPets] = useState<Pet[]>([]);
     const [permission, requestPermission] = useCameraPermissions();
     const [parent, setParent] = useState<string>('');
-    const { pet, setPet, updatePet } = usePet();
+    const [pet, setPet] = useState<Pet>();
 
     useEffect(() => {
         if (visible) loadData();
@@ -41,6 +40,22 @@ const AddParentWithPetNetModal = ({ visible, onClose, currentPetId }: {
             qrLock.current = false;
         }
     }, [isQRScanning]);
+
+    useEffect(() => {
+        const fetchPet = async () => {
+            const { pet, error } = await getPetById(currentPetId);
+
+            if (error) {
+                console.warn(error);
+                return;
+            }
+
+            if (pet) {
+                setPet(pet);
+            }
+        }
+        fetchPet();
+    }, [currentPetId])
 
     useEffect(() => {
         const subscription = AppState.addEventListener("change", (nextAppState) => {
@@ -77,8 +92,16 @@ const AddParentWithPetNetModal = ({ visible, onClose, currentPetId }: {
         }
 
 
-        if (pets) {
-            const filteredPets = pets.filter(pet => pet._id !== currentPetId);
+        if (pets && pet) {
+            const currentId = currentPetId;
+            const parentIds = pet.parents || [];
+
+            const filteredPets = pets.filter(p =>
+                p._id !== currentId &&
+                !parentIds.includes(p._id) &&
+                !pet.children.includes(p._id)
+            );
+
             setPets(filteredPets);
         }
     };
@@ -108,7 +131,6 @@ const AddParentWithPetNetModal = ({ visible, onClose, currentPetId }: {
             const data = await response.json();
             setPet(data.updatedPet);
             Alert.alert('Success', 'Parent added and linked successfully.');
-            updatePet();
             onClose();
 
         } catch (error) {

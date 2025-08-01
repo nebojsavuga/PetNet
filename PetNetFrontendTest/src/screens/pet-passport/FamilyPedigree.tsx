@@ -19,25 +19,40 @@ import { Typography } from '../../constants/Typography';
 import dayjs from 'dayjs';
 import { Images } from '../../constants/Images';
 import { usePet } from '../../contexts/PetContext';
+import { getPetById } from '../../services/PetService';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 type FamilyPedigreeDataRouteProp = RouteProp<PetPassportStackParamList, 'FamilyPedigree'>;
 
 const FamilyPedigree = () => {
     const route = useRoute<FamilyPedigreeDataRouteProp>();
-    const { pet, setPet, updatePet } = usePet();
+    const { petId } = route.params as { petId: string };
     const navigation = useNavigation();
-    // const [pet, setPet] = useState<Pet>();
+    const [pet, setPet] = useState<Pet>();
     const [parents, setParents] = useState<Pet[]>([]);
     const [children, setChildren] = useState<Pet[]>([]);
 
 
     useFocusEffect(
         useCallback(() => {
+            fetchPet();
             fetchFamily();
-            updatePet();
-        }, [pet?._id])
+        }, [petId])
     );
+
+    const fetchPet = async () => {
+        const { pet, error } = await getPetById(petId);
+
+        if (error) {
+            console.warn(error);
+            return;
+        }
+
+        if (pet) {
+            setPet(pet);
+            console.log("LJUBIMCINA: ", pet);
+        }
+    }
 
     const fetchFamily = async () => {
         try {
@@ -46,7 +61,7 @@ const FamilyPedigree = () => {
                 console.warn('No JWT token found');
                 return;
             }
-            const response = await fetch(`${API_URL}/pets/family/${pet._id}`, {
+            const response = await fetch(`${API_URL}/pets/family/${petId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
@@ -121,7 +136,7 @@ const FamilyPedigree = () => {
                                 editable={true}
                                 onBack={() => navigation.goBack()}
                                 // onShare={() => navigation.navigate('PetQrScreen', { petId: pet?._id })}
-                                onEdit={() => navigation.navigate('EditFamilyPedigree', { pet: pet })}
+                                onEdit={() => navigation.navigate('EditFamilyPedigree', { petId: petId })}
                             />
                         </View>
 

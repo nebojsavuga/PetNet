@@ -26,7 +26,7 @@ type PetPassportRouteProp = RouteProp<PetPassportStackParamList, 'PetPassport'>;
 const PetPassport = () => {
     const route = useRoute<PetPassportRouteProp>();
     const { petId } = route.params as { petId: string };
-    const { pet, setPet } = usePet();
+    const [pet, setPet] = useState<Pet>();
 
     const navigation = useNavigation();
     const navItems: { label: string; icon: string; screen: keyof PetPassportStackParamList }[] = [
@@ -64,7 +64,7 @@ const PetPassport = () => {
                         pet={pet}
                         editable={false}
                         onBack={() => navigation.goBack()}
-                        onShare={() => navigation.navigate('PetQrScreen', { pet: pet })}
+                        onShare={() => navigation.navigate('PetQrScreen', { petId: pet?._id })}
                     />
                     <View style={styles.emergencyBlock}>
                         <View style={styles.emergencyRow}>
@@ -92,7 +92,7 @@ const PetPassport = () => {
                                     styles.navRow,
                                     index === navItems.length - 1 && styles.lastNavRow,
                                 ]}
-                                onPress={() => navigation.navigate(screen, { pet: pet })}
+                                onPress={() => navigation.navigate(screen, { petId: pet?._id })}
                             >
                                 <View style={styles.navRowInner}>
                                     <Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={20} color="#D988F7" style={{ marginRight: 12 }} />

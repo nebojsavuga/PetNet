@@ -1,14 +1,12 @@
-import { Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native'
-import React, { useState } from 'react'
-import { Picker } from '@react-native-picker/picker';
-import { Typography } from '../../../constants/Typography';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { PetPassportStackParamList } from '../../../navigators/PetPassportNavigator';
+import { Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, SafeAreaView, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native'
+import React from 'react'
 import { Pet } from '../../../types/Pet';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Typography } from '../../../constants/Typography';
+import { PetPassportStackParamList } from '../../../navigators/PetPassportNavigator';
 
-const SelectAddParentModal = ({ visible, onClose, onExistingSelected, petId }: {
+const SelectAddChildModal = ({ visible, onClose, onExistingSelected, petId }: {
     visible: boolean;
     onClose: () => void;
     onExistingSelected: () => void;
@@ -18,9 +16,8 @@ const SelectAddParentModal = ({ visible, onClose, onExistingSelected, petId }: {
     const navigator = useNavigation<NativeStackNavigationProp<PetPassportStackParamList>>();
 
     const handleTemporaryPetNavigation = () => {
-        console.log('Navigating to PetParentsBasicInfo with pet:', petId);
         onClose();
-        navigator.navigate('PetParentsBasicInfo', { petId });
+        // navigator.navigate('PetParentsBasicInfo', { pet });
     };
 
     return (
@@ -41,7 +38,7 @@ const SelectAddParentModal = ({ visible, onClose, onExistingSelected, petId }: {
 
                                 <View style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 8 }}>
                                     <Pressable style={styles.saveButton} onPress={onExistingSelected}>
-                                        <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Parent has the PetNet Account</Text>
+                                        <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Child has the PetNet Account</Text>
                                     </Pressable>
                                     <Pressable style={styles.cancelButton} onPress={() => handleTemporaryPetNavigation()}>
                                         <Text style={[Typography.bodySmall, { color: '#D988F7' }]}>Create a Temporary Account</Text>
@@ -56,7 +53,7 @@ const SelectAddParentModal = ({ visible, onClose, onExistingSelected, petId }: {
     )
 }
 
-export default SelectAddParentModal
+export default SelectAddChildModal
 
 const styles = StyleSheet.create({
     backdrop: {
@@ -116,4 +113,4 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent',
         alignItems: 'center',
     },
-});
+})

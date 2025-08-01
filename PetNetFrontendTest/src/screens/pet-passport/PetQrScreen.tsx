@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ImageBackground } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { RouteProp, useRoute } from '@react-navigation/native';
@@ -10,10 +10,11 @@ type PetQrScreenDataRouteProp = RouteProp<PetPassportStackParamList, 'PetQrScree
 
 export default function PetQrScreen() {
     const route = useRoute<PetQrScreenDataRouteProp>();
-    const { pet, setPet } = usePet();
+    const { petId } = route.params as { petId: string };
+    const [pet, setPet] = useState<Pet>();
 
     // TODO: make it navigate to pet passport and add 1 more req param with isPetOwner flag to not be able to add stuff 
-    const qrValue = `https://yourapp.com/pet/${pet?._id}`;
+    const qrValue = `https://yourapp.com/pet/${petId}`;
     return (
         <ImageBackground
             source={require('../../../assets/images/backgroundUpright.png')}

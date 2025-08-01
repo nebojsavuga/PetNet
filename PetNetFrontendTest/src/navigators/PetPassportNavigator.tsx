@@ -14,14 +14,14 @@ import { Pet } from '../types/Pet';
 
 export type PetPassportStackParamList = {
     PetPassport: { petId: string };
-    FamilyPedigree: undefined
-    Awards: undefined
-    MedicalInterventions: undefined
-    Vaccines: undefined
-    OwnerData: undefined
-    PetQrScreen: undefined
-    EditFamilyPedigree: undefined
-    PetParentsBasicInfo: undefined
+    FamilyPedigree: { petId: string };
+    Awards: { petId: string };
+    MedicalInterventions: { petId: string };
+    Vaccines: { petId: string };
+    OwnerData: { petId: string };
+    PetQrScreen: { petId: string };
+    EditFamilyPedigree: { petId: string };
+    PetParentsBasicInfo: { petId: string };
 };
 
 const Stack = createNativeStackNavigator<PetPassportStackParamList>();

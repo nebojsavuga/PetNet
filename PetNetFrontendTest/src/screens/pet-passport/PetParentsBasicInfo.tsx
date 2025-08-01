@@ -1,5 +1,5 @@
 import { Alert, Image, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Images } from '../../constants/Images'
 import { Ionicons } from '@expo/vector-icons';
@@ -13,13 +13,16 @@ import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Pet } from '../../types/Pet';
 import { usePet } from '../../contexts/PetContext';
+import { getPetById } from '../../services/PetService';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 type PetTempParentDataRouteProp = RouteProp<PetPassportStackParamList, 'PetParentsBasicInfo'>;
 
 const PetParentsBasicInfo = () => {
     const route = useRoute<PetTempParentDataRouteProp>();
-    const { pet, setPet } = usePet();
+    const { petId } = route.params as { petId: string };
+
+    const [pet, setPet] = useState<Pet>();
 
     const navigator = useNavigation();
 
@@ -38,6 +41,23 @@ const PetParentsBasicInfo = () => {
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
+
+    useEffect(() => {
+        const fetchPet = async () => {
+            const { pet, error } = await getPetById(petId);
+
+            if (error) {
+                console.warn(error);
+                return;
+            }
+
+            if (pet) {
+                setPet(pet);
+            }
+        }
+        fetchPet();
+    }, [petId])
+
     const handleAddParent = async () => {
         try {
             const token = await AsyncStorage.getItem('jwtToken');
@@ -51,7 +71,7 @@ const PetParentsBasicInfo = () => {
             })
 
             console.log("BODY: ", body);
-            const response = await fetch(`${API_URL}/pets/${pet?._id}/add-temporary-parent`, {
+            const response = await fetch(`${API_URL}/pets/${petId}/add-temporary-parent`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

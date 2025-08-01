@@ -19,21 +19,42 @@ import { Typography } from '../../constants/Typography';
 import AddAwardModal from './modals/AddAwardModal';
 import { Images } from '../../constants/Images';
 import { usePet } from '../../contexts/PetContext';
+import { getPetById } from '../../services/PetService';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 type AwardsDataRouteProp = RouteProp<PetPassportStackParamList, 'Awards'>;
 
 const Awards = () => {
     const route = useRoute<AwardsDataRouteProp>();
-    const { pet, setPet } = usePet();
-    const [fetchedPet, setFetchedPet] = useState(pet);
+    const { petId } = route.params as { petId: string };
+
+    const [pet, setPet] = useState<Pet>();
     const navigation = useNavigation();
     const [isModalVisible, setModalVisible] = useState(false);
     const [selectedAward, setSelectedAward] = useState<Award | undefined>(undefined);
+
+    useEffect(() => {
+        const fetchPet = async () => {
+            const { pet, error } = await getPetById(petId);
+
+            if (error) {
+                console.warn(error);
+                return;
+            }
+
+            if (pet) {
+                setPet(pet);
+            }
+        }
+        fetchPet();
+    }, [petId])
+
     const handleClose = () => {
         setSelectedAward(undefined);
         setModalVisible(false);
     }
+
+
     const handleSaveAward = async (award: Award) => {
         try {
             const token = await AsyncStorage.getItem('jwtToken');
@@ -57,7 +78,7 @@ const Awards = () => {
                 );
             }
             console.log("Successfully awarded");
-            setFetchedPet(responseValue?.pet);
+            setPet(responseValue?.pet);
             setModalVisible(false);
         } catch (error) {
             console.error('Error saving award:', error);
@@ -121,7 +142,7 @@ const Awards = () => {
             <Image source={Images.centralPinkEllipse} style={styles.centerGlow} resizeMode="contain" />
             <Image source={Images.centralPinkEllipse} style={styles.bottomGlow} resizeMode="contain" />
             <FlatList
-                data={fetchedPet?.awards ?? []}
+                data={pet?.awards ?? []}
                 keyExtractor={(item) => item._id!}
                 renderItem={({ item }) => RenderAward(item, navigation)}
                 contentContainerStyle={styles.scrollContent}
@@ -132,7 +153,7 @@ const Awards = () => {
                                 title="Awards"
                                 pet={pet}
                                 onBack={() => navigation.goBack()}
-                                onShare={() => navigation.navigate('PetQrScreen', { pet: pet })}
+                                onShare={() => navigation.navigate('PetQrScreen', { petId: petId })}
                             />
                         </View>
                         <View style={{

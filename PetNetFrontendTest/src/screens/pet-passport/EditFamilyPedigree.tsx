@@ -1,10 +1,10 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Images } from '../../constants/Images'
 import { Typography } from '../../constants/Typography'
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native'
+import { RouteProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native'
 import SelectAddParentModal from './modals/SelectAddParentModal'
 import AddParentWithPetNetModal from './modals/AddParentWithPetNetModal'
 import { PetPassportStackParamList } from '../../navigators/PetPassportNavigator'
@@ -13,27 +13,55 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import Constants from 'expo-constants';
 import dayjs from 'dayjs'
 import { usePet } from '../../contexts/PetContext'
+import SelectAddChildModal from './modals/SelectAddChildModal'
+import AddChildWithPetNetModal from './modals/AddChildWithPetNetModal'
+import { getPetById } from '../../services/PetService'
 
 type EditFamilyPedigreeDataRouteProp = RouteProp<PetPassportStackParamList, 'EditFamilyPedigree'>;
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 const EditFamilyPedigree = () => {
 
     const route = useRoute<EditFamilyPedigreeDataRouteProp>();
-    const { pet, setPet, updatePet } = usePet();
+    const { petId } = route.params as { petId: string };
+    const [pet, setPet] = useState<Pet>();
+
     const navigation = useNavigation();
     const [parents, setParents] = useState<Pet[]>([]);
     const [children, setChildren] = useState<Pet[]>([]);
     const [isInitialModalVisible, setInitialModalVisible] = useState(false);
+    const [isInitialChildModalVisible, setInitialChildModalVisible] = useState(false);
     const [isSelectingModalVisible, setSelectingModalVisible] = useState(false);
+    const [isSelectingChildModalVisible, setSelectingChildModalVisible] = useState(false);
 
     const handleClose = () => {
         setSelectingModalVisible(false);
         setInitialModalVisible(false);
+        setInitialChildModalVisible(false);
+        setSelectingChildModalVisible(false);
+        fetchFamily();
     }
 
-    useEffect(() => {
-        fetchFamily();
-    }, [])
+    useFocusEffect(
+        useCallback(() => {
+            fetchPet();
+            fetchFamily();
+        }, [petId])
+    );
+
+    const fetchPet = async () => {
+        const { pet, error } = await getPetById(petId);
+
+        if (error) {
+            console.warn(error);
+            return;
+        }
+
+        if (pet) {
+            setPet(pet);
+            console.log("LJUBIMAC: ", pet)
+            fetchFamily();
+        }
+    }
 
     const fetchFamily = async () => {
         try {
@@ -43,7 +71,7 @@ const EditFamilyPedigree = () => {
                 return;
             }
 
-            const response = await fetch(`${API_URL}/pets/family/${pet?._id}`, {
+            const response = await fetch(`${API_URL}/pets/family/${petId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -56,10 +84,9 @@ const EditFamilyPedigree = () => {
             }
 
             const family = await response.json();
+            console.log("FAMILIJAAAA: ", family);
             setParents(family?.parents || []);
             setChildren(family?.children || []);
-            updatePet();
-            fetchFamily();
 
         } catch (error) {
             console.error('Failed to load pet family:', error);
@@ -81,10 +108,10 @@ const EditFamilyPedigree = () => {
                 return;
             }
 
-            console.log("PETID: ", pet?._id);
+            console.log("PETID: ", petId);
             console.log("PARENTID: ", parentId)
 
-            const response = await fetch(`${API_URL}/pets/${pet?._id}/deleteParent/${parentId}`, {
+            const response = await fetch(`${API_URL}/pets/${petId}/deleteParent/${parentId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -99,7 +126,39 @@ const EditFamilyPedigree = () => {
 
             const updatedChild = await response.json();
             setPet(updatedChild?.updatedPet);
-            updatePet();
+            fetchFamily();
+        } catch (error) {
+            console.error('Failed to delete pet parent:', error);
+        }
+    }
+
+    const deleteChild = async (childId: string) => {
+        try {
+            const token = await AsyncStorage.getItem('jwtToken');
+
+            if (!token) {
+                console.warn('No JWT token found');
+                return;
+            }
+
+            console.log("PETID: ", petId);
+            console.log("CHILDID: ", childId)
+
+            const response = await fetch(`${API_URL}/pets/${petId}/deleteChild/${childId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                console.error('Failed to remove parent:', response.status);
+                return;
+            }
+
+            const updatedChild = await response.json();
+            setPet(updatedChild?.updatedPet);
             fetchFamily();
         } catch (error) {
             console.error('Failed to delete pet parent:', error);
@@ -163,14 +222,46 @@ const EditFamilyPedigree = () => {
             </View>
             <View style={styles.content}>
                 <View style={styles.section}>
-                    <Text style={[Typography.bodyMedium, { color: '#F1EFF2' }]}>Children</Text>
-                    <View style={styles.card}>
-                        <Text style={[Typography.bodyMedium, { color: '#D8D5D9' }]}>Currently no children assigned</Text>
-                        <Pressable style={styles.button}>
-                            <Ionicons name="add" size={18} color="#322E33" />
-                            <Text style={[Typography.bodySmall, { color: '#322E33' }]}>Add children</Text>
-                        </Pressable>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text style={[Typography.bodyMedium, { color: '#F1EFF2' }]}>Children</Text>
+
+                        {/* ✅ Show add button ONLY if there's 1 parent */}
+                        {children.length === 1 && (
+                            <Pressable style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2 }} onPress={() => setInitialChildModalVisible(true)}>
+                                <Ionicons name="add" size={26} color="#F1EFF2" />
+                                <Text style={[Typography.bodySmall, { color: '#F1EFF2' }]}>Add Child</Text>
+                            </Pressable>
+                        )}
                     </View>
+                    {children.length === 0 && (
+                        <View style={styles.card}>
+                            <Text style={[Typography.bodyMedium, { color: '#D8D5D9' }]}>Currently no children assigned</Text>
+                            <Pressable style={styles.button} onPress={() => setInitialChildModalVisible(true)}>
+                                <Ionicons name="add" size={18} color="#322E33" />
+                                <Text style={[Typography.bodySmall, { color: '#322E33' }]}>Add children</Text>
+                            </Pressable>
+                        </View>
+                    )}
+
+                    {/* ✅ Case 2 & 3: Show one or two parent cards */}
+                    {children.length > 0 && (
+                        <View style={{ gap: 12 }}>
+                            {children.map((child) => (
+                                <View key={child._id} style={styles.petCardContainer}>
+                                    <Pressable onPress={() => deleteChild(child._id)} style={{ backgroundColor: '#FF3B30', width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 100 }}>
+                                        <Ionicons name="remove" size={18} color="#FFFFFF" />
+                                    </Pressable>
+
+                                    <View style={styles.petCard}>
+                                        <Text style={[Typography.bodyMediumSemiBold, { color: '#F7F7F7' }]}>{child.name}</Text>
+                                        <Text style={[Typography.bodySmall, { color: '#D8D5D9' }]}>
+                                            {child.breed} • {calculateAge(child.dateOfBirth)}
+                                        </Text>
+                                    </View>
+                                </View>
+                            ))}
+                        </View>
+                    )}
 
                 </View>
             </View>
@@ -178,15 +269,29 @@ const EditFamilyPedigree = () => {
                 visible={isInitialModalVisible}
                 onClose={() => handleClose()}
                 onExistingSelected={() => {
-                    setInitialModalVisible(false);
+                    setInitialChildModalVisible(false);
                     setTimeout(() => { setSelectingModalVisible(true), 300 })
                 }}
-                pet={pet}
+                petId={petId}
+            />
+            <SelectAddChildModal
+                visible={isInitialChildModalVisible}
+                onClose={() => handleClose()}
+                onExistingSelected={() => {
+                    setInitialModalVisible(false);
+                    setTimeout(() => { setSelectingChildModalVisible(true), 300 })
+                }}
+                petId={petId}
             />
             <AddParentWithPetNetModal
                 visible={isSelectingModalVisible}
                 onClose={() => handleClose()}
-                currentPetId={pet?._id}
+                currentPetId={petId}
+            />
+            <AddChildWithPetNetModal
+                visible={isSelectingChildModalVisible}
+                onClose={() => handleClose()}
+                currentPetId={petId}
             />
         </SafeAreaView>
     )

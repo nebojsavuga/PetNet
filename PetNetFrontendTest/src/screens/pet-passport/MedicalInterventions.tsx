@@ -24,8 +24,8 @@ type MedicalInterventionsDataRouteProp = RouteProp<PetPassportStackParamList, 'M
 
 const MedicalInterventions = () => {
     const route = useRoute<MedicalInterventionsDataRouteProp>();
-    // const { petId } = route.params as { petId: string };
-    const { pet, setPet } = usePet();
+    const { petId } = route.params as { petId: string };
+    const [pet, setPet] = useState<Pet>();
     const navigation = useNavigation();
     const [medicalInterventions, setMedicalInterventions] = useState<Intervention[]>();
 
@@ -38,7 +38,7 @@ const MedicalInterventions = () => {
                     console.warn('No JWT token found');
                     return;
                 }
-                const response = await fetch(`${API_URL}/pets/${pet?._id}`, {
+                const response = await fetch(`${API_URL}/pets/${petId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ const MedicalInterventions = () => {
                                 title="Medical Interventions"
                                 pet={pet}
                                 onBack={() => navigation.goBack()}
-                                onShare={() => navigation.navigate('PetQrScreen', { pet: pet })}
+                                onShare={() => navigation.navigate('PetQrScreen', { petId: petId })}
                             />
                         </View>
 
