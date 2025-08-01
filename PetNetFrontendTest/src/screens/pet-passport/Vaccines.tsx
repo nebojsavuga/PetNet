@@ -5,7 +5,8 @@ import {
     StyleSheet,
     Pressable,
     SafeAreaView,
-    FlatList
+    FlatList,
+    Image
 } from 'react-native';
 import { Pet, Vaccination } from "../../types/Pet";
 import { useEffect, useState } from "react";
@@ -16,6 +17,8 @@ import { PetPassportStackParamList } from "../../navigators/PetPassportNavigator
 import PetHeaderSection from "./PetHeaderSection";
 import { Typography } from '../../constants/Typography';
 import { usePet } from '../../contexts/PetContext';
+import { Images } from '../../constants/Images';
+import AddVaccineModal from './modals/AddVaccineModal';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 type VaccinesDataRouteProp = RouteProp<PetPassportStackParamList, 'Vaccines'>;
@@ -27,6 +30,7 @@ const Vaccines = () => {
     const { petId } = route.params as { petId: string };
 
     const [pet, setPet] = useState<Pet>();
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [vaccinations, setVaccinations] = useState<Vaccination[]>();
 
     useEffect(() => {
@@ -62,6 +66,13 @@ const Vaccines = () => {
         };
         fetchPet();
     }, []);
+
+
+    const handleClose = () => {
+        setIsModalOpen(false);
+    }
+
+
     const today = new Date();
 
     const RenderVaccination = (vaccination: Vaccination) => {
@@ -109,11 +120,14 @@ const Vaccines = () => {
     };
     return (
         <SafeAreaView style={{ flex: 1 }}>
+            <Image source={Images.topLeftGreenEllipse} style={styles.topLeftGlow} resizeMode="contain" />
+            <Image source={Images.centralPinkEllipse} style={styles.centerGlow} resizeMode="contain" />
+            <Image source={Images.centralPinkEllipse} style={styles.bottomGlow} resizeMode="contain" />
             <FlatList
                 data={vaccinations}
                 keyExtractor={(item) => item._id}
                 ListHeaderComponent={
-                    <>
+                    <SafeAreaView style={{ flex: 1 }}>
                         <View style={styles.container}>
                             <PetHeaderSection
                                 title="Vaccines"
@@ -123,26 +137,33 @@ const Vaccines = () => {
                             />
                         </View>
 
-                        <Text style={[Typography.heading, { color: '#F7F7F7', marginLeft: 10, marginTop: 20, marginBottom: 10 }]}>Vaccines ({vaccinations?.length ?? 0})</Text>
-                        <SafeAreaView
-                            style={[styles.navRow, { paddingVertical: 20, backgroundColor: '#2A4620', borderColor: '#558C3F' }]}
-                        >
-                            <View style={styles.navRowInner}>
-                                <SafeAreaView style={styles.petInfo}>
-                                    <Text style={[Typography.heading, { color: "#F1EFF2" }]}>Add new vaccination</Text>
-                                    <Text style={[Typography.bodySmall, { color: "#D8D5D9" }]}>
-                                        Get a link for
-                                    </Text>
-                                </SafeAreaView>
-                                <Pressable onPress={() => console.log('Add icon pressed')} style={{ marginRight: 5 }}>
-                                    <Ionicons name='add-circle-outline' size={35} color="#71BA54" />
+                        <View style={styles.content}>
+                            <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', alignContent: 'center', width: '100%' }}>
+                                <Text style={[Typography.bodyMediumSemiBold, { color: '#F7F7F7' }]}>
+                                    Vaccination Records
+                                    {/* ({vaccinations?.length ?? 0}) */}
+                                </Text>
+                                <View style={styles.badge}>
+                                    <Text style={[Typography.bodyExtraSmall, { color: '#71BA54' }]}>All vaccines up to date</Text>
+                                </View>
+                            </View>
+                            <View style={styles.card}>
+                                <Text style={[Typography.bodyMedium, { color: '#D8D5D9', textAlign: 'center' }]}>Add new vaccination or revaccination</Text>
+                                <Pressable style={styles.button} onPress={() => setIsModalOpen(true)}>
+                                    <Ionicons name="add" size={18} color="#322E33" />
+                                    <Text style={[Typography.bodySmall, { color: '#322E33' }]}>Add vaccine</Text>
                                 </Pressable>
                             </View>
-                        </SafeAreaView>
-                    </>
+                        </View>
+                    </SafeAreaView>
                 }
                 renderItem={({ item }) => RenderVaccination(item)}
                 contentContainerStyle={styles.scrollContent}
+            />
+            <AddVaccineModal
+                visible={isModalOpen}
+                onClose={() => handleClose()}
+                currentPetId={petId}
             />
         </SafeAreaView>
     );
@@ -159,7 +180,13 @@ const styles = StyleSheet.create({
         height: '100%',
         alignItems: 'center',
         justifyContent: 'space-between',
-        position: 'relative'
+        position: 'relative',
+    },
+    content: {
+        display: 'flex',
+        flexDirection: 'column',
+        padding: 16,
+        gap: 16
     },
     navRow: {
         width: '95%',
@@ -171,6 +198,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+    },
+    badge: {
+        borderRadius: 100,
+        borderWidth: 0.5,
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        borderColor: '#558C3F',
+        backgroundColor: '#2A4620',
+        color: '#71BA54'
     },
     input: {
         display: 'flex',
@@ -229,6 +265,31 @@ const styles = StyleSheet.create({
         borderWidth: 0.5,
         alignItems: 'center',
     },
+    card: {
+        display: 'flex',
+        flexDirection: 'column',
+        width: "100%",
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderRadius: 8,
+        padding: 16,
+        gap: 16,
+        borderColor: "#4C454D",
+        backgroundColor: "#FFFFFF1A"
+    },
+    button: {
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 12,
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        borderRadius: 8,
+        backgroundColor: '#E5E3E6'
+    },
     statusContainerYellow: {
         flexDirection: 'row',
         padding: 10,
@@ -246,5 +307,29 @@ const styles = StyleSheet.create({
         borderColor: '#FF5A5F',
         borderWidth: 0.5,
         alignItems: 'center',
+    },
+    topLeftGlow: {
+        position: 'absolute',
+        top: -400,
+        left: -400,
+        width: 800,
+        height: 800,
+        opacity: 0.8,
+    },
+    centerGlow: {
+        position: 'absolute',
+        top: 70,
+        left: -150,
+        width: 700,
+        height: 700,
+        opacity: 0.6,
+    },
+    bottomGlow: {
+        position: 'absolute',
+        top: 250,
+        left: -150,
+        width: 700,
+        height: 700,
+        opacity: 0.6,
     },
 })

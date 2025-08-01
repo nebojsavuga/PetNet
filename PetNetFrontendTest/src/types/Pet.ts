@@ -1,3 +1,5 @@
+import { Vaccine } from "./Vaccine";
+
 export interface Award {
     _id: string | null;
     place: '1st' | '2nd' | '3rd' | 'Participated';
@@ -16,10 +18,10 @@ export interface Intervention {
 
 export interface Vaccination {
     _id: string;
-    name: string;
-    timestamp: string;
-    nextDue?: string;
-    completed: boolean;
+    vaccine: Vaccine;
+    timestamp: string;     // Date the vaccination was given
+    completed: boolean;    // Was it completed?
+    nextDue?: string;      // Optional: calculated in frontend/backend
 }
 
 export interface Pet {
@@ -31,7 +33,7 @@ export interface Pet {
     breed: string;
     dateOfBirth: string;
     imageUrl?: string;
-    owner: string; // User._id
+    owner: string;
     parents: string[];
     children: string[];
     awards: Award[];

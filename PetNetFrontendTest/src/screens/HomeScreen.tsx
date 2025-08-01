@@ -20,6 +20,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { Images } from '../constants/Images';
 import { usePet } from '../contexts/PetContext';
+import { Styles } from '../constants/Styles';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 
@@ -158,17 +159,20 @@ const HomeScreen = () => {
         </View>
       </View>
 
-      <View style={styles.sectionHeader}>
-        <Text style={[Typography.body, { color: "#fff" }]}>Your Pets Passports</Text>
-        <Text style={[Typography.bodySmall, { color: "#fff" }]}>View All</Text>
-      </View>
+      {pets.length > 0 &&
+        (
+          <View style={styles.sectionHeader}>
+            <Text style={[Typography.bodyMediumSemiBold, { color: "#fff" }]}>Your Pets Passports</Text>
+          </View>
+        )
+      }
 
       {pets.length === 0 ? (
-        <View style={{ padding: 16, alignItems: 'center' }}>
-          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#F7F7F7', marginBottom: 8 }}>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={[Typography.h6, { color: '#F7F7F7', marginBottom: 8 }]}>
             Create Pet Passport
           </Text>
-          <Text style={{ fontSize: 14, color: '#BBB', textAlign: 'center' }}>
+          <Text style={[Typography.bodyMediumMedium, { color: '#D8D5D9', textAlign: 'center' }]}>
             Create your pet’s passport and unlock access to their health records anytime, anywhere.
           </Text>
         </View>
@@ -177,12 +181,12 @@ const HomeScreen = () => {
           data={pets}
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => renderPetCard(item, navigation)}
-          style={{ flexGrow: 0 }}
+          style={{ flexGrow: 1 }}
         />
       )}
 
-      <Pressable style={styles.newPetButton} onPress={() => navigation.navigate('CreatePetPassport')}>
-        <Text style={styles.newPetButtonText}>+ New Pet Passport</Text>
+      <Pressable style={Styles.defaultButton} onPress={() => navigation.navigate('CreatePetPassport')}>
+        <Text style={[Typography.bodySmall, { color: '#FFFFFF' }]}>New Pet Passport</Text>
       </Pressable>
     </SafeAreaView>
   );
@@ -194,8 +198,8 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 32,
     position: 'relative'
   },
   header: {

@@ -180,7 +180,6 @@ const EditFamilyPedigree = () => {
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Text style={[Typography.bodyMedium, { color: '#F1EFF2' }]}>Parents</Text>
 
-                        {/* ✅ Show add button ONLY if there's 1 parent */}
                         {parents.length === 1 && (
                             <Pressable style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2 }} onPress={() => setInitialModalVisible(true)}>
                                 <Ionicons name="add" size={26} color="#F1EFF2" />
@@ -198,7 +197,6 @@ const EditFamilyPedigree = () => {
                         </View>
                     )}
 
-                    {/* ✅ Case 2 & 3: Show one or two parent cards */}
                     {parents.length > 0 && (
                         <View style={{ gap: 12 }}>
                             {parents.map((parent) => (
@@ -225,7 +223,6 @@ const EditFamilyPedigree = () => {
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Text style={[Typography.bodyMedium, { color: '#F1EFF2' }]}>Children</Text>
 
-                        {/* ✅ Show add button ONLY if there's 1 parent */}
                         {children.length === 1 && (
                             <Pressable style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2 }} onPress={() => setInitialChildModalVisible(true)}>
                                 <Ionicons name="add" size={26} color="#F1EFF2" />
@@ -243,7 +240,6 @@ const EditFamilyPedigree = () => {
                         </View>
                     )}
 
-                    {/* ✅ Case 2 & 3: Show one or two parent cards */}
                     {children.length > 0 && (
                         <View style={{ gap: 12 }}>
                             {children.map((child) => (

@@ -122,11 +122,10 @@ const petSchema = new mongoose.Schema(
         ],
         vaccinations: [
             {
-                name: {
-                    type: String,
-                    required: true,
-                    trim: true,
-                    maxlength: 100
+                vaccine: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'Vaccine',
+                    required: true
                 },
                 timestamp: {
                     type: Date,
@@ -134,10 +133,9 @@ const petSchema = new mongoose.Schema(
                 },
                 completed: {
                     type: Boolean,
-                    required: true,
-                    default: false
-                },
-            },
+                    default: true // optional logic
+                }
+            }
         ]
     },
 
