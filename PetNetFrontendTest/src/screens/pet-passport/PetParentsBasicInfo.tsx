@@ -51,7 +51,7 @@ const PetParentsBasicInfo = () => {
             })
 
             console.log("BODY: ", body);
-            const response = await fetch(`${API_URL}/pets/${pet._id}/add-temporary-parent`, {
+            const response = await fetch(`${API_URL}/pets/${pet?._id}/add-temporary-parent`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

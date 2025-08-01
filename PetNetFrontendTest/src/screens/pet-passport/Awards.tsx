@@ -117,6 +117,9 @@ const Awards = () => {
     };
     return (
         <SafeAreaView style={{ flex: 1 }}>
+            <Image source={Images.topLeftGreenEllipse} style={styles.topLeftGlow} resizeMode="contain" />
+            <Image source={Images.centralPinkEllipse} style={styles.centerGlow} resizeMode="contain" />
+            <Image source={Images.centralPinkEllipse} style={styles.bottomGlow} resizeMode="contain" />
             <FlatList
                 data={fetchedPet?.awards ?? []}
                 keyExtractor={(item) => item._id!}
@@ -294,5 +297,29 @@ const styles = StyleSheet.create({
     },
     petInfo: {
         flex: 1,
-    }
+    },
+    topLeftGlow: {
+        position: 'absolute',
+        top: -400,
+        left: -400,
+        width: 800,
+        height: 800,
+        opacity: 0.8,
+    },
+    centerGlow: {
+        position: 'absolute',
+        top: 70,
+        left: -150,
+        width: 700,
+        height: 700,
+        opacity: 0.6,
+    },
+    bottomGlow: {
+        position: 'absolute',
+        top: 250,
+        left: -150,
+        width: 700,
+        height: 700,
+        opacity: 0.6,
+    },
 })

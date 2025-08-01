@@ -339,3 +339,33 @@ exports.deleteParent = async (req, res) => {
         return res.status(500).json({ error: 'Internal server error' });
     }
 }
+
+exports.addExistingParent = async (req, res) => {
+    try {
+        const { id, parentId } = req.params;
+
+        const childPet = await Pet.findById(id);
+
+        if (!childPet) return res.status(404).json({ error: 'Pet not found' })
+
+        const parentPet = await Pet.findById(parentId);
+
+        if (!parentPet) return res.status(404).json({ error: 'Parent not found' });
+
+        childPet.parents.push(parentPet._id);
+        await childPet.save();
+
+        parentPet.children.push(childPet._id);
+        await parentPet.save();
+
+
+        return res.status(201).json({
+            message: 'Parent assigned successfully',
+            parent: parentPet,
+            updatedPet: childPet
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+}

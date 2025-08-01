@@ -10,7 +10,8 @@ const {
     createOrUpdateIntervention,
     createOrUpdateAward,
     addTemporaryParent,
-    deleteParent
+    deleteParent,
+    addExistingParent
 } = require('../controllers/petController');
 const { authenticate } = require('../middlewares/auth');
 const upload = require('../middlewares/multer');
@@ -23,7 +24,8 @@ router.post('/image', authenticate, upload.single('image'), uploadImageToIpfs);
 router.post('/vaccination', authenticate, createOrUpdateVaccination);
 router.post('/intervention', authenticate, createOrUpdateIntervention);
 router.get('/:id', authenticate, getById);
-router.post('/:id/add-temporary-parent', authenticate, addTemporaryParent)
-router.delete('/:petId/deleteParent/:parentId', authenticate, deleteParent)
+router.post('/:id/add-temporary-parent', authenticate, addTemporaryParent);
+router.delete('/:petId/deleteParent/:parentId', authenticate, deleteParent);
+router.post('/:id/assign-existing-parent/:parentId', authenticate, addExistingParent);
 
 module.exports = router;

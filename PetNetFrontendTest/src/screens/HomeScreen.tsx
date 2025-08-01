@@ -19,6 +19,7 @@ import { Pet } from '../types/Pet';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { Images } from '../constants/Images';
+import { usePet } from '../contexts/PetContext';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 
@@ -31,6 +32,7 @@ const HomeScreen = () => {
 
   const [name, setName] = useState('Aleksa');
   const [pets, setPets] = useState<Pet[]>([]);
+  const { pet, setPet } = usePet();
 
   useEffect(() => {
     const fetchUserAndPets = async () => {
@@ -62,6 +64,7 @@ const HomeScreen = () => {
 
         const petsFromApi = await response.json();
         setPets(petsFromApi);
+        setPet(undefined);
 
       } catch (error) {
         console.error('Failed to load user or pets:', error);
@@ -70,6 +73,7 @@ const HomeScreen = () => {
 
     fetchUserAndPets();
   }, []);
+
   const calculateAge = (dob: string) => {
     const years = dayjs().diff(dayjs(dob), 'year');
     const months = dayjs().diff(dayjs(dob).add(years, 'year'), 'month');

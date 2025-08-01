@@ -186,6 +186,7 @@ const EditFamilyPedigree = () => {
             <AddParentWithPetNetModal
                 visible={isSelectingModalVisible}
                 onClose={() => handleClose()}
+                currentPetId={pet?._id}
             />
         </SafeAreaView>
     )

@@ -6,7 +6,7 @@ import Constants from 'expo-constants';
 
 type PetContextType = {
     pet: Pet | undefined;
-    setPet: (pet: Pet) => void;
+    setPet: (pet: Pet | undefined) => void;
     updatePet: () => Promise<void>;
 };
 

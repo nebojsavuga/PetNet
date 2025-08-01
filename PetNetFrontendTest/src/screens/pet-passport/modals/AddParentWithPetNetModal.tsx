@@ -1,4 +1,4 @@
-import { AppState, Image, Keyboard, KeyboardAvoidingView, Linking, Modal, Platform, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
+import { Alert, AppState, Image, Keyboard, KeyboardAvoidingView, Linking, Modal, Platform, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { Typography } from '../../../constants/Typography'
 import { Picker } from '@react-native-picker/picker';
@@ -10,11 +10,18 @@ import { Camera, CameraView } from 'expo-camera';
 import { Overlay } from '../../../components/Overlay';
 import { fetchUserAndPets } from '../../../services/PetService';
 import { Pet } from '../../../types/Pet';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
+import { usePet } from '../../../contexts/PetContext';
+import { useNavigation } from '@react-navigation/native';
 
 
-const AddParentWithPetNetModal = ({ visible, onClose }: {
+const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
+
+const AddParentWithPetNetModal = ({ visible, onClose, currentPetId }: {
     visible: boolean;
     onClose: () => void;
+    currentPetId: string | undefined
 }) => {
 
     const [isQRScanning, setIsQRScanning] = useState(false);
@@ -22,30 +29,12 @@ const AddParentWithPetNetModal = ({ visible, onClose }: {
     const appState = useRef(AppState.currentState);
     const [pets, setPets] = useState<Pet[]>([]);
     const [permission, requestPermission] = useCameraPermissions();
-    const [parent, setParent] = useState<
-        | 'Pipo'
-        | 'Svrca'
-        | 'Krompirkovic'
-        | 'Belka'
-        | ''
-    >('');
+    const [parent, setParent] = useState<string>('');
+    const { pet, setPet, updatePet } = usePet();
 
     useEffect(() => {
-        const loadData = async () => {
-            const { user, pets, error } = await fetchUserAndPets();
-
-            if (error) {
-                console.warn(error);
-                return;
-            }
-
-            if (pets) {
-                setPets(pets);
-            }
-        };
-
-        loadData();
-    }, []);
+        if (visible) loadData();
+    }, [visible]);
 
     useEffect(() => {
         if (isQRScanning) {
@@ -79,7 +68,54 @@ const AddParentWithPetNetModal = ({ visible, onClose }: {
         }
     };
 
+    const loadData = async () => {
+        const { user, pets, error } = await fetchUserAndPets();
 
+        if (error) {
+            console.warn(error);
+            return;
+        }
+
+
+        if (pets) {
+            const filteredPets = pets.filter(pet => pet._id !== currentPetId);
+            setPets(filteredPets);
+        }
+    };
+
+    const onSaveParent = async (parentId: string | undefined, id: string | undefined) => {
+        try {
+            const token = await AsyncStorage.getItem('jwtToken');
+
+            if (!token) {
+                console.warn('No JWT token found');
+                return;
+            }
+
+            const response = await fetch(`${API_URL}/pets/${id}/assign-existing-parent/${parentId}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                console.error('Error while saving parent', response.status);
+                return;
+            }
+
+            const data = await response.json();
+            setPet(data.updatedPet);
+            Alert.alert('Success', 'Parent added and linked successfully.');
+            updatePet();
+            onClose();
+
+        } catch (error) {
+            console.error(error);
+            Alert.alert('Error', 'Something went wrong.');
+        }
+    }
 
     return (
         <>
@@ -106,11 +142,10 @@ const AddParentWithPetNetModal = ({ visible, onClose }: {
                                                 itemStyle={{ color: '#F1EFF2', fontSize: 14 }}
                                                 mode="dropdown"
                                             >
-                                                <Picker.Item label="Select gender..." value="" color="#D8D5D9" />
-                                                <Picker.Item label="Pipo" value="Pipo" />
-                                                <Picker.Item label="Svrca" value="Svrca" />
-                                                <Picker.Item label="Krompirkovic" value="Krompirkovic" />
-                                                <Picker.Item label="Belka" value="Belka" />
+                                                <Picker.Item label="Select a pet from your list..." value="" color="#D8D5D9" />
+                                                {pets.map((pet) => (
+                                                    <Picker.Item key={pet._id} label={pet.name} value={pet._id} color="#262326" />
+                                                ))}
                                             </Picker>
                                         </View>
                                     </View>
@@ -119,6 +154,17 @@ const AddParentWithPetNetModal = ({ visible, onClose }: {
                                         <Image source={Images.qrCodeIcon} style={{ width: 18, height: 18 }} />
                                         <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Scan QR code to add</Text>
                                     </Pressable>
+
+                                    {parent !== '' && (
+                                        <Pressable
+                                            style={[Styles.defaultButton]}
+                                            onPress={() => {
+                                                onSaveParent(parent, currentPetId)
+                                            }}
+                                        >
+                                            <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Continue</Text>
+                                        </Pressable>
+                                    )}
                                 </SafeAreaView>
                             </Pressable>
                         </KeyboardAvoidingView>

@@ -5,7 +5,8 @@ import {
     StyleSheet,
     Pressable,
     SafeAreaView,
-    FlatList
+    FlatList,
+    Image
 } from 'react-native';
 import { Intervention, Pet } from "../../types/Pet";
 import { useEffect, useState } from "react";
@@ -16,6 +17,7 @@ import { PetPassportStackParamList } from "../../navigators/PetPassportNavigator
 import PetHeaderSection from "./PetHeaderSection";
 import { Typography } from '../../constants/Typography';
 import { usePet } from '../../contexts/PetContext';
+import { Images } from '../../constants/Images';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 type MedicalInterventionsDataRouteProp = RouteProp<PetPassportStackParamList, 'MedicalInterventions'>;
@@ -83,6 +85,9 @@ const MedicalInterventions = () => {
     };
     return (
         <SafeAreaView style={{ flex: 1 }}>
+            <Image source={Images.topLeftGreenEllipse} style={styles.topLeftGlow} resizeMode="contain" />
+            <Image source={Images.centralPinkEllipse} style={styles.centerGlow} resizeMode="contain" />
+            <Image source={Images.centralPinkEllipse} style={styles.bottomGlow} resizeMode="contain" />
             <FlatList
                 data={medicalInterventions}
                 keyExtractor={(item) => item._id}
@@ -93,7 +98,7 @@ const MedicalInterventions = () => {
                                 title="Medical Interventions"
                                 pet={pet}
                                 onBack={() => navigation.goBack()}
-                                onShare={() => navigation.navigate('PetQrScreen', { petId: pet?._id })}
+                                onShare={() => navigation.navigate('PetQrScreen', { pet: pet })}
                             />
                         </View>
 
@@ -140,11 +145,11 @@ const styles = StyleSheet.create({
         marginHorizontal: 'auto',
         marginBottom: 10,
         borderRadius: 8,
-        backgroundColor: '#322E33',
         padding: 14,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        position: 'relative'
     },
     input: {
         display: 'flex',
@@ -231,5 +236,29 @@ const styles = StyleSheet.create({
     },
     petInfo: {
         flex: 1,
-    }
+    },
+    topLeftGlow: {
+        position: 'absolute',
+        top: -400,
+        left: -400,
+        width: 800,
+        height: 800,
+        opacity: 0.8,
+    },
+    centerGlow: {
+        position: 'absolute',
+        top: 70,
+        left: -150,
+        width: 700,
+        height: 700,
+        opacity: 0.6,
+    },
+    bottomGlow: {
+        position: 'absolute',
+        top: 250,
+        left: -150,
+        width: 700,
+        height: 700,
+        opacity: 0.6,
+    },
 })
