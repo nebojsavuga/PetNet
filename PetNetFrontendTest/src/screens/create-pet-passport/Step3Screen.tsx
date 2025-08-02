@@ -84,7 +84,7 @@ const Step3Screen = () => {
                     <Ionicons name="arrow-back" size={24} color="#F7F7F7" />
                 </Pressable>
             </View>
-            <Text style={[Typography.h2, { color: '#F7F7F7' }]}>Your pet's basic info</Text>
+            <Text style={[Typography.h6, { color: '#F7F7F7' }]}>Your pet's Chip ID</Text>
             <View style={styles.dataSection}>
                 <View style={styles.input}>
                     <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>Chip ID</Text>
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         backgroundColor: '#19171A',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'space-between',
         paddingHorizontal: 24,
         paddingVertical: 32,

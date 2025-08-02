@@ -22,7 +22,7 @@ const AddVaccineModal = ({ visible, onClose, currentPetId }: {
     const [vaccine, setVaccine] = useState<string>('');
     const [vaccines, setVaccines] = useState<Vaccine[]>([]);
     const [pet, setPet] = useState<Pet>();
-    const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(new Date(2020, 1, 1));
+    const [vaccinationDate, setVaccinationDate] = useState<Date | undefined>(new Date(2020, 1, 1));
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
     useEffect(() => {
@@ -70,9 +70,45 @@ const AddVaccineModal = ({ visible, onClose, currentPetId }: {
 
             const res = await response.json();
             setVaccines(res.vaccines);
+            console.log("VAKCINE: ", vaccines);
         } catch (error) {
             Alert.alert('Error while fetching vaccines');
             return
+        }
+    }
+
+    const saveVaccine = async () => {
+        try {
+            const token = await AsyncStorage.getItem('jwtToken');
+            if (!token) {
+                Alert.alert("JWT token missing");
+                return;
+            }
+
+            const response = await fetch(`${API_URL}/pets/${currentPetId}/add-vaccination`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    vaccineId: vaccine,
+                    timestamp: vaccinationDate
+                })
+            });
+
+            if (!response.ok) {
+                Alert.alert("Error adding vaccination");
+                return;
+            }
+
+            const { pet: updatedPet } = await response.json();
+            setPet(updatedPet);
+            Alert.alert("Vaccination saved!");
+            onClose();
+        } catch (err) {
+            console.error(err);
+            Alert.alert("Failed to add vaccine");
         }
     }
 
@@ -113,19 +149,19 @@ const AddVaccineModal = ({ visible, onClose, currentPetId }: {
                                         <View style={styles.input}>
                                             <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2', marginBottom: 4 }]}>Date</Text>
                                             <Pressable onPress={() => setIsDatePickerOpen(true)} style={styles.inputField}>
-                                                <Text style={[Typography.bodySmall, { color: dateOfBirth ? '#F7F7F7' : '#D8D5D9' }]}>
-                                                    {dateOfBirth ? dateOfBirth.toLocaleDateString() : "Your date of birth"}
+                                                <Text style={[Typography.bodySmall, { color: vaccinationDate ? '#F7F7F7' : '#D8D5D9' }]}>
+                                                    {vaccinationDate ? vaccinationDate.toLocaleDateString() : "Your date of birth"}
                                                 </Text>
                                             </Pressable>
                                             {isDatePickerOpen && (
                                                 <DateTimePicker
-                                                    value={dateOfBirth || new Date()}
+                                                    value={vaccinationDate || new Date()}
                                                     mode="date"
                                                     display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                                                     maximumDate={new Date()}
                                                     onChange={(event, selectedDate) => {
                                                         setIsDatePickerOpen(Platform.OS === 'ios');
-                                                        if (selectedDate) setDateOfBirth(selectedDate);
+                                                        if (selectedDate) setVaccinationDate(vaccinationDate);
                                                     }}
                                                     themeVariant="dark"
                                                 />
@@ -134,7 +170,7 @@ const AddVaccineModal = ({ visible, onClose, currentPetId }: {
                                     </View>
 
                                     {vaccine && (
-                                        <Pressable style={Styles.defaultButton}>
+                                        <Pressable style={Styles.defaultButton} onPress={() => saveVaccine()}>
                                             <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Continue</Text>
                                         </Pressable>
                                     )}

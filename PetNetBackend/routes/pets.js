@@ -13,7 +13,8 @@ const {
     deleteParent,
     addExistingParent,
     addExistingChild,
-    deleteChild
+    deleteChild,
+    addOrUpdateVaccination
 } = require('../controllers/petController');
 const { authenticate } = require('../middlewares/auth');
 const upload = require('../middlewares/multer');
@@ -31,5 +32,6 @@ router.delete('/:petId/deleteParent/:parentId', authenticate, deleteParent);
 router.delete('/:petId/deleteChild/:childId', authenticate, deleteChild);
 router.post('/:id/assign-existing-parent/:parentId', authenticate, addExistingParent);
 router.post('/:id/assign-existing-child/:childId', authenticate, addExistingChild);
+router.post('/:petId/add-vaccination', authenticate, addOrUpdateVaccination);
 
 module.exports = router;

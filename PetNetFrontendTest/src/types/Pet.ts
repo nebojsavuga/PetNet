@@ -18,10 +18,11 @@ export interface Intervention {
 
 export interface Vaccination {
     _id: string;
-    vaccine: Vaccine;
-    timestamp: string;     // Date the vaccination was given
-    completed: boolean;    // Was it completed?
-    nextDue?: string;      // Optional: calculated in frontend/backend
+    vaccineId: string; // still useful
+    timestamp: string;
+    completed: boolean;
+    vaccine: Vaccine; // full vaccine data
+    nextDue?: string;    // Optional: calculated in frontend/backend
 }
 
 export interface Pet {

@@ -19,9 +19,18 @@ import { Typography } from '../../constants/Typography';
 import { usePet } from '../../contexts/PetContext';
 import { Images } from '../../constants/Images';
 import AddVaccineModal from './modals/AddVaccineModal';
+import { Vaccine } from '../../types/Vaccine';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 type VaccinesDataRouteProp = RouteProp<PetPassportStackParamList, 'Vaccines'>;
+
+type VaccinationDisplayItem = {
+    _id: string;
+    name: string;
+    date: string;
+    nextDue: string;
+    completed: boolean;
+};
 
 const Vaccines = () => {
     const route = useRoute<VaccinesDataRouteProp>();
@@ -31,42 +40,73 @@ const Vaccines = () => {
 
     const [pet, setPet] = useState<Pet>();
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [vaccinations, setVaccinations] = useState<Vaccination[]>();
+    const [vaccinations, setVaccinations] = useState<VaccinationDisplayItem[]>();
 
     useEffect(() => {
-
-        const fetchPet = async () => {
+        const fetchPetAndVaccines = async () => {
             try {
                 const token = await AsyncStorage.getItem('jwtToken');
-                if (!token) {
-                    console.warn('No JWT token found');
-                    return;
-                }
-                const response = await fetch(`${API_URL}/pets/${petId}`, {
+                if (!token) return;
+
+                // Fetch pet
+                const petResponse = await fetch(`${API_URL}/pets/${petId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
-                    },
+                    }
                 });
 
-                if (!response.ok) {
-                    console.error('Failed to fetch pets:', response.status);
+                if (!petResponse.ok) {
+                    console.warn('Failed to fetch pet');
                     return;
                 }
 
-                const pet = await response.json();
-                setPet(pet);
-                setVaccinations(
-                    (pet?.vaccinations ?? []).sort((a: Vaccination, b: Vaccination) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+                const petData = await petResponse.json();
+                setPet(petData);
+
+                const enrichedVaccinations: VaccinationDisplayItem[] = [];
+
+                for (const v of petData.vaccinations) {
+                    const vaccineRes = await fetch(`${API_URL}/vaccines/${v.vaccine}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    if (!vaccineRes.ok) {
+                        console.warn(`Failed to fetch vaccine ${v.vaccine}`);
+                        continue;
+                    }
+
+                    const { vaccine } = await vaccineRes.json();
+
+                    const vaccinationDate = new Date(v.timestamp);
+                    const nextDue = new Date(vaccinationDate.getTime() + vaccine.revaccinationPeriod * 24 * 60 * 60 * 1000);
+
+                    enrichedVaccinations.push({
+                        _id: v._id,
+                        completed: v.completed,
+                        date: v.timestamp,
+                        nextDue: nextDue.toISOString(),
+                        name: vaccine.name
+                    });
+                }
+
+                // Sort by vaccination date descending
+                enrichedVaccinations.sort((a, b) =>
+                    new Date(b.date).getTime() - new Date(a.date).getTime()
                 );
 
+                setVaccinations(enrichedVaccinations);
+
             } catch (error) {
-                console.error('Failed to load pets:', error);
+                console.error("Error fetching pet and vaccines", error);
             }
         };
-        fetchPet();
-    }, []);
 
+        fetchPetAndVaccines();
+    }, []);
 
     const handleClose = () => {
         setIsModalOpen(false);
@@ -75,47 +115,50 @@ const Vaccines = () => {
 
     const today = new Date();
 
-    const RenderVaccination = (vaccination: Vaccination) => {
-        let statusElement;
-        const vaccinationDate = new Date(vaccination.timestamp);
+    const RenderVaccination = (item: VaccinationDisplayItem) => {
+        const vaccinationDate = new Date(item.date);
+        const nextDueDate = new Date(item.nextDue);
+        const today = new Date();
 
-        if (vaccination.completed) {
+        let statusElement;
+        if (item.completed) {
             statusElement = (
                 <View style={styles.statusContainerGreen}>
-                    <Ionicons name="checkmark-outline" size={20} color="#71BA54" style={{ marginRight: 5 }} />
-                    <Text style={[Typography.button, { color: "#71BA54" }]}>Done</Text>
+                    <Ionicons name="checkmark-outline" size={15} color="#71BA54" />
+                    <Text style={[Typography.bodyExtraSmall, { color: "#71BA54" }]}>Done</Text>
                 </View>
             );
         } else if (vaccinationDate > today) {
             statusElement = (
                 <View style={styles.statusContainerYellow}>
-                    <Ionicons name="time-outline" size={20} color="#EBC948" style={{ marginRight: 5 }} />
-                    <Text style={[Typography.button, { color: "#EBC948" }]}>To do</Text>
+                    <Ionicons name="time-outline" size={15} color="#EBC948" />
+                    <Text style={[Typography.bodyExtraSmall, { color: "#EBC948" }]}>To do</Text>
                 </View>
             );
         } else {
             statusElement = (
                 <View style={styles.statusContainerRed}>
-                    <Ionicons name="close-outline" size={20} color="#FF5A5F" style={{ marginRight: 5 }} />
-                    <Text style={[Typography.button, { color: "#FF5A5F" }]}>Missed</Text>
+                    <Ionicons name="close-outline" size={15} color="#FF5A5F" />
+                    <Text style={[Typography.bodyExtraSmall, { color: "#FF5A5F" }]}>Missed</Text>
                 </View>
             );
         }
-        return (
-            <SafeAreaView
-                style={styles.navRow}
-            >
-                <View key={vaccination._id} style={styles.navRowInner}>
-                    <SafeAreaView style={styles.petInfo}>
-                        <Text style={[Typography.heading, { color: "#F7F7F7" }]}>{vaccination.name}</Text>
-                        <Text style={[Typography.bodySmall, { color: "#F7F7F7" }]}>
-                            {new Date(vaccination.timestamp).toLocaleDateString('en-GB')}
-                        </Text>
 
-                    </SafeAreaView>
+        return (
+            <View style={styles.navRow}>
+                <View style={styles.navRowInner}>
+                    <View style={styles.petInfo}>
+                        <Text style={[Typography.bodyMediumSemiBold, { color: "#F7F7F7" }]}>{item.name}</Text>
+                        <Text style={[Typography.bodySmall, { color: "#F7F7F7" }]}>
+                            Vaccinated: {vaccinationDate.toLocaleDateString('en-GB')}
+                        </Text>
+                        <Text style={[Typography.bodySmall, { color: "#F7F7F7" }]}>
+                            Next Due: {nextDueDate.toLocaleDateString('en-GB')}
+                        </Text>
+                    </View>
                     {statusElement}
                 </View>
-            </SafeAreaView>
+            </View>
         );
     };
     return (
@@ -193,11 +236,13 @@ const styles = StyleSheet.create({
         marginHorizontal: 'auto',
         marginBottom: 10,
         borderRadius: 8,
-        backgroundColor: '#322E33',
-        padding: 14,
+        backgroundColor: '#262326',
+        padding: 16,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        borderWidth: 1,
+        borderColor: '#322E33'
     },
     badge: {
         borderRadius: 100,
@@ -258,12 +303,14 @@ const styles = StyleSheet.create({
     },
     statusContainerGreen: {
         flexDirection: 'row',
-        padding: 10,
-        borderRadius: 999,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 100,
         backgroundColor: '#2A4620',
         borderColor: '#558C3F',
         borderWidth: 0.5,
         alignItems: 'center',
+        gap: 6
     },
     card: {
         display: 'flex',

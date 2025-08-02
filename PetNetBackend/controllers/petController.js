@@ -449,3 +449,39 @@ exports.deleteChild = async (req, res) => {
         return res.status(500).json({ error: 'Internal server error' });
     }
 }
+
+exports.addOrUpdateVaccination = async (req, res) => {
+    try {
+        const { petId } = req.params;
+        const { vaccineId, timestamp } = req.body;
+
+        const pet = await Pet.findById(petId).populate('vaccinations.vaccine');
+        if (!pet) return res.status(404).json({ error: 'Pet not found' });
+
+        // Check if this vaccine already exists (revaccination)
+        const existing = pet.vaccinations.find(
+            (v) => v.vaccine.toString() === vaccineId
+        );
+
+        if (existing) {
+            existing.timestamp = timestamp;
+        } else {
+            pet.vaccinations.push({
+                vaccine: vaccineId,
+                timestamp,
+                completed: true,
+            });
+        }
+
+        await pet.save();
+
+        const updated = await Pet.findById(petId)
+            .populate('vaccinations.vaccine')
+            .lean();
+
+        return res.status(200).json({ message: 'Vaccination recorded', pet: updated });
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+};
