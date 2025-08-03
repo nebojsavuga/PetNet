@@ -6,7 +6,9 @@ import {
     Pressable,
     SafeAreaView,
     FlatList,
-    Image
+    Image,
+    Linking,
+    ScrollView
 } from 'react-native';
 import { Intervention, Pet } from "../../types/Pet";
 import { useEffect, useState } from "react";
@@ -18,110 +20,162 @@ import PetHeaderSection from "./PetHeaderSection";
 import { Typography } from '../../constants/Typography';
 import { usePet } from '../../contexts/PetContext';
 import { Images } from '../../constants/Images';
+import AddNewInterventionModal from './modals/AddNewInterventionModal';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 type MedicalInterventionsDataRouteProp = RouteProp<PetPassportStackParamList, 'MedicalInterventions'>;
+
+type InterventionReport = {
+    fileName: string;
+    url: string;
+    clinicName: string;
+    interventionName?: string;
+    uploadedAt?: string;
+};
 
 const MedicalInterventions = () => {
     const route = useRoute<MedicalInterventionsDataRouteProp>();
     const { petId } = route.params as { petId: string };
     const [pet, setPet] = useState<Pet>();
     const navigation = useNavigation();
-    const [medicalInterventions, setMedicalInterventions] = useState<Intervention[]>();
+    const [reports, setReports] = useState<InterventionReport[]>([]);
+    const [isModalVisible, setModalVisible] = useState(false);
 
     useEffect(() => {
-
-        const fetchPet = async () => {
+        const fetchData = async () => {
             try {
                 const token = await AsyncStorage.getItem('jwtToken');
                 if (!token) {
                     console.warn('No JWT token found');
                     return;
                 }
-                const response = await fetch(`${API_URL}/pets/${petId}`, {
+
+                const petResponse = await fetch(`${API_URL}/pets/${petId}`, {
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        Authorization: `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     },
                 });
 
-                if (!response.ok) {
-                    console.error('Failed to fetch pets:', response.status);
+                if (!petResponse.ok) {
+                    const errorText = await petResponse.text();
+                    console.error('Failed to fetch pet:', errorText);
                     return;
                 }
 
-                const fetchedPet = await response.json();
+                const fetchedPet = await petResponse.json();
                 setPet(fetchedPet);
-                setMedicalInterventions(pet?.interventions ?? []);
 
+
+                const reportResponse = await fetch(`${API_URL}/pets/getInterventionReports/${petId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (!reportResponse.ok) {
+                    const errText = await reportResponse.text();
+                    console.error('Failed to fetch reports:', errText);
+                    return;
+                }
+
+                const reportData = await reportResponse.json();
+                setReports(reportData.reports || []);
+                console.log("REPORTS: ", reports);
             } catch (error) {
-                console.error('Failed to load pets:', error);
+                console.error('Failed to load data:', error);
             }
         };
-        fetchPet();
+
+        fetchData();
     }, []);
-    const RenderIntervention = (intervention: Intervention) => {
+
+    const getReportDate = (r: InterventionReport) => {
+        if (r.uploadedAt) return new Date(r.uploadedAt);
+
+        const base = r.interventionName || '';
+        const parts = base.split('_');
+        const ts = parts[parts.length - 1];
+        const n = Number(ts);
+        return isNaN(n) ? new Date() : new Date(n);
+    };
+
+    const handleClose = () => {
+        setModalVisible(false);
+    }
+
+    const RenderPdfReport = (report: InterventionReport, index: number) => {
+        const date = getReportDate(report);
+
         return (
-            <SafeAreaView
-                style={styles.navRow}
-            >
-                <View key={intervention._id} style={styles.navRowInner}>
-                    <SafeAreaView style={styles.petInfo}>
-                        <Text style={[Typography.heading, { color: "#F7F7F7" }]}>{intervention.interventionName}</Text>
-                        <Text style={[Typography.bodySmall, { color: "#F7F7F7" }]}>
-                            {intervention.clinicName}
+            <Pressable key={index} style={styles.navRow} onPress={() => Linking.openURL(report.url)}>
+                <View style={[styles.navRowInner, { alignItems: 'center' }]}>
+                    <Image source={Images.pdfIcon} style={{ width: 24, height: 24 }} />
+
+                    {/* Leva strana: ime intervencije + klinika, u dva reda */}
+                    <View style={[styles.petInfo, { flex: 1, marginLeft: 16 }]}>
+                        <Text style={[Typography.heading, { color: "#F7F7F7" }]}>
+                            {report.interventionName || 'Intervention'}
                         </Text>
-                        <Text style={[Typography.bodySmall, { color: "#F7F7F7" }]}>
-                            {intervention.vetName}
+                        <Text style={[Typography.bodySmall, { color: "#D8D5D9" }]}>
+                            {report.clinicName || 'Clinic'}
                         </Text>
-                    </SafeAreaView>
-                    <Ionicons name='calendar-outline' size={20} color="#B2ABB3" style={[styles.rightArrow, { marginRight: 5 }]} />
-                    <Text style={[Typography.bodySmall, { color: "#F7F7F7" }]}>
-                        {new Date(intervention.date).toLocaleDateString('en-GB')}
-                    </Text>
+                    </View>
+
+                    <View style={{ marginLeft: 8, alignItems: 'flex-end' }}>
+                        <Text style={[Typography.bodySmall, { color: "#F7F7F7" }]}>
+                            📅 {date.toLocaleDateString()}
+                        </Text>
+                    </View>
                 </View>
-            </SafeAreaView>
+            </Pressable>
         );
     };
     return (
+
         <SafeAreaView style={{ flex: 1 }}>
             <Image source={Images.topLeftGreenEllipse} style={styles.topLeftGlow} resizeMode="contain" />
             <Image source={Images.centralPinkEllipse} style={styles.centerGlow} resizeMode="contain" />
             <Image source={Images.centralPinkEllipse} style={styles.bottomGlow} resizeMode="contain" />
-            <FlatList
-                data={medicalInterventions}
-                keyExtractor={(item) => item._id}
-                ListHeaderComponent={
-                    <>
-                        <View style={styles.container}>
-                            <PetHeaderSection
-                                title="Medical Interventions"
-                                pet={pet}
-                                onBack={() => navigation.goBack()}
-                                onShare={() => navigation.navigate('PetQrScreen', { petId: petId })}
-                            />
-                        </View>
 
-                        <Text style={[Typography.heading, { color: '#F7F7F7', marginLeft: 10, marginTop: 20, marginBottom: 10 }]}>Interventions ({medicalInterventions?.length ?? 0})</Text>
-                        <SafeAreaView
-                            style={[styles.navRow, { paddingVertical: 20, backgroundColor: '#2A4620', borderColor: '#558C3F' }]}
-                        >
-                            <View style={styles.navRowInner}>
-                                <SafeAreaView style={styles.petInfo}>
-                                    <Text style={[Typography.heading, { color: "#F1EFF2" }]}>Add new intervention</Text>
-                                    <Text style={[Typography.bodySmall, { color: "#D8D5D9" }]}>
-                                        Get a link for veterinarian
-                                    </Text>
-                                </SafeAreaView>
-                                <Pressable onPress={() => console.log('Add icon pressed')} style={{ marginRight: 5 }}>
-                                    <Ionicons name='add-circle-outline' size={35} color="#71BA54" />
-                                </Pressable>
-                            </View>
-                        </SafeAreaView>
-                    </>
-                }
-                renderItem={({ item }) => RenderIntervention(item)}
-                contentContainerStyle={styles.scrollContent}
+            <ScrollView contentContainerStyle={styles.scrollContent}>
+                <View style={styles.container}>
+                    <View style={styles.container}>
+                        <PetHeaderSection
+                            title="Medical Interventions"
+                            pet={pet}
+                            onBack={() => navigation.goBack()}
+                            onShare={() => navigation.navigate('PetQrScreen', { petId: petId })}
+                        />
+                    </View>
+                </View>
+
+                <Text style={[Typography.bodyMediumSemiBold, { color: '#F7F7F7', marginLeft: 10, marginTop: 20, marginBottom: 10 }]}>
+                    Interventions ({reports.length})
+                </Text>
+
+                <Pressable style={styles.linkButton} onPress={() => setModalVisible(true)}>
+                    <View style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <Text style={[Typography.bodyMediumSemiBold, { color: '#F1EFF2' }]}>Add new intervention</Text>
+                        <Text style={[Typography.bodySmall, { color: '#D8D5D9' }]}>Get a link for veterinarian</Text>
+                    </View>
+                    <Ionicons name="add-circle-outline" size={32} color="#71BA54" style={{ marginRight: 12 }} />
+
+                </Pressable>
+
+                {reports.length > 0 ? (
+                    reports.map((report, idx) => RenderPdfReport(report, idx))
+                ) : (
+                    <Text style={[Typography.bodySmall, { color: '#D8D5D9', marginLeft: 10 }]}>
+                        No reports found.
+                    </Text>
+                )}
+            </ScrollView>
+            <AddNewInterventionModal
+                visible={isModalVisible}
+                onClose={() => handleClose()}
+                petId={petId}
             />
         </SafeAreaView>
     );
@@ -143,13 +197,16 @@ const styles = StyleSheet.create({
     navRow: {
         width: '95%',
         marginHorizontal: 'auto',
-        marginBottom: 10,
+        marginBottom: 8,
         borderRadius: 8,
-        padding: 14,
+        padding: 16,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        position: 'relative'
+        position: 'relative',
+        backgroundColor: '#262326',
+        borderColor: '#322E33',
+        borderWidth: 1
     },
     input: {
         display: 'flex',
@@ -169,8 +226,10 @@ const styles = StyleSheet.create({
     rightArrow: {
     },
     navRowInner: {
+        display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'space-between'
     },
     inputField: {
         width: '100%',
@@ -236,6 +295,7 @@ const styles = StyleSheet.create({
     },
     petInfo: {
         flex: 1,
+        gap: 2
     },
     topLeftGlow: {
         position: 'absolute',
@@ -261,4 +321,18 @@ const styles = StyleSheet.create({
         height: 700,
         opacity: 0.6,
     },
+    linkButton: {
+        display: 'flex',
+        flexDirection: 'row',
+        width: '95%',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: '#2A462099',
+        borderWidth: 1,
+        borderColor: '#558C3F',
+        borderRadius: 8,
+        marginLeft: 10,
+        padding: 16,
+        marginBottom: 8
+    }
 })

@@ -94,31 +94,33 @@ const petSchema = new mongoose.Schema(
                 },
             },
         ],
-        interventions: [
+        interventionReports: [
             {
                 interventionName: {
                     type: String,
-                    required: true,
-                    trim: true,
-                    maxlength: 100
+                    required: true
+                },
+                cid: {
+                    type: String,
+                    required: true
+                },
+                fileName: {
+                    type: String,
+                    required: true
+                },
+                url: {
+                    type: String,
+                    required: true
+                },
+                uploadedAt: {
+                    type: Date,
+                    default: Date.now
                 },
                 clinicName: {
                     type: String,
-                    required: true,
-                    trim: true,
-                    maxlength: 100
-                },
-                vetName: {
-                    type: String,
-                    required: true,
-                    trim: true,
-                    maxlength: 100
-                },
-                date: {
-                    type: Date,
                     required: true
-                },
-            },
+                }
+            }
         ],
         vaccinations: [
             {

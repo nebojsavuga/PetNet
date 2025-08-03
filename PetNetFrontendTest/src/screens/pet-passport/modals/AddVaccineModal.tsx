@@ -160,8 +160,8 @@ const AddVaccineModal = ({ visible, onClose, currentPetId }: {
                                                     display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                                                     maximumDate={new Date()}
                                                     onChange={(event, selectedDate) => {
-                                                        setIsDatePickerOpen(Platform.OS === 'ios');
-                                                        if (selectedDate) setVaccinationDate(vaccinationDate);
+                                                        setIsDatePickerOpen(Platform.OS === 'ios'); // ili `false` ako želiš da zatvoriš na Androidu
+                                                        if (selectedDate) setVaccinationDate(selectedDate);
                                                     }}
                                                     themeVariant="dark"
                                                 />

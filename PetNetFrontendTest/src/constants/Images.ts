@@ -16,4 +16,5 @@ export const Images = {
     vaccineIcon: require('../../assets/images/VaccineIcon.png'),
     trophy: require('../../assets/images/trophy.png'),
     finish: require('../../assets/images/FinishIcon.png'),
+    pdfIcon: require('../../assets/images/PDFIcon.png'),
 };

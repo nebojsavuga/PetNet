@@ -13,25 +13,35 @@ const {
     bundlrStorage,
 } = require("@metaplex-foundation/js");
 const mongoose = require('mongoose');
-const { pinata } = require('../config/pinata');
-
+// const { pinata } = require('../config/pinata');
+const pinataSDK = require('@pinata/sdk');
+const pinata = new pinataSDK({ pinataJWTKey: process.env.PINATA_JWT });
 
 exports.uploadImageToIpfs = async (req, res) => {
     try {
-        if (!req.file) {
-            return res.status(400).json({ error: 'No file uploaded' });
-        }
-        const timestamp = Date.now();
-        const randomFileName = `${timestamp}.jpg`;
-        const blob = new Blob([fs.readFileSync(req.file.path)]);
-        const file = new File([blob], randomFileName, { type: "image/jpeg" });
+        if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
-        const response = await pinata.upload.public.file(file);
-        const url = await pinata.gateways.public.convert(response.cid);
-        fs.unlink(req.file.path, (err) => {
-            if (err) console.error('Failed to delete temp file:', err);
-        });
-        return res.status(200).json({ url });
+        const timestamp = Date.now();
+        const fileName = `${timestamp}.jpg`;
+        const filePath = req.file.path;
+
+        const stream = fs.createReadStream(filePath);
+
+        const options = {
+            pinataMetadata: {
+                name: fileName,
+                keyvalues: { type: 'pet-image', timestamp: String(timestamp) }
+            },
+            pinataOptions: { cidVersion: 1 }
+        };
+
+        const pin = await pinata.pinFileToIPFS(stream, options);
+        const cid = pin.IpfsHash;
+        const url = `https://gateway.pinata.cloud/ipfs/${cid}`;
+
+        fs.unlink(filePath, () => { });
+
+        return res.status(200).json({ url, cid });
     } catch (err) {
         console.error('Pinata upload error:', err);
         return res.status(500).json({ error: 'Failed to upload image to IPFS' });
@@ -40,32 +50,53 @@ exports.uploadImageToIpfs = async (req, res) => {
 
 exports.uploadPdfToIpfs = async (req, res) => {
     try {
-        const { petId, interventionName } = req.body;
+        const { petId, clinicName, interventionName } = req.body;
         if (!req.file || !petId) {
             return res.status(400).json({ error: 'Missing PDF file or petId' });
         }
 
         const timestamp = Date.now();
-        const fileName = `intervention_${interventionName}_${petId}_${timestamp}.pdf`;
+        const fileName = `intervention_${clinicName}_${interventionName}_${petId}_${timestamp}.pdf`;
+        const fileStream = fs.createReadStream(req.file.path);
 
-        const fileBuffer = fs.readFileSync(req.file.path);
-        const blob = new Blob([fileBuffer]);
-        const file = new File([blob], fileName, { type: "application/pdf" });
+        const options = {
+            pinataMetadata: {
+                name: fileName,
+                keyvalues: {
+                    petId,
+                    interventionName,
+                    clinicName,
+                    timestamp: timestamp.toString(),
+                    type: 'intervention'
+                }
+            },
+            pinataOptions: {
+                cidVersion: 1
+            }
+        };
 
-        const response = await pinata.upload.public.file(file);
-        const url = await pinata.gateways.public.convert(response.cid);
+        const response = await pinata.pinFileToIPFS(fileStream, options);
+        const cid = response.IpfsHash;
+        const url = `https://gateway.pinata.cloud/ipfs/${cid}`;
+
+        await Pet.findByIdAndUpdate(petId, {
+            $push: {
+                interventionReports: {
+                    interventionName,
+                    clinicName,
+                    cid,
+                    fileName,
+                    url,
+                    uploadedAt: new Date(Number(timestamp))
+                }
+            }
+        });
 
         fs.unlink(req.file.path, (err) => {
             if (err) console.error('Failed to delete temp file:', err);
         });
 
-        return res.status(200).json({
-            success: true,
-            url,
-            cid: response.cid,
-            fileName,
-            petId
-        });
+        return res.status(200).json({ success: true, cid, url, fileName, clinicName, interventionName, petId });
     } catch (err) {
         console.error('PDF upload error:', err);
         return res.status(500).json({ error: 'Failed to upload PDF to IPFS' });
@@ -107,40 +138,44 @@ exports.create = async (req, res) => {
 
         const secretKey = bs58.decode(process.env.SOLANA_SECRET_KEY);
         const wallet = Keypair.fromSecretKey(secretKey);
-        const connection = new Connection(clusterApiUrl(process.env.SOLANA_CLUSTER), "confirmed");
+        const connection = new Connection(clusterApiUrl(process.env.SOLANA_CLUSTER), 'confirmed');
+
         const metaplex = Metaplex.make(connection)
             .use(keypairIdentity(wallet))
             .use(bundlrStorage());
+
         const metadata = {
             name: `${name}'s Pet Passport`,
             symbol: 'PET',
             description: `NFT Passport for ${name}, the ${breed}.`,
             image: imageUrl,
             attributes: [
-                { trait_type: "Gender", value: gender },
-                { trait_type: "Breed", value: breed },
-                { trait_type: "Race", value: race },
-                { trait_type: "Chip Number", value: chipNumber },
-                { trait_type: "Date of Birth", value: dateOfBirth }
+                { trait_type: 'Gender', value: gender },
+                { trait_type: 'Breed', value: breed },
+                { trait_type: 'Race', value: race },
+                { trait_type: 'Chip Number', value: chipNumber || '' },
+                { trait_type: 'Date of Birth', value: dateOfBirth }
             ]
         };
-        const response = await pinata.upload.public.json(metadata);
-        const metadataUrl = await pinata.gateways.public.convert(response.cid);
+
+        const pinOpts = {
+            pinataMetadata: { name: `${name}_nft_metadata.json`, keyvalues: { type: 'pet-nft' } },
+            pinataOptions: { cidVersion: 1 }
+        };
+        const pinned = await pinata.pinJSONToIPFS(metadata, pinOpts);
+        const metadataCid = pinned.IpfsHash;
+        const metadataUrl = `https://gateway.pinata.cloud/ipfs/${metadataCid}`;
+
         const { nft } = await metaplex.nfts().create({
             uri: metadataUrl,
             name: metadata.name,
             sellerFeeBasisPoints: 0,
             symbol: metadata.symbol,
-            creators: [
-                {
-                    address: wallet.publicKey,
-                    share: 100
-                }
-            ]
+            creators: [{ address: wallet.publicKey, share: 100 }]
         });
+
         pet.nftMintAddress = nft.address.toBase58();
         pet.nftUri = metadataUrl;
-
         await pet.save();
 
         res.status(201).json({ message: 'Pet created successfully', pet });
@@ -285,7 +320,11 @@ exports.createOrUpdateAward = async (req, res) => {
             return res.status(404).json({ error: 'Pet not found.' });
         }
         const awardDate = date ? new Date(date) : new Date();
-        const existingAward = pet.awards.findIndex(award => award._id.equals(new mongoose.Types.ObjectId(_id)));
+        let existingAward = -1;
+        if (_id) {
+            const objectId = new mongoose.Types.ObjectId(_id);
+            existingAward = pet.awards.findIndex(award => award._id && award._id.equals(objectId));
+        }
         if (existingAward !== -1) {
             pet.awards[existingAward].awardName = awardName;
             pet.awards[existingAward].date = awardDate;
@@ -497,9 +536,8 @@ exports.addOrUpdateVaccination = async (req, res) => {
         const pet = await Pet.findById(petId).populate('vaccinations.vaccine');
         if (!pet) return res.status(404).json({ error: 'Pet not found' });
 
-        // Check if this vaccine already exists (revaccination)
         const existing = pet.vaccinations.find(
-            (v) => v.vaccine.toString() === vaccineId
+            (v) => v.vaccine && v.vaccine._id.toString() === vaccineId
         );
 
         if (existing) {
@@ -522,5 +560,19 @@ exports.addOrUpdateVaccination = async (req, res) => {
     } catch (error) {
         console.error(error.message);
         return res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+exports.getPetInterventionReports = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const pet = await Pet.findById(id);
+        if (!pet) return res.status(404).json({ error: 'Pet not found' });
+
+        return res.status(200).json({ reports: pet.interventionReports || [] });
+    } catch (error) {
+        console.error('Failed to fetch reports:', error);
+        return res.status(500).json({ error: 'Server error' });
     }
 };
