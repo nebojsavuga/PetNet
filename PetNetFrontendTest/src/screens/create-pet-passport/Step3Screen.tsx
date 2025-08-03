@@ -10,105 +10,65 @@ import { RootStackParamList } from "../../types/RootStackParamList";
 import { usePetPassport } from "../../contexts/CreatePetPassportContext";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
+import { CreatingPetPassportStackParamList } from "../../types/CreatingPetPassportStackParamList";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
+type Step3NavProp = NativeStackNavigationProp<CreatingPetPassportStackParamList, "Step3">;
 
 const Step3Screen = () => {
-    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+    // const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+    const navigation = useNavigation<Step3NavProp>();
     const { updateData, data } = usePetPassport();
 
     const [chipNumber, setChipNumber] = useState<string>('');
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
     const handleSubmit = async () => {
         updateData({ chipNumber });
-        const token = await AsyncStorage.getItem('jwtToken');
-        if (!token) {
-            Alert.alert('Unauthorized', 'You must be logged in.');
-            return;
-        }
-        let ipfsUrl = data.imageUrl;
-        if (data.imageUrl?.startsWith('file://')) {
-            const formData = new FormData();
-            formData.append('image', {
-                uri: data.imageUrl,
-                type: 'image/jpeg',
-                name: 'photo.jpg',
-            } as any);
-
-            const ipfsRes = await fetch(`${API_URL}/pets/image`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'multipart/form-data',
-                },
-                body: formData,
-            });
-
-            const ipfsData = await ipfsRes.json();
-            if (!ipfsRes.ok) {
-                Alert.alert('Error', ipfsData.error || 'Failed to upload image');
-                return;
-            }
-            ipfsUrl = ipfsData.url;
-            updateData({ imageUrl: ipfsUrl });
-        }
-        const petResponse = await fetch(`${API_URL}/pets`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                ...data,
-                chipNumber: chipNumber,
-                imageUrl: ipfsUrl,
-            }),
-        });
-        const petData = await petResponse.json();
-        if (!petResponse.ok) {
-            Alert.alert('Error', petData.error || 'Could not create pet');
-            return;
-        }
-        navigation.reset({
-            index: 0,
-            routes: [{ name: 'HomeScreen' }],
-        });
+        navigation.navigate('Step4');
     };
 
     return (
         <SafeAreaView style={styles.container}>
             <Image source={Images.topLeftGreenEllipse} style={styles.topLeftGlow} resizeMode="contain" />
             <Image source={Images.centralPinkEllipse} style={styles.centerGlow} resizeMode="contain" />
-            <View style={styles.upperContent}>
-                <Pressable onPress={() => navigation.goBack()}>
-                    <Ionicons name="arrow-back" size={24} color="#F7F7F7" />
-                </Pressable>
-            </View>
-            <Text style={[Typography.h6, { color: '#F7F7F7' }]}>Your pet's Chip ID</Text>
-            <View style={styles.dataSection}>
-                <View style={styles.input}>
-                    <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>Chip ID</Text>
-                    <TextInput placeholder="Your pet's Chip ID"
-                        placeholderTextColor={'#D8D5D9'}
-                        onFocus={() => setFocusedInput('chip')}
-                        onBlur={() => setFocusedInput(null)}
-                        value={chipNumber}
-                        onChangeText={setChipNumber}
-                        style={[
-                            Typography.bodySmall,
-                            styles.inputField,
-                            {
-                                borderColor: focusedInput === 'chip' ? '#BF38F2' : '#4C454D'
-                            }
-                        ]}
-                    />
+            <View style={styles.topContent}>
+                <View style={styles.upperContent}>
+                    <Pressable onPress={() => navigation.goBack()}>
+                        <Ionicons name="arrow-back" size={24} color="#F7F7F7" />
+                    </Pressable>
+                </View>
+                <Text style={[Typography.h6, { color: '#F7F7F7' }]}>Your pet's Chip ID</Text>
+                <View style={styles.dataSection}>
+                    <View style={styles.input}>
+                        <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>Chip ID</Text>
+                        <TextInput placeholder="Your pet's Chip ID"
+                            placeholderTextColor={'#D8D5D9'}
+                            onFocus={() => setFocusedInput('chip')}
+                            onBlur={() => setFocusedInput(null)}
+                            value={chipNumber}
+                            onChangeText={setChipNumber}
+                            style={[
+                                Typography.bodySmall,
+                                styles.inputField,
+                                {
+                                    borderColor: focusedInput === 'chip' ? '#BF38F2' : '#4C454D'
+                                }
+                            ]}
+                        />
+                    </View>
                 </View>
             </View>
             <View style={styles.connectionSection}>
                 <Pressable style={styles.createNewAccountButton} onPress={() => handleSubmit()}>
-                    <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Finish</Text>
+                    <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Continue</Text>
                 </Pressable>
             </View>
+            {/* <View style={styles.connectionSection}>
+                <Pressable style={styles.createNewAccountButton} onPress={() => handleSubmit()}>
+                    <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Finish</Text>
+                </Pressable>
+            </View> */}
         </SafeAreaView >
     )
 }
@@ -129,6 +89,12 @@ const styles = StyleSheet.create({
         position: 'relative'
     },
     upperContent: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 32,
+        width: '100%'
+    },
+    topContent: {
         display: 'flex',
         flexDirection: 'column',
         gap: 32,

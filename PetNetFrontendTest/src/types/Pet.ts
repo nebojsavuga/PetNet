@@ -1,7 +1,7 @@
 import { Vaccine } from "./Vaccine";
 
 export interface Award {
-    _id: string | null;
+    _id?: string | null;
     place: '1st' | '2nd' | '3rd' | 'Participated';
     awardName: string;
     showName: string;
@@ -17,12 +17,12 @@ export interface Intervention {
 }
 
 export interface Vaccination {
-    _id: string;
-    vaccineId: string; // still useful
+    _id?: string;
+    vaccineId: string;
     timestamp: string;
     completed: boolean;
-    vaccine: Vaccine; // full vaccine data
-    nextDue?: string;    // Optional: calculated in frontend/backend
+    vaccine: Vaccine;
+    nextDue?: string;
 }
 
 export interface Pet {

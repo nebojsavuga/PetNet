@@ -38,6 +38,40 @@ exports.uploadImageToIpfs = async (req, res) => {
     }
 };
 
+exports.uploadPdfToIpfs = async (req, res) => {
+    try {
+        const { petId, interventionName } = req.body;
+        if (!req.file || !petId) {
+            return res.status(400).json({ error: 'Missing PDF file or petId' });
+        }
+
+        const timestamp = Date.now();
+        const fileName = `intervention_${interventionName}_${petId}_${timestamp}.pdf`;
+
+        const fileBuffer = fs.readFileSync(req.file.path);
+        const blob = new Blob([fileBuffer]);
+        const file = new File([blob], fileName, { type: "application/pdf" });
+
+        const response = await pinata.upload.public.file(file);
+        const url = await pinata.gateways.public.convert(response.cid);
+
+        fs.unlink(req.file.path, (err) => {
+            if (err) console.error('Failed to delete temp file:', err);
+        });
+
+        return res.status(200).json({
+            success: true,
+            url,
+            cid: response.cid,
+            fileName,
+            petId
+        });
+    } catch (err) {
+        console.error('PDF upload error:', err);
+        return res.status(500).json({ error: 'Failed to upload PDF to IPFS' });
+    }
+};
+
 exports.create = async (req, res) => {
     try {
         const {
@@ -47,8 +81,11 @@ exports.create = async (req, res) => {
             race,
             breed,
             dateOfBirth,
-            imageUrl
+            imageUrl,
+            vaccinations,
+            awards
         } = req.body;
+
         if (!name || !gender || !race || !breed || !dateOfBirth) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
@@ -62,6 +99,8 @@ exports.create = async (req, res) => {
             dateOfBirth,
             imageUrl,
             owner: req.userId,
+            vaccinations,
+            awards
         });
 
         await pet.save();

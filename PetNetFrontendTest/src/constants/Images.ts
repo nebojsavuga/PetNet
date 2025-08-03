@@ -12,5 +12,8 @@ export const Images = {
     FirstPlace: require('../../assets/images/1st.png'),
     SecondPlace: require('../../assets/images/2nd.png'),
     ThirdPlace: require('../../assets/images/3rd.png'),
-    qrCodeIcon: require('../../assets/images/QRIcon.png')
+    qrCodeIcon: require('../../assets/images/QRIcon.png'),
+    vaccineIcon: require('../../assets/images/VaccineIcon.png'),
+    trophy: require('../../assets/images/trophy.png'),
+    finish: require('../../assets/images/FinishIcon.png'),
 };

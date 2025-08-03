@@ -48,6 +48,7 @@ const PetPassport = () => {
 
             if (pet) {
                 setPet(pet);
+                console.log(pet._id);
             }
         }
         fetchPet();

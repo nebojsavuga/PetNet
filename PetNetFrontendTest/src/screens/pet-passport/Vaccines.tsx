@@ -9,7 +9,7 @@ import {
     Image
 } from 'react-native';
 import { Pet, Vaccination } from "../../types/Pet";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Constants from 'expo-constants';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from '@expo/vector-icons';
@@ -42,73 +42,70 @@ const Vaccines = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [vaccinations, setVaccinations] = useState<VaccinationDisplayItem[]>();
 
-    useEffect(() => {
-        const fetchPetAndVaccines = async () => {
-            try {
-                const token = await AsyncStorage.getItem('jwtToken');
-                if (!token) return;
+    const fetchPetAndVaccines = useCallback(async () => {
+        try {
+            const token = await AsyncStorage.getItem('jwtToken');
+            if (!token) return;
 
-                // Fetch pet
-                const petResponse = await fetch(`${API_URL}/pets/${petId}`, {
+            const petResponse = await fetch(`${API_URL}/pets/${petId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (!petResponse.ok) {
+                console.warn('Failed to fetch pet');
+                return;
+            }
+
+            const petData = await petResponse.json();
+            setPet(petData);
+
+            const enrichedVaccinations: VaccinationDisplayItem[] = [];
+
+            for (const v of petData.vaccinations) {
+                const vaccineRes = await fetch(`${API_URL}/vaccines/${v.vaccine}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     }
                 });
 
-                if (!petResponse.ok) {
-                    console.warn('Failed to fetch pet');
-                    return;
+                if (!vaccineRes.ok) {
+                    console.warn(`Failed to fetch vaccine ${v.vaccine}`);
+                    continue;
                 }
 
-                const petData = await petResponse.json();
-                setPet(petData);
+                const { vaccine } = await vaccineRes.json();
+                const vaccinationDate = new Date(v.timestamp);
+                const nextDue = new Date(vaccinationDate.getTime() + vaccine.revaccinationPeriod * 86400000);
 
-                const enrichedVaccinations: VaccinationDisplayItem[] = [];
-
-                for (const v of petData.vaccinations) {
-                    const vaccineRes = await fetch(`${API_URL}/vaccines/${v.vaccine}`, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json',
-                        }
-                    });
-
-                    if (!vaccineRes.ok) {
-                        console.warn(`Failed to fetch vaccine ${v.vaccine}`);
-                        continue;
-                    }
-
-                    const { vaccine } = await vaccineRes.json();
-
-                    const vaccinationDate = new Date(v.timestamp);
-                    const nextDue = new Date(vaccinationDate.getTime() + vaccine.revaccinationPeriod * 24 * 60 * 60 * 1000);
-
-                    enrichedVaccinations.push({
-                        _id: v._id,
-                        completed: v.completed,
-                        date: v.timestamp,
-                        nextDue: nextDue.toISOString(),
-                        name: vaccine.name
-                    });
-                }
-
-                // Sort by vaccination date descending
-                enrichedVaccinations.sort((a, b) =>
-                    new Date(b.date).getTime() - new Date(a.date).getTime()
-                );
-
-                setVaccinations(enrichedVaccinations);
-
-            } catch (error) {
-                console.error("Error fetching pet and vaccines", error);
+                enrichedVaccinations.push({
+                    _id: v._id,
+                    completed: v.completed,
+                    date: v.timestamp,
+                    nextDue: nextDue.toISOString(),
+                    name: vaccine.name
+                });
             }
-        };
 
+            enrichedVaccinations.sort((a, b) =>
+                new Date(b.date).getTime() - new Date(a.date).getTime()
+            );
+
+            setVaccinations(enrichedVaccinations);
+        } catch (error) {
+            console.error("Error fetching pet and vaccines", error);
+        }
+    }, [petId]);
+
+    useEffect(() => {
         fetchPetAndVaccines();
-    }, []);
+    }, [fetchPetAndVaccines]);
 
     const handleClose = () => {
+        fetchPetAndVaccines();
         setIsModalOpen(false);
     }
 

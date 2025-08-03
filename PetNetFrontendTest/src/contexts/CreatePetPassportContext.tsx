@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from "react";
+import { Award, Vaccination } from "../types/Pet";
 
 type PetPassportData = {
     name?: string;
@@ -7,7 +8,9 @@ type PetPassportData = {
     gender?: string,
     dateOfBirth?: Date,
     chipNumber?: string,
-    imageUrl?: string
+    imageUrl?: string,
+    vaccinations?: Vaccination[];
+    awards?: Award[];
 };
 
 type PetPassportContextType = {
