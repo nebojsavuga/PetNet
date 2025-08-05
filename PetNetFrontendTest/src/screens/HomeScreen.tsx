@@ -82,47 +82,6 @@ const HomeScreen = () => {
   };
 
   const renderPetCard = (pet: Pet, navigation: NavProp) => {
-    const incompleteVaccinations = pet.vaccinations.filter(vac => !vac.completed);
-
-    if (incompleteVaccinations.length === 0) {
-      return (
-        <Pressable
-          key={pet._id}
-          onPress={() => navigation.navigate('PetPassportStack', {
-            screen: 'PetPassport',
-            params: { petId: pet._id }
-          })}
-        >
-          <SafeAreaView key={pet._id} style={styles.petCard}>
-            <Image source={{ uri: pet.imageUrl }} style={styles.petImage} />
-            <SafeAreaView style={styles.petInfo}>
-              <Text style={styles.petName}>{pet.name}</Text>
-              <Text style={styles.petDetails}>
-                {pet.breed} • {calculateAge(pet.dateOfBirth)} • {pet.gender}
-              </Text>
-            </SafeAreaView>
-          </SafeAreaView>
-        </Pressable>
-      );
-    }
-    const latestVaccination = incompleteVaccinations[0];
-
-    incompleteVaccinations.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-    const now = dayjs();
-    const vacDate = dayjs(latestVaccination.timestamp);
-
-    let vaccineBadgeText = '';
-    if (vacDate.isBefore(now, 'day')) {
-      vaccineBadgeText = `Last Vaccination: ${vacDate.format('MMM D, YYYY')}`;
-    } else {
-      const diffDays = vacDate.diff(now, 'day');
-      if (diffDays < 30) {
-        vaccineBadgeText = `Next Vaccination in: ${diffDays}d`;
-      } else {
-        const diffMonths = vacDate.diff(now, 'month');
-        vaccineBadgeText = `Next Vaccination in: ${diffMonths}m`;
-      }
-    }
     return (
       <Pressable
         key={pet._id}
@@ -132,16 +91,17 @@ const HomeScreen = () => {
         })}
       >
         <SafeAreaView key={pet._id} style={styles.petCard}>
-          <Image source={{ uri: pet.imageUrl }} style={styles.petImage} />
+          {pet.imageUrl && (
+            <Image source={{ uri: pet.imageUrl }} style={styles.petImage} />
+          )}
           <SafeAreaView style={styles.petInfo}>
-            <Text style={styles.petName}>{pet.name}</Text>
-            <Text style={styles.petDetails}>
-              {pet.breed} • {calculateAge(pet.dateOfBirth)} • {pet.gender}
+            <Text style={[Typography.bodyLargeBold, { color: '#F1EFF2' }]}>{pet.name}</Text>
+            <Text style={[Typography.bodySmall, { color: '#D8D5D9' }]}>
+              {pet.breed}
             </Text>
-
-            <View style={[styles.vaccineBadge, { backgroundColor: vacDate.isBefore(now, 'day') ? '#888888' : '#E8B23C' }]}>
-              <Text style={styles.vaccineBadgeText}>{vaccineBadgeText}</Text>
-            </View>
+            <Text style={[Typography.bodySmall, { color: '#D8D5D9' }]}>
+              {calculateAge(pet.dateOfBirth)} • {pet.gender}
+            </Text>
           </SafeAreaView>
         </SafeAreaView>
       </Pressable >
@@ -155,7 +115,7 @@ const HomeScreen = () => {
         <Text style={[Typography.h6, { color: "#fff" }]}>Hello, {name}</Text>
         <View style={styles.icons}>
           <Ionicons name="notifications-outline" size={22} color="#fff" />
-          <Ionicons name="settings-outline" size={22} color="#fff" style={{ marginLeft: 16 }} />
+          {/* <Ionicons name="settings-outline" size={22} color="#fff" style={{ marginLeft: 16 }} /> */}
         </View>
       </View>
 

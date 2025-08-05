@@ -1,4 +1,4 @@
-import { Image, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Alert, Image, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,129 +8,86 @@ import { Typography } from '../../constants/Typography';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { OnboardingStackParamList } from '../../types/OnboardingStackParamList';
 import { useOnboarding } from '../../contexts/OnboardingContext';
+import Constants from 'expo-constants'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { RootStackParamList } from '../../types/RootStackParamList';
 
-type Step4NavProp = NativeStackNavigationProp<OnboardingStackParamList, "Step4">;
+type Step4NavProp = NativeStackNavigationProp<RootStackParamList>;
+const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 
 const Step4Screen = () => {
 
     const navigation = useNavigation<Step4NavProp>();
+    const { updateData, data } = useOnboarding();
 
-    const [code, setCode]  = useState(['', '', '', '', '', '']);
-    const inputs = useRef<Array<TextInput | null>>([]);
-    const [resendAvailable, setResendAvailable] = useState(false);
-    const [timer, setTimer] = useState(28);
     useEffect(() => {
-        const isComplete = code.every((digit) => digit !== '');
+        console.log("DATA: ", data);
+    }, [])
 
-        if (isComplete) {
-            setTimeout(() => {
-                navigation.navigate('Step5');
-            }, 200);
-        }
-    }, [code]);
+    const handleSubmit = async () => {
+        try {
+            const payload = {
+                fullName: data.fullname?.trim(),
+                email: data.email?.trim().toLowerCase(),
+                phoneNumber: data.phoneNumber,
+                address: data.address?.trim(),
+                walletAddress: data.walletAddress,
+            };
 
-    const handleChange = (text: string, index: number) => {
-        const newCode = [...code];
-        newCode[index] = text.slice(-1);
-        setCode(newCode);
+            console.log('PAY: ', payload)
 
-        if (text && index < 5) {
-            inputs.current[index + 1]?.focus();
+            if (!payload.fullName || !payload.email || !payload.phoneNumber || !payload.address || !payload.walletAddress) {
+                Alert.alert('Some data is missing');
+                return;
+            }
+
+            const r1 = await fetch(`${API_URL}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            if (!r1.ok) {
+                const err = await r1.json().catch(() => ({}));
+                throw new Error(err?.error || `Register failed (${r1.status})`);
+            }
+
+            const r2 = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ walletAddress: payload.walletAddress }),
+            });
+            if (!r2.ok) {
+                const err = await r2.json().catch(() => ({}));
+                throw new Error(err?.error || `Login failed (${r2.status})`);
+            }
+            const { token, user } = await r2.json();
+            await AsyncStorage.setItem('jwtToken', token);
+            await AsyncStorage.setItem('user', JSON.stringify(user));
+
+            navigation.replace('HomeScreen');
+        } catch (e: any) {
+            console.log('[onboarding submit] error:', e?.message || e);
         }
     };
-
-    useEffect(() => {
-        let interval: NodeJS.Timeout | null = null;
-
-        if (!resendAvailable) {
-            interval = setInterval(() => {
-                setTimer((prev) => {
-                    if (prev <= 1) {
-                        clearInterval(interval!);
-                        setResendAvailable(true);
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
-        }
-
-        return () => {
-            if (interval) clearInterval(interval);
-        };
-    }, [resendAvailable]);
-
-    const handleResend = () => {
-        setTimer(28);
-        setResendAvailable(false);
-    }
-
     return (
         <SafeAreaView style={styles.container}>
             <Image source={Images.topLeftGreenEllipse} style={styles.topLeftGlow} resizeMode="contain" />
             <Image source={Images.centralPinkEllipse} style={styles.centerGlow} resizeMode="contain" />
-
+            <View style={styles.backButton}>
+            </View>
             <View style={styles.upperContent}>
-                <Pressable onPress={() => navigation.goBack()}>
-                    <Ionicons name="arrow-back" size={24} color="#F7F7F7" />
-                </Pressable>
-
-                <Text style={[Typography.h2, { color: '#F7F7F7' }]}>Verify your mobile number</Text>
-
+                <Image source={Images.OnboardingFinishedIcon} style={styles.mailSentImg} resizeMode="contain" />
+                <Text style={[Typography.h1, { color: '#F7F7F7' }]}>You’re good to go</Text>
                 <View style={styles.emailSection}>
-                    <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>
-                        Verification Code (SMS)
+                    <Text style={[Typography.body, { color: '#F1EFF2', textAlign: 'center', paddingHorizontal: 20 }]}>
+                        Start by creating first pet passport for your pet
                     </Text>
-
-                    <View style={styles.codeInputWrapper}>
-                        {code.map((digit, index) => (
-                            <TextInput
-                                key={index}
-                                ref={(ref) => (inputs.current[index] = ref)}
-                                style={[Typography.bodySmall, styles.codeInput]}
-                                keyboardType="number-pad"
-                                maxLength={1}
-                                value={digit}
-                                onChangeText={(text) => handleChange(text, index)}
-                                onKeyPress={({ nativeEvent }) => {
-                                    if (nativeEvent.key === 'Backspace' && code[index] === '' && index > 0) {
-                                        inputs.current[index - 1]?.focus();
-                                    }
-                                }}
-                            />
-                        ))}
-                    </View>
-
-                    {/* Instruction Text */}
-                    <Text style={[Typography.bodyExtraSmall, { color: '#D8D5D9', alignSelf: 'flex-start' }]}>
-                        Enter 6 digit code sent to +381 64 12****7
-                    </Text>
-
-                    {/* Timer / Resend */}
-                    {resendAvailable ? (
-                        <Pressable
-                            onPress={handleResend}
-                            style={styles.createNewAccountButton}>
-                            <Text style={[Typography.bodySmall, { color: '#F7F7F7', fontWeight: '600' }]}>
-                                Resend code
-                            </Text>
-                        </Pressable>
-                    ) : (
-                        <Text
-                            style={[
-                                Typography.bodySmall,
-                                {
-                                    color: '#732291',
-                                    marginTop: 24,
-                                    alignSelf: 'center',
-                                    textAlign: 'center',
-                                },
-                            ]}
-                        >
-                            You can get a new code in {timer}s
-                        </Text>
-                    )}
                 </View>
+            </View>
+            <View style={styles.connectionSection}>
+                <Pressable style={styles.openMailButton} onPress={() => handleSubmit()}>
+                    <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Continue to App</Text>
+                </Pressable>
             </View>
         </SafeAreaView>
     )
@@ -139,41 +96,72 @@ const Step4Screen = () => {
 export default Step4Screen
 
 const styles = StyleSheet.create({
+    openMailButton: {
+        display: 'flex',
+        width: '100%',
+        borderRadius: 8,
+        padding: 12,
+        backgroundColor: '#BF38F2',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
     container: {
         flex: 1,
+        flexDirection: 'column',
+        width: '100%',
+        height: '100%',
         backgroundColor: '#19171A',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         paddingHorizontal: 24,
         paddingVertical: 32,
-        position: 'relative',
+        position: 'relative'
+    },
+    mailSentImg: {
+        width: 48,
+        height: 48
+    },
+    backButton: {
+        display: 'flex',
+        flexDirection: 'row',
+        width: '100%',
+        alignItems: 'flex-start'
     },
     upperContent: {
-        flex: 1,
-        gap: 32,
-        width: '100%',
-    },
-    emailSection: {
-        gap: 12,
-        width: '100%',
-        alignItems: 'flex-start',
-    },
-    codeInputWrapper: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '100%',
-        maxWidth: 360,
+        display: 'flex',
+        flexDirection: 'column',
         gap: 8,
-        alignSelf: 'center',
+        width: '100%',
+        alignItems: 'center',
+
     },
-    codeInput: {
-        width: 45,
-        height: 45,
-        borderWidth: 2,
-        borderColor: '#4C454D',
+    connectionSection: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 8,
+        width: '100%'
+    },
+    connectWalletButton: {
+        display: 'flex',
+        width: '100%',
         borderRadius: 8,
-        textAlign: 'center',
-        fontSize: 20,
-        color: '#ffffff',
-        backgroundColor: '#FFFFFF1A',
+        padding: 12,
+        backgroundColor: '#F7F7F7',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: "#242424"
+    },
+    dividerContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+    },
+    divider: {
+        flex: 1,
+        height: 1,
+        width: '100%',
+        backgroundColor: "#4C454D",
     },
     topLeftGlow: {
         position: 'absolute',
@@ -191,14 +179,32 @@ const styles = StyleSheet.create({
         height: 700,
         opacity: 0.6,
     },
-    createNewAccountButton: {
-        marginTop: 24,
+    resendButton: {
         display: 'flex',
         width: '100%',
         borderRadius: 8,
         padding: 12,
-        backgroundColor: '#BF38F2',
+        backgroundColor: '#391149',
         alignItems: 'center',
         justifyContent: 'center'
     },
-});
+    socialButtons: {
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        gap: 8
+    },
+    emailSection: {
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        alignItems: 'center'
+    },
+    input: {
+        width: '100%',
+        paddingHorizontal: 16,
+        borderWidth: 1,
+        borderRadius: 8,
+        borderColor: '#4C454D'
+    }
+})

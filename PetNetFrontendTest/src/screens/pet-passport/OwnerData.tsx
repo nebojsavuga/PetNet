@@ -83,7 +83,7 @@ const OwnerData = () => {
                     </View>
                     <View style={styles.input}>
                         <Text style={[Typography.bodySmall, { color: '#D8D5D9' }]}>Location</Text>
-                        <Text style={[Typography.bodyMediumSemiBold, { color: '#F1EFF2' }]}>{user?.walletAddress}</Text>
+                        <Text style={[Typography.bodyMediumSemiBold, { color: '#F1EFF2' }]}>{user?.address || ''}</Text>
                     </View>
                     <View style={styles.input}>
                         <Text style={[Typography.bodySmall, { color: '#D8D5D9' }]}>Email</Text>

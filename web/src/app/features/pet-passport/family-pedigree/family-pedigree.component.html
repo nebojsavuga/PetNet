@@ -1,0 +1,81 @@
+<div class="flex w-[100vw] min-h-[100vh] relative items-start justify-center z-1 overflow-hidden py-4 overflow-y-auto overflow-x-hidden"
+    style="background: linear-gradient(to bottom, #19171A 40%, #391149 100%);">
+    <img src="../assets/TopLeftEllipse.png" class="absolute top-0 -left-30 z-[2]">
+    <div class="flex flex-col px-4 py-8 gap-12 z-[3] w-full items-center justify-center h-full p-2">
+        <p class="font-inter text-[16px] font-semibold text-[#F1EFF2]">Family pedigree</p>
+        <div class="flex flex-col gap-2 items-center justify-center">
+            <div class="flex flex-col size-[112px] rounded-full mb-4">
+                <img [src]="pet.imageUrl" class="size-[112px] object-cover rounded-full"/>
+            </div>
+            <p class="font-inter text-[30px] font-bold text-[#F1EFF2]">{{pet.name}}</p>
+            <p class="font-inter text-[16px] font-medium text-[#D8D5D9]">{{pet.breed}} • 3y 7m • {{pet.gender}}</p>
+            <div class="py-[4px] px-3 rounded-full border-[1px] border-[#4C454D]">
+                <p class="font-inter text-[14px] font-regular text-[#D8D5D9]">Chip ID: {{pet.chipNumber}}</p>
+            </div>
+        </div>
+        <div class="flex flex-col w-full gap-4">
+            <p class="font-inter text-[16px] font-semibold text-[#F1EFF2]">Parents</p>
+            @if (parents.length === 0) {
+                <div class="flex flex-row items-center justify-between w-full bg-[#262326] p-4 rounded-[8px] border-[1px] border-[#322E33]">
+                    <div class="flex flex-row w-full items-center gap-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                            <path d="M16 0.900024C7.65002 0.900024 0.900024 7.65002 0.900024 16C0.900024 24.35 7.65002 31.15 16 31.15C24.35 31.15 31.15 24.35 31.15 16C31.15 7.65002 24.35 0.900024 16 0.900024ZM16 28.9C8.90002 28.9 3.15002 23.1 3.15002 16C3.15002 8.90002 8.90002 3.15002 16 3.15002C23.1 3.15002 28.9 8.95002 28.9 16.05C28.9 23.1 23.1 28.9 16 28.9Z" fill="#E5E3E6"/>
+                            <path d="M20.6 11.35C20.15 10.9 19.45 10.9 19 11.35L16 14.4L12.95 11.35C12.5 10.9 11.8 10.9 11.35 11.35C10.9 11.8 10.9 12.5 11.35 12.95L14.4 16L11.35 19.05C10.9 19.5 10.9 20.2 11.35 20.65C11.55 20.85 11.85 21 12.15 21C12.45 21 12.75 20.9 12.95 20.65L16 17.6L19.05 20.65C19.25 20.85 19.55 21 19.85 21C20.15 21 20.45 20.9 20.65 20.65C21.1 20.2 21.1 19.5 20.65 19.05L17.6 16L20.65 12.95C21.05 12.5 21.05 11.8 20.6 11.35Z" fill="#E5E3E6"/>
+                        </svg>
+                        <div class="flex flex-col w-full gap-1">
+                            <p class="text-[16px] font-inter font-semibold text-[#F1EFF2]">This pet doesn’t have parents</p>
+                        </div>
+                    </div>
+                </div>
+            }
+            @else {
+                @for (parent of parents; track $index) {
+                    <div class="flex flex-row items-center justify-between w-full bg-[#262326] p-4 rounded-[8px] border-[1px] border-[#322E33]">
+                        <div class="flex flex-row w-full items-center gap-4">
+                            @if (parent.imageUrl !== '') {
+                                <img [src]="parent.imageUrl" class="rounded-full size-[64px]">
+                            }
+                            <div class="flex flex-col w-full gap-1">
+                                <p class="text-[16px] font-inter font-semibold text-[#F1EFF2]">{{parent.name}}</p>
+                                <p class="text-[14px] font-inter font-regular text-[#D8D5D9]">Parent {{parent.dateOfBirth | date:'yyyy-MM-dd'}}</p>
+                                <p class="text-[14px] font-inter font-regular text-[#D8D5D9]">{{parent.breed}}</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+        <div class="flex flex-col w-full gap-4">
+            <p class="font-inter text-[16px] font-semibold text-[#F1EFF2]">Children</p>
+            @if (children.length === 0) {
+                <div class="flex flex-row items-center justify-between w-full bg-[#262326] p-4 rounded-[8px] border-[1px] border-[#322E33]">
+                    <div class="flex flex-row w-full items-center gap-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                            <path d="M16 0.900024C7.65002 0.900024 0.900024 7.65002 0.900024 16C0.900024 24.35 7.65002 31.15 16 31.15C24.35 31.15 31.15 24.35 31.15 16C31.15 7.65002 24.35 0.900024 16 0.900024ZM16 28.9C8.90002 28.9 3.15002 23.1 3.15002 16C3.15002 8.90002 8.90002 3.15002 16 3.15002C23.1 3.15002 28.9 8.95002 28.9 16.05C28.9 23.1 23.1 28.9 16 28.9Z" fill="#E5E3E6"/>
+                            <path d="M20.6 11.35C20.15 10.9 19.45 10.9 19 11.35L16 14.4L12.95 11.35C12.5 10.9 11.8 10.9 11.35 11.35C10.9 11.8 10.9 12.5 11.35 12.95L14.4 16L11.35 19.05C10.9 19.5 10.9 20.2 11.35 20.65C11.55 20.85 11.85 21 12.15 21C12.45 21 12.75 20.9 12.95 20.65L16 17.6L19.05 20.65C19.25 20.85 19.55 21 19.85 21C20.15 21 20.45 20.9 20.65 20.65C21.1 20.2 21.1 19.5 20.65 19.05L17.6 16L20.65 12.95C21.05 12.5 21.05 11.8 20.6 11.35Z" fill="#E5E3E6"/>
+                        </svg>
+                        <div class="flex flex-col w-full gap-1">
+                            <p class="text-[16px] font-inter font-semibold text-[#F1EFF2]">This pet doesn’t have children</p>
+                        </div>
+                    </div>
+                </div>
+            }
+            @else {
+                @for (child of children; track $index) {
+                    <div class="flex flex-row items-center justify-between w-full bg-[#262326] p-4 rounded-[8px] border-[1px] border-[#322E33]">
+                        <div class="flex flex-row w-full items-center gap-4">
+                            @if (child.imageUrl !== '') {
+                                <img [src]="child.imageUrl" class="rounded-full size-[64px]">
+                            }
+                            <div class="flex flex-col w-full gap-1">
+                                <p class="text-[16px] font-inter font-semibold text-[#F1EFF2]">{{child.name}}</p>
+                                <p class="text-[14px] font-inter font-regular text-[#D8D5D9]">Child {{child.dateOfBirth | date:'yyyy-MM-dd'}}</p>
+                                <p class="text-[14px] font-inter font-regular text-[#D8D5D9]">{{child.breed}}</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

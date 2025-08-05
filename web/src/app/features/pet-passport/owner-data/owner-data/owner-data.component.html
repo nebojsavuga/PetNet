@@ -1,0 +1,43 @@
+<div class="flex w-[100vw] min-h-[100vh] relative items-start justify-center z-1 overflow-hidden py-4 overflow-y-auto overflow-x-hidden"
+    style="background: linear-gradient(to bottom, #19171A 40%, #391149 100%);">
+    <img src="../assets/TopLeftEllipse.png" class="absolute top-0 -left-30 z-[2]">
+    <div class="flex flex-col px-4 py-8 gap-12 z-[3] w-full items-center justify-center h-full p-2">
+        <p class="font-inter text-[16px] font-semibold text-[#F1EFF2]">Owner's data</p>
+        <div class="flex flex-col gap-2 items-center justify-center">
+            <div class="flex flex-col size-[112px] rounded-full mb-4">
+                <img [src]="pet.imageUrl" class="size-[112px] object-cover rounded-full"/>
+            </div>
+            <p class="font-inter text-[30px] font-bold text-[#F1EFF2]">{{pet.name}}</p>
+            <p class="font-inter text-[16px] font-medium text-[#D8D5D9]">{{pet.breed}} • 3y 7m • {{pet.gender}}</p>
+            <div class="py-[4px] px-3 rounded-full border-[1px] border-[#4C454D]">
+                <p class="font-inter text-[14px] font-regular text-[#D8D5D9]">Chip ID: {{pet.chipNumber}}</p>
+            </div>
+        </div>
+        <div class="flex flex-col gap-4 w-full h-full">
+            <div class="flex flex-col w-full gap-4">
+                <p class="font-inter text-[16px] font-semibold text-[#F1EFF2]">Owner Information</p>
+                <div class="flex flex-col gap-4 bg-[#262326] rounded-[8px] p-4 border-[1px] border-[#322E33]">
+                    <div class="flex flex-col w-full gap-1">
+                        <p class="text-[14px] font-inter font-regular text-[#D8D5D9]">Name</p>
+                        <p class="text-[16px] font-inter font-semibold text-[#F1EFF2]">Owner name</p>
+                    </div>
+                    <div class="flex flex-col w-full gap-1">
+                        <p class="text-[14px] font-inter font-regular text-[#D8D5D9]">Location</p>
+                        <p class="text-[16px] font-inter font-semibold text-[#F1EFF2]">Country - City, State</p>
+                    </div>
+                    <div class="flex flex-col w-full gap-1">
+                        <p class="text-[14px] font-inter font-regular text-[#D8D5D9]">Email address</p>
+                        <p class="text-[16px] font-inter font-semibold text-[#F1EFF2]">Owners email address</p>
+                    </div>
+                    <div class="flex flex-col w-full gap-1">
+                        <p class="text-[14px] font-inter font-regular text-[#D8D5D9]">Phone</p>
+                        <p class="text-[16px] font-inter font-semibold text-[#F1EFF2]">(+1) 123 45 67</p>
+                    </div>
+                </div>
+            </div>
+            <button class="flex w-full p-3 rounded-[8px] items-center justify-center text-[#F1EFF2] bg-[#BF38F2]">
+              Call Owner
+            </button>
+        </div>
+    </div>
+</div>

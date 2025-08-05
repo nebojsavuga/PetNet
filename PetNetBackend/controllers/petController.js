@@ -550,7 +550,7 @@ exports.addOrUpdateVaccination = async (req, res) => {
             });
         }
 
-        await pet.save();
+        await pet.save({ validateModifiedOnly: true });
 
         const updated = await Pet.findById(petId)
             .populate('vaccinations.vaccine')
@@ -574,5 +574,20 @@ exports.getPetInterventionReports = async (req, res) => {
     } catch (error) {
         console.error('Failed to fetch reports:', error);
         return res.status(500).json({ error: 'Server error' });
+    }
+};
+
+exports.webGetById = async (req, res) => {
+    try {
+        const pet = await Pet.findOne({ _id: req.params.id });
+
+        if (!pet) {
+            return res.status(404).json({ error: 'Pet not found.' });
+        }
+
+        res.json(pet);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
     }
 };

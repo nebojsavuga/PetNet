@@ -108,7 +108,9 @@ const FamilyPedigree = () => {
                 style={styles.navRow}
             >
                 <SafeAreaView key={selectedPet._id} style={styles.navRowInner}>
-                    <Image source={{ uri: selectedPet.imageUrl }} style={styles.petImage} />
+                    {selectedPet.imageUrl && (
+                        <Image source={{ uri: selectedPet.imageUrl }} style={styles.petImage} />
+                    )}
                     <SafeAreaView style={styles.petInfo}>
                         <Text style={[Typography.bodyMediumSemiBold, { color: "#F7F7F7" }]}>{selectedPet.name}</Text>
                         <Text style={[Typography.bodySmall, { color: "#D8D5D9" }]}>

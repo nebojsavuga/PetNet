@@ -12,21 +12,17 @@ async function seed() {
         await Pet.deleteMany({});
         await Vaccine.deleteMany({});
 
-        const user = new User({
-            fullName: 'Nebojsa Vuga',
-            email: 'nebojsavuga01@gmail.com',
-            phoneNumber: '+55412',
-            verificationType: 'email',
-            address: {
-                addressString: '1 Novembar 35, Lacarak',
-                latitude: 44.998617,
-                longitude: 19.563195
-            },
-            walletAddress: '3XFKoAdCCNPxToXCz2sLfHFzwRybANfBMTSGsur4oAHP',
-        });
+        // const user = new User({
+        //     fullName: 'Nebojsa Vuga',
+        //     email: 'nebojsavuga01@gmail.com',
+        //     phoneNumber: '+55412',
+        //     verificationType: 'email',
+        //     address: '1 Novembar 35, Lacarak',
+        //     walletAddress: '3XFKoAdCCNPxToXCz2sLfHFzwRybANfBMTSGsur4oAHP',
+        // });
 
-        await user.save();
-        console.log('User seeded.');
+        // await user.save();
+        // console.log('User seeded.');
 
         // const buddy = new Pet({
         //     name: 'Buddy',

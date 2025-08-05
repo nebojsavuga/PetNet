@@ -1,0 +1,12 @@
+.img-container {
+    display: flex;
+    flex-direction: column;
+    border-radius: 100%;
+    width: 112px;
+    height: 112px;
+}
+
+.passportImg {
+    object-fit: cover;
+    border-radius: 100%;
+}

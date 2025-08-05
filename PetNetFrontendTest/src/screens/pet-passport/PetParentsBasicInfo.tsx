@@ -127,8 +127,10 @@ const PetParentsBasicInfo = () => {
                                 Typography.bodySmall,
                                 styles.inputField,
                                 {
+                                    color: '#F7F7F7',
                                     borderColor: focusedInput === 'name' ? '#BF38F2' : '#4C454D'
                                 }
+
                             ]}
                         />
                     </View>
@@ -145,6 +147,7 @@ const PetParentsBasicInfo = () => {
                                 Typography.bodySmall,
                                 styles.inputField,
                                 {
+                                    color: '#F7F7F7',
                                     borderColor: focusedInput === 'breed' ? '#BF38F2' : '#4C454D'
                                 }
                             ]}

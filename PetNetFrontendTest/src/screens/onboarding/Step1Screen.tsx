@@ -11,17 +11,23 @@ import { useOnboarding } from '../../contexts/OnboardingContext'
 
 type Step1NavProp = NativeStackNavigationProp<OnboardingStackParamList, "Step1">;
 
+const EMAIL_REGEX = /\S+@\S+\.\S+/;
+
 const Step1Screen = () => {
-    // TODO: get wallet address from previous screen
     const navigation = useNavigation<Step1NavProp>();
-    const { updateData } = useOnboarding();
+    const { data, updateData } = useOnboarding();
 
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
-    const [email, setEmail] = useState<string>('');
+    const [email, setEmail] = useState<string>(data.email ?? '');
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const isValid = EMAIL_REGEX.test(normalizedEmail);
+
     const handleNext = () => {
-        updateData({ email });
+        // čuvamo normalizovan email
+        updateData({ email: normalizedEmail });
         navigation.navigate("Step2");
-    }
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -31,16 +37,24 @@ const Step1Screen = () => {
                 <Pressable onPress={() => navigation.goBack()}>
                     <Ionicons name="arrow-back" size={24} color="#F7F7F7" />
                 </Pressable>
-                <Text style={[Typography.h2, { color: '#F7F7F7' }]}>What’s your Email Address?</Text>
+
+                <Text style={[Typography.h2, { color: '#F7F7F7' }]}>
+                    What’s your Email Address?
+                </Text>
+
                 <View style={styles.emailSection}>
                     <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>Email</Text>
+
                     <TextInput
-                        placeholder='Your email address'
-                        placeholderTextColor={'#D8D5D9'}
+                        placeholder="Your email address"
+                        placeholderTextColor="#D8D5D9"
                         onFocus={() => setFocusedInput('email')}
                         onBlur={() => setFocusedInput(null)}
                         value={email}
-                        onChangeText={setEmail}
+                        onChangeText={(text) => setEmail(text)}   // ← ispravka
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        autoCorrect={false}
                         style={[
                             Typography.bodySmall,
                             styles.inputField,
@@ -50,33 +64,35 @@ const Step1Screen = () => {
                             },
                         ]}
                     />
-                    <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>
+
+                    {/* opciono, lagani hint o validaciji */}
+                    {!isValid && email.length > 0 && (
+                        <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2', marginTop: 6 }]}>
+                            Please enter a valid email address.
+                        </Text>
+                    )}
+
+                    <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2', marginTop: 10 }]}>
                         By submitting your email you confirm{'\n'}you’ve read the{'  '}
                         <Text style={{ color: '#BF38F2', fontWeight: '600' }}>Privacy Notice</Text>
                     </Text>
                 </View>
             </View>
+
             <View style={styles.connectionSection}>
-                <Pressable style={styles.createNewAccountButton} onPress={() => handleNext()}>
-                    <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Create New Account</Text>
+                <Pressable
+                    style={[styles.createNewAccountButton, !isValid && { opacity: 0.6 }]}
+                    onPress={handleNext}
+                    disabled={!isValid}
+                >
+                    <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Continue</Text>
                 </Pressable>
-                <View style={styles.dividerContainer}>
-                    <View style={styles.divider} />
-                </View>
-                <View style={styles.socialButtons}>
-                    <Pressable style={styles.connectWalletButton}>
-                        <Text style={[Typography.bodyBold, { color: '#242424' }]}>Continue with Apple</Text>
-                    </Pressable>
-                    <Pressable style={styles.connectWalletButton}>
-                        <Text style={[Typography.bodyBold, { color: '#242424' }]}>Continue with Google</Text>
-                    </Pressable>
-                </View>
             </View>
         </SafeAreaView>
-    )
-}
+    );
+};
 
-export default Step1Screen
+export default Step1Screen;
 
 const styles = StyleSheet.create({
     container: {

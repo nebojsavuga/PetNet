@@ -32,15 +32,45 @@ type VaccinationDisplayItem = {
     completed: boolean;
 };
 
+type VaccinationStatus = 'done' | 'upcoming' | 'missed';
+
+const addMonths = (date: Date, months: number) => {
+    const d = new Date(date);
+    const day = d.getDate();
+    d.setMonth(d.getMonth() + months);
+    if (d.getDate() < day) d.setDate(0); // handle month-end overflow
+    return d;
+};
+
+export const getVaccinationStatus = (nextDueISO: string): VaccinationStatus => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const nextDue = new Date(nextDueISO);
+    nextDue.setHours(0, 0, 0, 0);
+
+    const fourMonthsFromToday = addMonths(today, 4);
+
+    if (nextDue < today) return 'missed';
+    if (nextDue >= fourMonthsFromToday) return 'done';
+    return 'upcoming';
+};
+
 const Vaccines = () => {
     const route = useRoute<VaccinesDataRouteProp>();
-    // const { pet, setPet } = usePet();
+    type VaccinationStatus = 'done' | 'upcoming' | 'missed';
+
     const navigation = useNavigation();
     const { petId } = route.params as { petId: string };
 
     const [pet, setPet] = useState<Pet>();
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [vaccinations, setVaccinations] = useState<VaccinationDisplayItem[]>();
+
+    const allStatuses = (vaccinations ?? []).map(v => getVaccinationStatus(v.nextDue));
+    const hasMissed = allStatuses.includes('missed');
+    const upToDate = !hasMissed;
+
 
     const fetchPetAndVaccines = useCallback(async () => {
         try {
@@ -109,34 +139,34 @@ const Vaccines = () => {
         setIsModalOpen(false);
     }
 
-
     const today = new Date();
 
     const RenderVaccination = (item: VaccinationDisplayItem) => {
         const vaccinationDate = new Date(item.date);
         const nextDueDate = new Date(item.nextDue);
-        const today = new Date();
+
+        const status = getVaccinationStatus(item.nextDue);
 
         let statusElement;
-        if (item.completed) {
+        if (status === 'done') {
             statusElement = (
                 <View style={styles.statusContainerGreen}>
                     <Ionicons name="checkmark-outline" size={15} color="#71BA54" />
-                    <Text style={[Typography.bodyExtraSmall, { color: "#71BA54" }]}>Done</Text>
+                    <Text style={[Typography.bodyExtraSmall, { color: "#71BA54", marginBottom: 3 }]}>Done</Text>
                 </View>
             );
-        } else if (vaccinationDate > today) {
+        } else if (status === 'upcoming') {
             statusElement = (
                 <View style={styles.statusContainerYellow}>
                     <Ionicons name="time-outline" size={15} color="#EBC948" />
-                    <Text style={[Typography.bodyExtraSmall, { color: "#EBC948" }]}>To do</Text>
+                    <Text style={[Typography.bodyExtraSmall, { color: "#EBC948", marginBottom: 3 }]}>Upcoming</Text>
                 </View>
             );
         } else {
             statusElement = (
                 <View style={styles.statusContainerRed}>
                     <Ionicons name="close-outline" size={15} color="#FF5A5F" />
-                    <Text style={[Typography.bodyExtraSmall, { color: "#FF5A5F" }]}>Missed</Text>
+                    <Text style={[Typography.bodyExtraSmall, { color: "#FF5A5F", marginBottom: 3 }]}>Missed</Text>
                 </View>
             );
         }
@@ -178,14 +208,20 @@ const Vaccines = () => {
                         </View>
 
                         <View style={styles.content}>
-                            <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', alignContent: 'center', width: '100%' }}>
+                            <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                                 <Text style={[Typography.bodyMediumSemiBold, { color: '#F7F7F7' }]}>
                                     Vaccination Records
-                                    {/* ({vaccinations?.length ?? 0}) */}
                                 </Text>
-                                <View style={styles.badge}>
-                                    <Text style={[Typography.bodyExtraSmall, { color: '#71BA54' }]}>All vaccines up to date</Text>
-                                </View>
+
+                                {upToDate ? (
+                                    <View style={styles.badge}>
+                                        <Text style={[Typography.bodyExtraSmall, { color: '#71BA54' }]}>All vaccines up to date</Text>
+                                    </View>
+                                ) : (
+                                    <View style={[styles.badgeWarning, { borderColor: '#FF5A5F' }]}>
+                                        <Text style={[Typography.bodyExtraSmall, { color: '#FF5A5F' }]}>Vaccines not up to date</Text>
+                                    </View>
+                                )}
                             </View>
                             <View style={styles.card}>
                                 <Text style={[Typography.bodyMedium, { color: '#D8D5D9', textAlign: 'center' }]}>Add new vaccination or revaccination</Text>
@@ -248,6 +284,15 @@ const styles = StyleSheet.create({
         paddingVertical: 4,
         borderColor: '#558C3F',
         backgroundColor: '#2A4620',
+        color: '#71BA54'
+    },
+    badgeWarning: {
+        borderRadius: 100,
+        borderWidth: 0.5,
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        borderColor: '#558C3F',
+        backgroundColor: '#5E0E1B80',
         color: '#71BA54'
     },
     input: {
@@ -335,22 +380,29 @@ const styles = StyleSheet.create({
         backgroundColor: '#E5E3E6'
     },
     statusContainerYellow: {
+        display: 'flex',
         flexDirection: 'row',
-        padding: 10,
-        borderRadius: 999,
         backgroundColor: '#3F3A1D',
         borderColor: '#EBC948',
         borderWidth: 0.5,
         alignItems: 'center',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 100,
+        gap: 6
     },
     statusContainerRed: {
+        display: 'flex',
         flexDirection: 'row',
-        padding: 10,
+        gap: 6,
         borderRadius: 999,
         backgroundColor: '#4D2022',
         borderColor: '#FF5A5F',
         borderWidth: 0.5,
         alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
     },
     topLeftGlow: {
         position: 'absolute',

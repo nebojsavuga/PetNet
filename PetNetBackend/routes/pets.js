@@ -16,7 +16,8 @@ const {
     deleteChild,
     addOrUpdateVaccination,
     uploadPdfToIpfs,
-    getPetInterventionReports
+    getPetInterventionReports,
+    webGetById
 } = require('../controllers/petController');
 const { authenticate } = require('../middlewares/auth');
 const upload = require('../middlewares/multer');
@@ -38,5 +39,6 @@ router.post('/:petId/add-vaccination', authenticate, addOrUpdateVaccination);
 router.post('/upload-pdf', upload.single('file'), uploadPdfToIpfs);
 router.get('/getInterventionReports/:id', authenticate, getPetInterventionReports);
 
+router.get('/passport/:id', webGetById);
 
 module.exports = router;

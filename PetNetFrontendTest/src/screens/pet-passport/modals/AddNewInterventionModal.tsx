@@ -16,7 +16,7 @@ const AddNewInterventionModal = ({ visible, onClose, petId }: {
     onClose: () => void;
     petId: string
 }) => {
-    const link = `http://localhost:4200/${petId}`;
+    const link = `https://petnet-b419f.web.app/${petId}`;
 
     const handleCopy = async () => {
         try {

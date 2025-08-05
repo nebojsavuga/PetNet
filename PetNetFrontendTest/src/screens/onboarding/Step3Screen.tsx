@@ -13,20 +13,28 @@ import { useOnboarding } from '../../contexts/OnboardingContext';
 type Step3NavProp = NativeStackNavigationProp<OnboardingStackParamList, "Step3">;
 
 const Step3Screen = () => {
-    const [show, setShow] = useState(false);
     const navigation = useNavigation<Step3NavProp>();
-    const { updateData } = useOnboarding();
+    const { data, updateData } = useOnboarding();
 
-    const [selectedCountry, setSelectedCountry] = useState({
-        dial_code: '+381',
-        flag: '🇷🇸',
-    });
-    const [phoneNumber, setPhoneNumber] = useState('');
+    const [fullName, setFullName] = useState<string>(data.fullname ?? '');
+    const [city, setCity] = useState<string>('');
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
+    const [showCountryPicker, setShowCountryPicker] = useState(false);
+    const [country, setCountry] = useState({ name: 'Serbia', flag: '🇷🇸' });
+    const isFullNameValid = fullName.trim().length >= 2;
+    const isCityValid = city.trim().length >= 2;
+    const canContinue = isFullNameValid && isCityValid;
+
+
     const handleNext = () => {
-        updateData({ phoneNumber });
-        navigation.navigate("Step4");
-    }
+        if (!canContinue) return;
+        const address = `${city.trim()}, ${country.name}`;
+        updateData({
+            fullname: fullName.trim(),
+            address,
+        });
+        navigation.navigate('Step4');
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -36,89 +44,93 @@ const Step3Screen = () => {
                 <Pressable onPress={() => navigation.goBack()}>
                     <Ionicons name="arrow-back" size={24} color="#F7F7F7" />
                 </Pressable>
-                <Text style={[Typography.h2, { color: '#F7F7F7' }]}>What’s your mobile number?</Text>
-                <View style={styles.emailSection}>
-                    <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>Mobile number</Text>
-                    <View style={styles.mobileInputArea}>
-                        <Pressable
-                            onPress={() => setShow(true)}
-                            style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                gap: 6,
-                                paddingHorizontal: 16,
-                                paddingVertical: 16,
-                                borderWidth: 1,
-                                borderColor: '#4C454D',
-                                borderRadius: 8,
-                                backgroundColor: '#FFFFFF1A',
-                            }}
-                        >
-                            <Text style={{ fontSize: 18 }}>{selectedCountry.flag}</Text>
-                            <Text style={{ color: '#F7F7F7', fontSize: 14 }}>{selectedCountry.dial_code}</Text>
-                        </Pressable>
-                        <TextInput
-                            placeholder='Your mobile number'
+                <Text style={[Typography.h2, { color: '#F7F7F7' }]}>Enter your personal information</Text>
+                <View style={styles.dataSection}>
+                    <View style={styles.input}>
+                        <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>Full name</Text>
+                        <TextInput placeholder='Your full name (e.g. John Doe)'
                             placeholderTextColor={'#D8D5D9'}
-                            keyboardType='phone-pad'
-                            onFocus={() => setFocusedInput('phoneNumber')}
+                            value={fullName}
+                            onChangeText={setFullName}
+                            onFocus={() => setFocusedInput('fullName')}
                             onBlur={() => setFocusedInput(null)}
-                            value={phoneNumber}
-                            onChangeText={setPhoneNumber}
                             style={[
                                 Typography.bodySmall,
                                 styles.inputField,
                                 {
                                     color: '#F7F7F7',
-                                    borderColor: focusedInput === 'phoneNumber' ? '#D988F7' : '#4C454D',
+                                    borderColor: focusedInput === 'fullName' ? '#BF38F2' : '#4C454D',
                                 },
                             ]}
-                        />
-                        <CountryPicker
-                            lang="en"
-                            show={show}
-                            style={{
-                                modal: {
-                                    height: 400,
-                                },
-                            }}
-                            pickerButtonOnPress={(item) => {
-                                setSelectedCountry({
-                                    dial_code: item.dial_code,
-                                    flag: item.flag,
-                                });
-                                setShow(false);
-                            }}
-                            onBackdropPress={() => setShow(false)}
                         />
                     </View>
-                    <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>
-                        By continuing, I agree to the PetNet App{'\n'}
-                        <Text style={{ color: '#BF38F2', fontWeight: '600' }}>Terms & Conditions</Text>
-                        <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}> and </Text>
-                        <Text style={{ color: '#BF38F2', fontWeight: '600' }}>Privacy Notice</Text>
-                    </Text>
-                    <Pressable
-                        style={[
-                            styles.createNewAccountButton,
-                            {
-                                backgroundColor: phoneNumber.replace(/\D/g, '').length >= 7 ? '#BF38F2' : '#732291',
-                                opacity: phoneNumber.replace(/\D/g, '').length >= 7 ? 1 : 0.5,
-                            },
-                        ]}
-                        disabled={phoneNumber.replace(/\D/g, '').length < 7}
-                        onPress={() => handleNext()}>
-                        <Text
-                            style={[
-                                Typography.bodySmall,
-                                {
-                                    color: phoneNumber.replace(/\D/g, '').length >= 7 ? '#F7F7F7' : '#988F99',
-                                    fontWeight: phoneNumber.replace(/\D/g, '').length >= 7 ? '600' : '400',
-                                },
-                            ]}
-                        >Create New Account</Text>
-                    </Pressable>
+                    <View style={styles.rowInputs}>
+                        <View style={[styles.input, { flex: 1 }]}>
+                            <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>Country</Text>
+                            <Pressable
+                                onPress={() => setShowCountryPicker(true)}
+                                style={[
+                                    styles.inputField,
+                                    {
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        gap: 8,
+                                        paddingHorizontal: 16,
+                                        height: 56,
+                                    },
+                                ]}
+                            >
+                                {country.flag && (
+                                    <Text style={{ fontSize: 20 }}>{country.flag}</Text>
+                                )}
+                                <Text style={{ color: '#F7F7F7', fontSize: 16 }}>
+                                    {country.name}
+                                </Text>
+                            </Pressable>
+                            <CountryPicker
+                                lang="en"
+                                show={showCountryPicker}
+                                style={{ modal: { height: 500 } }}
+                                onBackdropPress={() => setShowCountryPicker(false)}
+                                pickerButtonOnPress={(item) => {
+                                    setCountry({ name: item.name.en, flag: item.flag });
+                                    setShowCountryPicker(false);
+                                }}
+                            />
+                        </View>
+
+                        <View style={[styles.input, { flex: 1 }]}>
+                            <Text style={[Typography.bodyExtraSmall, { color: '#F1EFF2' }]}>City</Text>
+                            <TextInput placeholderTextColor={'#D8D5D9'}
+                                placeholder="Your city"
+                                value={city}
+                                onChangeText={setCity}
+                                onFocus={() => setFocusedInput('city')}
+                                onBlur={() => setFocusedInput(null)}
+                                style={[
+                                    Typography.bodySmall,
+                                    styles.inputField,
+                                    {
+                                        color: '#F7F7F7',
+                                        borderColor: focusedInput === 'city' ? '#BF38F2' : '#4C454D',
+                                    },
+                                ]}
+                            />
+                        </View>
+                    </View>
                 </View>
+            </View>
+            <View style={styles.connectionSection}>
+                <Pressable
+                    style={[
+                        styles.createNewAccountButton,
+                        { opacity: canContinue ? 1 : 0.5, backgroundColor: canContinue ? '#BF38F2' : '#732291' },
+                    ]}
+                    disabled={!canContinue}
+                    onPress={handleNext}
+                >
+                    <Text style={[Typography.bodySmall, { color: '#F7F7F7' }]}>Create Account</Text>
+                </Pressable>
             </View>
         </SafeAreaView>
     )
@@ -190,7 +202,6 @@ const styles = StyleSheet.create({
         opacity: 0.6,
     },
     createNewAccountButton: {
-        marginTop: 24,
         display: 'flex',
         width: '100%',
         borderRadius: 8,
@@ -205,34 +216,33 @@ const styles = StyleSheet.create({
         width: '100%',
         gap: 8
     },
-    emailSection: {
+    input: {
         display: 'flex',
         flexDirection: 'column',
         width: '100%',
-        gap: 12,
+        gap: 4,
         alignItems: 'flex-start'
     },
     inputField: {
-        flex: 1,
+        width: '100%',
         paddingHorizontal: 16,
+        height: 56,
         borderWidth: 1,
         borderRadius: 8,
         borderColor: '#4C454D',
-        backgroundColor: '#FFFFFF1A',
+        backgroundColor: "#FFFFFF1A"
     },
-    countryInput: {
-        paddingHorizontal: 16,
-        borderWidth: 1,
-        borderRadius: 8,
-        borderColor: '#4C454D',
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
+    dataSection: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 16,
+        width: '100%',
     },
-    mobileInputArea: {
+    rowInputs: {
         display: 'flex',
         flexDirection: 'row',
-        gap: 8,
+        gap: 16,
+        alignItems: 'center',
         width: '100%'
     }
 })

@@ -109,6 +109,13 @@ export const Typography = StyleSheet.create({
         lineHeight: 24,
         letterSpacing: 0,
     },
+    bodyLargeBold: {
+        fontFamily: 'SchibstedGrotesk-Bold',
+        fontWeight: '700' as TextStyle['fontWeight'],
+        fontSize: 18,
+        lineHeight: 26,
+        letterSpacing: 0,
+    },
 
     // Caption
     caption: {

@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { isTokenExpired } from '../utils/jwt';
+import { useOnboarding } from '../contexts/OnboardingContext'
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api';
 
@@ -23,7 +24,16 @@ const WalletConnectionScreen = () => {
     const navigation = useNavigation<WalletNavProp>();
     const { authorizeSession } = useAuthorization();
     const { connect } = useMobileWallet();
+    const { updateData, data } = useOnboarding();
     const [authorizationInProgress, setAuthorizationInProgress] = useState(false);
+
+    const withTimeout = <T,>(p: Promise<T>, ms: number) =>
+        new Promise<T>((resolve, reject) => {
+            const t = setTimeout(() => reject(new Error('timeout')), ms);
+            p.then(v => { clearTimeout(t); resolve(v); })
+                .catch(e => { clearTimeout(t); reject(e); });
+        });
+
     useEffect(() => {
         const checkLogin = async () => {
             try {
@@ -56,16 +66,14 @@ const WalletConnectionScreen = () => {
     }, []);
     const loginWithWalletAddress = async (walletAddress: string) => {
         try {
-            console.log("API_URL: ", API_URL);
-            const response = await fetch(`${API_URL}/auth/login`, {
+            const response = await withTimeout(fetch(`${API_URL}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ walletAddress }),
-            });
+            }), 6000);
+            console.timeEnd('[login]');
             console.log("RESPONSE: ", response);
             if (!response.ok) {
-                // user not found or other error
-                console.log('not ok')
                 return null;
             }
 
@@ -104,7 +112,10 @@ const WalletConnectionScreen = () => {
             return;
         }
 
-        console.log('Wallet address: ', account.publicKey.toString());
+        const walletAddress = account.publicKey.toString();
+        console.log('Wallet address: ', walletAddress);
+        updateData({ walletAddress });
+
         const loginResult = await loginWithWalletAddress(account.publicKey.toString());
 
         console.log("login result: ", loginResult);
@@ -114,7 +125,7 @@ const WalletConnectionScreen = () => {
                 routes: [{ name: 'HomeScreen' }],
             });
         } else {
-            navigation.navigate("Onboarding");
+            navigation.replace("Onboarding");
         }
     }, [authorizationInProgress, authorizeSession]);
 

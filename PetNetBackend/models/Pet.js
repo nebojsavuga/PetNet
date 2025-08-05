@@ -118,7 +118,7 @@ const petSchema = new mongoose.Schema(
                 },
                 clinicName: {
                     type: String,
-                    required: true
+                    required: false
                 }
             }
         ],

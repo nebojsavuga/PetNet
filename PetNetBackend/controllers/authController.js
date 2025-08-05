@@ -33,19 +33,14 @@ exports.register = async (req, res) => {
             fullName,
             email,
             phoneNumber,
-            verificationType,
-            addressString,
-            latitude,
-            longitude,
+            address,
             walletAddress
         } = req.body;
         if (
             !fullName ||
-            !verificationType ||
-            !['email', 'phone'].includes(verificationType) ||
-            !addressString ||
-            latitude === undefined ||
-            longitude === undefined ||
+            !email ||
+            !phoneNumber ||
+            !address ||
             !walletAddress
         ) {
             return res.status(400).json({ error: 'Missing or invalid fields' });
@@ -67,12 +62,7 @@ exports.register = async (req, res) => {
             fullName,
             email,
             phoneNumber,
-            verificationType,
-            address: {
-                addressString,
-                latitude,
-                longitude
-            },
+            address,
             walletAddress
         });
 

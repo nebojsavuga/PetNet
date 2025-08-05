@@ -6,16 +6,13 @@ type OnboardingData = {
     phoneNumber?: string,
     addressString?: string,
     walletAddress?: string,
-    latitude?: number,
-    longitude?: number,
-    verificationType?: 'email' | 'phone'
 };
 
 type OnboardingContextType = {
     data: OnboardingData,
     updateData: (newData: Partial<OnboardingData>) => void;
     resetData: () => void;
-}  
+}
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
 

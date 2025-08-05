@@ -21,30 +21,11 @@ const userSchema = new mongoose.Schema(
             trim: true,
             maxlength: 20,
         },
-        verificationType: {
-            type: String,
-            enum: ['email', 'phone'],
-            required: true,
-        },
         address: {
-            addressString: {
-                type: String,
-                required: true,
-                trim: true,
-                maxlength: 200,
-            },
-            latitude: {
-                type: Number,
-                required: true,
-                min: -90,
-                max: 90,
-            },
-            longitude: {
-                type: Number,
-                required: true,
-                min: -180,
-                max: 180,
-            },
+            type: String,
+            required: true,
+            trim: true,
+            maxlength: 200,
         },
         walletAddress: {
             type: String,
